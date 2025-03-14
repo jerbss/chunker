@@ -27,6 +27,54 @@
         .tab-content.active { display: block; }
         .diagram-container { margin-top: 30px; overflow: auto; max-width: 100%; }
         .diagram-container svg { max-width: 100%; height: auto; }
+        
+        /* Estilos adicionais para conteúdo extenso */
+        .formatted-content {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 15px;
+        }
+        
+        /* Botão de expansão */
+        .expand-button {
+            display: block;
+            margin: 10px auto;
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        /* Índice para navegação rápida */
+        .toc {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .toc-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .toc a {
+            color: #2980b9;
+            text-decoration: none;
+            display: block;
+            margin: 5px 0;
+        }
+        
+        /* Classes para target de links de ancoragem */
+        :target {
+            background-color: #ffffd0;
+            padding: 3px;
+            border-radius: 3px;
+            transition: background-color 0.5s ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -39,7 +87,11 @@
         </div>
         <div class="form-group">
             <label>Número de Partes:</label>
-            <input type="number" name="num_partes" value="{{ num_partes }}" min="2" required>
+            <input type="number" name="num_partes" value="{{ num_partes }}" min="2" max="22" required>
+            <small style="color:#777;">Mínimo: 2, Máximo: 22</small>
+            <div id="parts-warning" style="display:none; color:#e74c3c; margin-top:5px;">
+                <strong>Nota:</strong> Conteúdos com muitas partes podem levar mais tempo para gerar.
+            </div>
         </div>
         <button type="submit">Gerar Divisão</button>
     </form>
@@ -60,7 +112,16 @@
     
     <div id="formatted" class="result tab-content active">
         <h3>Guia de Estudos:</h3>
+        
+        <!-- Índice automático para conteúdo extenso -->
+        <div class="toc" id="table-of-contents">
+            <div class="toc-title">Índice Rápido</div>
+            <!-- Será preenchido via JavaScript -->
+        </div>
+        
         <div class="formatted-content">{{ html_result }}</div>
+        
+        <button class="expand-button" onclick="toggleContentHeight()">Expandir/Recolher</button>
     </div>
     
     <div id="diagram" class="result tab-content">
@@ -122,6 +183,55 @@
             }
         }
     }
+    
+    // Função para expandir e recolher conteúdo
+    function toggleContentHeight() {
+        var content = document.querySelector('.formatted-content');
+        if (content.style.maxHeight === 'none') {
+            content.style.maxHeight = '600px';
+        } else {
+            content.style.maxHeight = 'none';
+        }
+    }
+    
+    // Criar índice automático baseado nos cabeçalhos
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            var toc = document.getElementById('table-of-contents');
+            var headings = document.querySelectorAll('.formatted-content h2, .formatted-content h3');
+            
+            if (headings.length > 5) { // Só mostrar índice se tiver muitos cabeçalhos
+                headings.forEach(function(heading, index) {
+                    // Adicionar ID ao cabeçalho se não tiver
+                    if (!heading.id) {
+                        heading.id = 'heading-' + index;
+                    }
+                    
+                    // Criar link para o índice
+                    var link = document.createElement('a');
+                    link.href = '#' + heading.id;
+                    link.textContent = heading.textContent;
+                    link.style.paddingLeft = (heading.tagName === 'H3') ? '15px' : '0';
+                    
+                    toc.appendChild(link);
+                });
+            } else {
+                toc.style.display = 'none';
+            }
+        }, 1000); // Aguardar um segundo para garantir que o conteúdo foi renderizado
+    });
+
+    // Mostrar aviso para muitas partes
+    document.querySelector('input[name="num_partes"]').addEventListener('change', function() {
+        var numPartes = parseInt(this.value);
+        var warning = document.getElementById('parts-warning');
+        
+        if (numPartes > 10) {
+            warning.style.display = 'block';
+        } else {
+            warning.style.display = 'none';
+        }
+    });
     </script>
 </body>
 </html>

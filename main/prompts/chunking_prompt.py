@@ -19,16 +19,15 @@ Instruções para a estruturação do guia:
    - Tópicos principais (3-5 itens) com breves descrições
    - Conceitos-chave a serem dominados
    - Uma pergunta de reflexão ao final
+   - IMPORTANTE: TODAS AS PARTES DEVEM SER DETALHADAS COMPLETAMENTE, SEM EXCEÇÃO. NÃO USE PLACEHOLDERS OU INDICAÇÕES DE "CONTINUAR A ESTRUTURA".
 
 # SEÇÃO FINAL (Após a última parte)
 5. Adicione uma conclusão que:
    - Sintetize a progressão do conhecimento através das partes
    - Explique como as partes se integram em uma visão completa do tema
-6. Inclua uma seção de "Aplicação Prática" com 3 sugestões de projetos ou atividades que integram múltiplas partes
-7. Finalize com 4-5 recursos recomendados (livros, cursos online, ferramentas) para aprofundamento
 
 # MODELO CONCEITUAL EM TEIA
-8. Ao final, crie um diagrama de relações entre conceitos usando o formato Mermaid:
+6. Ao final, crie um diagrama de relações entre conceitos usando o formato Mermaid:
    - Identifique 10-15 conceitos-chave principais distribuídos entre as partes
    - Crie relações entre esses conceitos usando verbos direcionais
    - Use o seguinte formato para o diagrama Mermaid (observe a sintaxe correta):
@@ -54,4 +53,14 @@ def generate_prompt(tema, num_partes):
     Returns:
         str: O prompt completo para envio ao modelo Gemini.
     """
-    return f"{CHUNKING_SYSTEM_PROMPT}\n\nCrie um guia de estudos completo para o tema \"{tema}\" dividido em {num_partes} partes, incluindo um modelo conceitual em teia usando Mermaid."
+    # Instruções mais explícitas para garantir detalhamento completo
+    instrucoes_adicionais = """
+    ATENÇÃO ESPECIAL:
+    - Você DEVE detalhar TODAS as partes completamente (de 1 até {num_partes})
+    - Cada parte deve seguir exatamente a mesma estrutura com o mesmo nível de detalhamento
+    - NÃO use placeholders ou texto indicando "continuar estrutura para as partes X a Y"
+    - NÃO use reticências ou outras indicações para omitir conteúdo
+    - Se o tema tiver muitas partes naturais (como os 22 Arcanos do Tarô), certifique-se de detalhar cada um individualmente
+    """
+    
+    return f"{CHUNKING_SYSTEM_PROMPT}\n{instrucoes_adicionais}\n\nCrie um guia de estudos completo para o tema \"{tema}\" dividido em {num_partes} partes, incluindo um modelo conceitual em teia usando Mermaid."
