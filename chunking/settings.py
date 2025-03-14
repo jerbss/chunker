@@ -11,6 +11,16 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+# Carregar variáveis do arquivo .env
+load_dotenv(os.path.join(Path(__file__).resolve().parent.parent, '.env'))
+
+# Configurações do Gemini
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+GEMINI_PRODUCT_NUMBER = os.environ.get('GEMINI_PRODUCT_NUMBER')
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
