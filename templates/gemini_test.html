@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>Divisão de Temas com Gemini</title>
+    <!-- Carregar Mermaid antes dos estilos -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         .form-group { margin-bottom: 15px; }
@@ -23,6 +25,8 @@
         .tab-button.active { background-color: #f5f5f5; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        .diagram-container { margin-top: 30px; overflow: auto; max-width: 100%; }
+        .diagram-container svg { max-width: 100%; height: auto; }
     </style>
 </head>
 <body>
@@ -49,13 +53,27 @@
     
     {% if html_result %}
     <div class="tab-buttons">
-        <button class="tab-button active" onclick="openTab(event, 'formatted')">Visualização Formatada</button>
+        <button class="tab-button active" onclick="openTab(event, 'formatted')">Conteúdo</button>
+        <button class="tab-button" onclick="openTab(event, 'diagram')">Diagrama em Teia</button>
         <button class="tab-button" onclick="openTab(event, 'raw')">Markdown Bruto</button>
     </div>
     
     <div id="formatted" class="result tab-content active">
-        <h3>Divisão do Tema:</h3>
+        <h3>Guia de Estudos:</h3>
         <div class="formatted-content">{{ html_result }}</div>
+    </div>
+    
+    <div id="diagram" class="result tab-content">
+        <h3>Modelo Conceitual em Teia:</h3>
+        <div class="diagram-container">
+            {% if mermaid_code %}
+                <div class="mermaid">
+                    {{mermaid_code|safe}}
+                </div>
+            {% else %}
+                <p>Nenhum diagrama em teia gerado para este tema.</p>
+            {% endif %}
+        </div>
     </div>
     
     <div id="raw" class="result tab-content">
@@ -65,6 +83,17 @@
     {% endif %}
     
     <script>
+    // Configurar Mermaid
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose',
+        flowchart: {
+            htmlLabels: true,
+            curve: 'basis'
+        }
+    });
+
     function openTab(evt, tabName) {
         var i, tabContent, tabButtons;
         
@@ -83,6 +112,15 @@
         // Show the current tab, and add an "active" class to the button
         document.getElementById(tabName).style.display = "block";
         evt.currentTarget.className += " active";
+
+        // Forçar re-renderização do diagrama quando a aba for aberta
+        if (tabName === 'diagram') {
+            try {
+                mermaid.contentLoaded();
+            } catch (e) {
+                console.error('Erro ao renderizar Mermaid:', e);
+            }
+        }
     }
     </script>
 </body>
