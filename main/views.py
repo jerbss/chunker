@@ -52,11 +52,36 @@ def test_gemini(request):
             if num_partes > 10:
                 # Dividir em duas solicitações para conseguir detalhes completos
                 meio = num_partes // 2
-                prompt_parte1 = f"Crie um guia de estudos para o tema \"{tema}\" detalhando COMPLETAMENTE apenas as partes de 1 até {meio}, seguindo exatamente esta estrutura para cada parte:\n\n- Título claro e descritivo com numeração\n- Objetivo de aprendizagem específico (1 parágrafo)\n- Tópicos principais (3-5 itens) com breves descrições\n- Conceitos-chave a serem dominados\n- Uma pergunta de reflexão ao final"
+                prompt_parte1 = f"""Crie um guia de estudos para o tema "{tema}" detalhando COMPLETAMENTE apenas as partes de 1 até {meio}.
+
+Use esta formatação:
+- Seções principais como Heading 1 (#): "# Parte X: [Título]" 
+- Dentro de cada parte use destaque em negrito:
+  - **Objetivo de Aprendizagem:** (1 parágrafo)
+  - **Tópicos Principais:** (lista de 3-5 itens com descrições)
+  - **Conceitos-chave:** (lista de termos)
+  - **Pergunta de Reflexão:** (questão instigante)"""
                 
-                prompt_parte2 = f"Crie um guia de estudos para o tema \"{tema}\" detalhando COMPLETAMENTE apenas as partes de {meio+1} até {num_partes}, seguindo exatamente esta estrutura para cada parte:\n\n- Título claro e descritivo com numeração\n- Objetivo de aprendizagem específico (1 parágrafo)\n- Tópicos principais (3-5 itens) com breves descrições\n- Conceitos-chave a serem dominados\n- Uma pergunta de reflexão ao final\n\nE por fim, adicione uma conclusão que sintetize a progressão do conhecimento e como as partes se integram."
+                prompt_parte2 = f"""Crie um guia de estudos para o tema "{tema}" detalhando COMPLETAMENTE apenas as partes de {meio+1} até {num_partes}.
+
+Use esta formatação:
+- Seções principais como Heading 1 (#): "# Parte X: [Título]" 
+- Dentro de cada parte use destaque em negrito:
+  - **Objetivo de Aprendizagem:** (1 parágrafo)
+  - **Tópicos Principais:** (lista de 3-5 itens com descrições)
+  - **Conceitos-chave:** (lista de termos)
+  - **Pergunta de Reflexão:** (questão instigante)
+
+Ao final, adicione uma conclusão como Heading 1 (# Conclusão) que sintetize tudo."""
                 
-                prompt_parte3 = f"Crie a introdução para um guia de estudos para o tema \"{tema}\" em {num_partes} partes, incluindo:\n\n- Título principal\n- Contextualização (2-3 parágrafos)\n- Público-alvo e tempo estimado\n- Objetivos gerais (4-5)\n\nE então crie um diagrama mermaid mostrando as relações entre 10-15 conceitos-chave deste tema, usando verbos direcionais nas setas."
+                prompt_parte3 = f"""Crie a introdução para um guia de estudos para o tema "{tema}" em {num_partes} partes.
+Use esta formatação:
+- Título principal como Heading 2 (##): "## Guia de Estudos: {tema} em {num_partes} Partes (Nível: Intermediário)"
+- Subseções como Heading 2 (##):
+  - ## Contextualização (2-3 parágrafos)
+  - ## Objetivos Gerais (4-5 competências em lista)
+
+Depois crie um diagrama mermaid mostrando relações entre 10-15 conceitos-chave deste tema, usando verbos direcionais nas setas."""
                 
                 # Configuração correta para o modelo Gemini
                 generation_config = genai.GenerationConfig(

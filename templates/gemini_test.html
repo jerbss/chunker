@@ -75,6 +75,173 @@
             border-radius: 3px;
             transition: background-color 0.5s ease-in-out;
         }
+        
+        /* Melhorias para títulos e subtítulos */
+        .formatted-content h1 {
+            font-size: 28px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            color: #2c3e50;
+        }
+        
+        .formatted-content h2 {
+            font-size: 24px;
+            color: #2980b9;
+            margin-top: 28px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            display: block;
+            clear: both;
+        }
+        
+        /* Destaque especial para os títulos de partes */
+        .formatted-content h2[id^="heading-"] {
+            color: #fff;
+            background-color: #3498db;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 25px 0 15px 0;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: none;
+        }
+        
+        .formatted-content h3 {
+            font-size: 20px;
+            color: #16a085;
+            margin-top: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        
+        /* Melhoria para o índice */
+        .toc {
+            position: sticky;
+            top: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 0 0 20px 0;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .toc-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .toc-section {
+            font-weight: bold;
+            color: #3498db;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .toc a {
+            color: #2980b9;
+            text-decoration: none;
+            display: block;
+            margin: 5px 0;
+            padding: 3px 0;
+            transition: background-color 0.2s;
+            border-radius: 3px;
+        }
+        
+        .toc a:hover {
+            background-color: #ecf0f1;
+            padding-left: 5px;
+        }
+        
+        .toc a.part-link {
+            font-weight: bold;
+            color: #3498db;
+            border-left: 2px solid #3498db;
+            padding-left: 8px;
+        }
+        
+        /* Modo compacto para conteúdo extenso */
+        .compact-mode .formatted-content h2 + p,
+        .compact-mode .formatted-content h2 + p + p,
+        .compact-mode .formatted-content h2 + p + p + p,
+        .compact-mode .formatted-content h2 + * + ul {
+            display: none;
+        }
+        
+        .compact-mode .formatted-content h2 {
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+        
+        .compact-mode-toggle {
+            background: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        
+        /* Classes para target de links de ancoragem */
+        :target {
+            scroll-margin-top: 20px;
+            animation: highlight-fade 2s;
+        }
+        
+        @keyframes highlight-fade {
+            0% { background-color: #ffffd0; }
+            100% { background-color: transparent; }
+        }
+
+        /* Hierarquia de Títulos e Destaques */
+        .formatted-content h1 {
+            font-size: 28px;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 35px 0 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .formatted-content h2 {
+            font-size: 22px;
+            color: #2980b9;
+            margin-top: 25px;
+            padding: 6px 0;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        /* Destaques para estruturas internas */
+        .formatted-content strong {
+            color: #16a085;
+            font-weight: bold;
+        }
+        
+        /* Destaque especial para os elementos estruturais das partes */
+        .formatted-content p > strong:first-child {
+            display: inline-block;
+            color: #2c3e50;
+            font-size: 18px;
+            margin-top: 15px;
+            border-left: 4px solid #27ae60;
+            padding-left: 10px;
+        }
+        
+        /* Estilo para perguntas de reflexão */
+        .formatted-content p:has(> strong:contains("Pergunta de Reflexão")) {
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-left: 4px solid #f39c12;
+            margin: 15px 0;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -112,6 +279,10 @@
     
     <div id="formatted" class="result tab-content active">
         <h3>Guia de Estudos:</h3>
+        
+        <div class="view-controls">
+            <button class="compact-mode-toggle" onclick="toggleCompactMode()">Alternar Modo Compacto</button>
+        </div>
         
         <!-- Índice automático para conteúdo extenso -->
         <div class="toc" id="table-of-contents">
@@ -194,33 +365,126 @@
         }
     }
     
-    // Criar índice automático baseado nos cabeçalhos
+    // Variável para rastrear o estado do modo compacto
+    let isCompactMode = false;
+    
+    // Função para alternar o modo compacto
+    function toggleCompactMode() {
+        const contentDiv = document.querySelector('.formatted-content');
+        if (isCompactMode) {
+            contentDiv.classList.remove('compact-mode');
+            document.querySelector('.compact-mode-toggle').textContent = 'Ativar Modo Compacto';
+        } else {
+            contentDiv.classList.add('compact-mode');
+            document.querySelector('.compact-mode-toggle').textContent = 'Mostrar Tudo';
+        }
+        isCompactMode = !isCompactMode;
+    }
+    
+    // Criar índice automático melhorado
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
-            var toc = document.getElementById('table-of-contents');
-            var headings = document.querySelectorAll('.formatted-content h2, .formatted-content h3');
+            const toc = document.getElementById('table-of-contents');
             
-            if (headings.length > 5) { // Só mostrar índice se tiver muitos cabeçalhos
-                headings.forEach(function(heading, index) {
-                    // Adicionar ID ao cabeçalho se não tiver
-                    if (!heading.id) {
-                        heading.id = 'heading-' + index;
+            // Encontrar todas as partes (h2 que começam com "Parte")
+            const parts = document.querySelectorAll('.formatted-content h2');
+            
+            if (parts.length > 3) { // Só mostrar índice se tiver várias partes
+                const mainTitle = document.querySelector('.formatted-content h1');
+                if (mainTitle) {
+                    mainTitle.id = 'main-title';
+                    const titleLink = document.createElement('a');
+                    titleLink.href = '#main-title';
+                    titleLink.textContent = mainTitle.textContent;
+                    titleLink.className = 'toc-section';
+                    toc.appendChild(titleLink);
+                }
+                
+                // Seção para objetivos
+                const goalsHeader = document.createElement('div');
+                goalsHeader.className = 'toc-section';
+                goalsHeader.textContent = 'Objetivo do Guia';
+                toc.appendChild(goalsHeader);
+                
+                // Encontrar e adicionar links para as primeiras seções (antes das partes)
+                const initialSections = document.querySelectorAll('.formatted-content h2:not([id^="parte-"]):not(:nth-child(n+4))');
+                initialSections.forEach(function(heading, index) {
+                    if (!heading.textContent.toLowerCase().includes('parte')) {
+                        if (!heading.id) heading.id = 'section-' + index;
+                        const link = document.createElement('a');
+                        link.href = '#' + heading.id;
+                        link.textContent = heading.textContent;
+                        toc.appendChild(link);
                     }
-                    
-                    // Criar link para o índice
-                    var link = document.createElement('a');
-                    link.href = '#' + heading.id;
-                    link.textContent = heading.textContent;
-                    link.style.paddingLeft = (heading.tagName === 'H3') ? '15px' : '0';
-                    
-                    toc.appendChild(link);
                 });
+                
+                // Seção para partes
+                const partsHeader = document.createElement('div');
+                partsHeader.className = 'toc-section';
+                partsHeader.textContent = 'Partes do Estudo';
+                toc.appendChild(partsHeader);
+                
+                // Adicionar partes ao índice
+                parts.forEach(function(part, index) {
+                    if (part.textContent.toLowerCase().includes('parte')) {
+                        if (!part.id) part.id = 'parte-' + index;
+                        const link = document.createElement('a');
+                        link.href = '#' + part.id;
+                        link.textContent = part.textContent;
+                        link.className = 'part-link';
+                        toc.appendChild(link);
+                        
+                        // Adicionar interatividade ao título da parte no modo compacto
+                        part.addEventListener('click', function() {
+                            if (document.querySelector('.formatted-content').classList.contains('compact-mode')) {
+                                // Toggle visibility of next elements
+                                let nextEl = part.nextElementSibling;
+                                let count = 0;
+                                while (nextEl && count < 5 && !nextEl.tagName.match(/^H[1-2]$/i)) {
+                                    if (nextEl.style.display === 'none' || window.getComputedStyle(nextEl).display === 'none') {
+                                        nextEl.style.display = '';
+                                    } else {
+                                        nextEl.style.display = 'none';
+                                    }
+                                    nextEl = nextEl.nextElementSibling;
+                                    count++;
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                // Seção para conclusão
+                const conclusionSections = document.querySelectorAll('.formatted-content h2');
+                const conclusionSection = Array.from(conclusionSections).find(h => 
+                    h.textContent.toLowerCase().includes('conclusão'));
+                
+                if (conclusionSection) {
+                    const conclusionHeader = document.createElement('div');
+                    conclusionHeader.className = 'toc-section';
+                    conclusionHeader.textContent = 'Conclusão';
+                    toc.appendChild(conclusionHeader);
+                    
+                    if (!conclusionSection.id) conclusionSection.id = 'conclusion';
+                    const link = document.createElement('a');
+                    link.href = '#' + conclusionSection.id;
+                    link.textContent = conclusionSection.textContent;
+                    toc.appendChild(link);
+                }
             } else {
                 toc.style.display = 'none';
             }
-        }, 1000); // Aguardar um segundo para garantir que o conteúdo foi renderizado
+            
+            // Adicionar IDs e modificar formatação dos títulos de partes
+            document.querySelectorAll('.formatted-content h2').forEach(function(heading, index) {
+                if (heading.textContent.toLowerCase().includes('parte')) {
+                    if (!heading.id) heading.id = 'parte-' + index;
+                }
+            });
+            
+        }, 1000);
     });
-
+    
     // Mostrar aviso para muitas partes
     document.querySelector('input[name="num_partes"]').addEventListener('change', function() {
         var numPartes = parseInt(this.value);

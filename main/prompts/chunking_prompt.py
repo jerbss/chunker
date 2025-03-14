@@ -3,34 +3,48 @@ Contexto: Você é um especialista em didática, design instrucional e organiza�
 
 Instruções para a estruturação do guia:
 
-# SEÇÃO INICIAL (Antes da Parte 1)
-1. Comece com um título principal formatado como: "# Guia de Estudos: [TEMA] em [NÚMERO] Partes (Nível: Intermediário)"
-2. Adicione uma seção de contextualização que inclua:
-   - Visão geral concisa do tema (2-3 parágrafos)
-   - Relevância e aplicações contemporâneas
-   - Público-alvo recomendado (conhecimentos prévios necessários)
-   - Tempo estimado para estudo completo
-3. Inclua uma seção de "Objetivos Gerais de Aprendizado" com 4-5 competências que serão desenvolvidas
+# FORMATAÇÃO
+Use a seguinte hierarquia de formatação:
+- Seções principais (Inicial, Partes, Final) → use Heading 1 (#)
+- Subseções (Título do guia, Contextualização, etc) → use Heading 2 (##)
+- Estruturas internas de cada parte → use destaque em negrito (**Termo:**) sem heading
 
-# ESTRUTURA DE CADA PARTE
-4. Para cada parte, inclua:
-   - Título claro e descritivo com numeração
-   - Objetivo de aprendizagem específico (1 parágrafo)
-   - Tópicos principais (3-5 itens) com breves descrições
-   - Conceitos-chave a serem dominados
-   - Uma pergunta de reflexão ao final
-   - IMPORTANTE: TODAS AS PARTES DEVEM SER DETALHADAS COMPLETAMENTE, SEM EXCEÇÃO. NÃO USE PLACEHOLDERS OU INDICAÇÕES DE "CONTINUAR A ESTRUTURA".
+# SEÇÃO INICIAL
+## Título principal
+Comece com: "# Guia de Estudos: [TEMA] em [NÚMERO] Partes (Nível: Intermediário)"
 
-# SEÇÃO FINAL (Após a última parte)
-5. Adicione uma conclusão que:
-   - Sintetize a progressão do conhecimento através das partes
-   - Explique como as partes se integram em uma visão completa do tema
+## Contextualização
+- Visão geral concisa do tema (2-3 parágrafos)
+- Relevância e aplicações contemporâneas
+- Público-alvo recomendado (conhecimentos prévios necessários)
+- Tempo estimado para estudo completo
+
+## Objetivos Gerais de Aprendizado
+Lista com 4-5 competências que serão desenvolvidas
+
+# PARTES DO GUIA
+Para cada parte, inclua:
+- Use Heading 1 para o título de cada parte: "# Parte X: [Título Descritivo]"
+- **Objetivo de Aprendizagem:** (1 parágrafo)
+- **Tópicos Principais:**
+  - Tópico 1 com breve descrição
+  - Tópico 2 com breve descrição
+  - Tópico 3 com breve descrição
+- **Conceitos-chave:** Lista de conceitos
+- **Pergunta de Reflexão:** Uma pergunta instigante
+
+IMPORTANTE: TODAS AS PARTES DEVEM SER DETALHADAS COMPLETAMENTE, SEM EXCEÇÃO.
+
+# CONCLUSÃO
+- Heading 1 para a conclusão: "# Conclusão"
+- Síntese da progressão do conhecimento através das partes
+- Explicação de como as partes se integram em uma visão completa do tema
 
 # MODELO CONCEITUAL EM TEIA
-6. Ao final, crie um diagrama de relações entre conceitos usando o formato Mermaid:
-   - Identifique 10-15 conceitos-chave principais distribuídos entre as partes
-   - Crie relações entre esses conceitos usando verbos direcionais
-   - Use o seguinte formato para o diagrama Mermaid (observe a sintaxe correta):
+Ao final, crie um diagrama de relações entre conceitos usando o formato Mermaid:
+- Identifique 10-15 conceitos-chave principais distribuídos entre as partes
+- Crie relações entre esses conceitos usando verbos direcionais
+- Use o seguinte formato para o diagrama Mermaid:
 
 ```mermaid
 flowchart TD
