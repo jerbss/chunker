@@ -4,6 +4,7 @@ from django.utils.safestring import mark_safe
 import google.generativeai as genai
 import markdown
 import re
+import requests
 from .prompts.chunking_prompt import generate_prompt
 
 def test_gemini(request):
@@ -12,7 +13,6 @@ def test_gemini(request):
     tema = ""
     num_partes = 2
     html_result = None
-    mermaid_code = None  # Mudança aqui - vamos armazenar apenas o código
     
     try:
         # Configurar a API com a chave
@@ -79,9 +79,7 @@ Use esta formatação:
 - Título principal como Heading 2 (##): "## Guia de Estudos: {tema} em {num_partes} Partes (Nível: Intermediário)"
 - Subseções como Heading 2 (##):
   - ## Contextualização (2-3 parágrafos)
-  - ## Objetivos Gerais (4-5 competências em lista)
-
-Depois crie um diagrama mermaid mostrando relações entre 10-15 conceitos-chave deste tema, usando verbos direcionais nas setas."""
+  - ## Objetivos Gerais (4-5 competências em lista)"""
                 
                 # Configuração correta para o modelo Gemini
                 generation_config = genai.GenerationConfig(
@@ -91,13 +89,25 @@ Depois crie um diagrama mermaid mostrando relações entre 10-15 conceitos-chave
                     max_output_tokens=8192,
                 )
                 
-                # Gerar as três partes com a configuração correta
-                response1 = model.generate_content(prompt_parte1, generation_config=generation_config)
-                response2 = model.generate_content(prompt_parte2, generation_config=generation_config)  
-                response3 = model.generate_content(prompt_parte3, generation_config=generation_config)
-                
-                # Combinar os resultados
-                result = response3.text + "\n\n" + response1.text + "\n\n" + response2.text
+                try:
+                    # Gerar as três partes com a configuração correta
+                    response1 = model.generate_content(prompt_parte1, generation_config=generation_config)
+                    response2 = model.generate_content(prompt_parte2, generation_config=generation_config)  
+                    response3 = model.generate_content(prompt_parte3, generation_config=generation_config)
+                    
+                    # Combinar os resultados
+                    result = response3.text + "\n\n" + response1.text + "\n\n" + response2.text
+                except Exception as api_error:
+                    if "429" in str(api_error):
+                        error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
+                        return render(request, 'gemini_test.html', {
+                            'error': error,
+                            'tema': tema,
+                            'num_partes': num_partes,
+                            'quota_exceeded': True
+                        })
+                    else:
+                        raise api_error
             else:
                 # Para poucos tópicos, usar abordagem normal
                 prompt = generate_prompt(tema, num_partes)
@@ -118,33 +128,40 @@ Depois crie um diagrama mermaid mostrando relações entre 10-15 conceitos-chave
                     {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
                 ]
                 
-                response = model.generate_content(
-                    prompt,
-                    generation_config=generation_config,
-                    safety_settings=safety_settings
-                )
-                result = response.text
+                try:
+                    response = model.generate_content(
+                        prompt,
+                        generation_config=generation_config,
+                        safety_settings=safety_settings
+                    )
+                    result = response.text
+                except Exception as api_error:
+                    if "429" in str(api_error):
+                        error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
+                        return render(request, 'gemini_test.html', {
+                            'error': error,
+                            'tema': tema,
+                            'num_partes': num_partes,
+                            'quota_exceeded': True
+                        })
+                    else:
+                        raise api_error
             
-            # Extrair código Mermaid se existir
-            mermaid_pattern = r"```mermaid\s*([\s\S]*?)\s*```"
-            mermaid_matches = re.findall(mermaid_pattern, result)
-            
-            if (mermaid_matches):
-                mermaid_code = mermaid_matches[0].strip()
-                # Remover possíveis espaços extras e indentação
-                mermaid_code = '\n'.join(line.strip() for line in mermaid_code.split('\n'))
-            
-            # Converter markdown para HTML (excluindo o código mermaid)
-            result_without_mermaid = re.sub(mermaid_pattern, '', result)
-            html_result = mark_safe(markdown.markdown(result_without_mermaid, extensions=['extra', 'fenced_code']))
+            # Converter markdown para HTML
+            html_result = mark_safe(markdown.markdown(result, extensions=['extra', 'fenced_code']))
+    except requests.exceptions.HTTPError as http_error:
+        if http_error.response.status_code == 429:
+            error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
+        else:
+            error = f"Erro HTTP: {http_error}"
     except Exception as e:
         error = str(e)
     
     return render(request, 'gemini_test.html', {
         'result': result,
         'html_result': html_result,
-        'mermaid_code': mermaid_code,  # Passar o código ao invés do diagrama
         'error': error,
         'tema': tema,
-        'num_partes': num_partes
+        'num_partes': num_partes,
+        'quota_exceeded': "429" in str(error) if error else False
     })

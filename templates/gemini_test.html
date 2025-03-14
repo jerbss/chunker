@@ -277,13 +277,29 @@
                 <strong>Nota:</strong> Conteúdos com muitas partes podem levar mais tempo para gerar.
             </div>
         </div>
-        <button type="submit">Gerar Divisão</button>
+        <button type="submit" {% if quota_exceeded %}disabled title="API indisponível no momento"{% endif %}>Gerar Divisão</button>
     </form>
     
     {% if error %}
     <div class="result error">
         <h3>Erro:</h3>
         <p>{{ error }}</p>
+        {% if quota_exceeded %}
+        <div style="margin-top: 15px; padding: 10px; background-color: #fff8e1; border-left: 4px solid #ffc107; border-radius: 4px;">
+            <h4 style="margin-top: 0; color: #ff6f00;">O que isso significa?</h4>
+            <p>A API do Google Gemini tem limites de uso gratuito:</p>
+            <ul>
+                <li>60 solicitações por minuto</li>
+                <li>Número limitado de solicitações por dia</li>
+            </ul>
+            <p>Opções para resolver:</p>
+            <ol>
+                <li>Aguardar alguns minutos e tentar novamente</li>
+                <li>Obter uma nova chave de API em <a href="https://ai.google.dev/" target="_blank">Google AI Studio</a></li>
+                <li>Atualizar para um plano pago no Google Cloud</li>
+            </ol>
+        </div>
+        {% endif %}
     </div>
     {% endif %}
     

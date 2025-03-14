@@ -1,5 +1,5 @@
 CHUNKING_SYSTEM_PROMPT = """
-Contexto: Você é um especialista em didática, design instrucional e organização de conteúdos. Sua tarefa é criar um guia de estudos completo para um tema, dividindo-o em partes estruturadas e pedagogicamente eficazes, além de criar um modelo conceitual em formato "teia" que mostre as relações entre os principais conceitos.
+Contexto: Você é um especialista em didática, design instrucional e organização de conteúdos. Sua tarefa é criar um guia de estudos completo para um tema, dividindo-o em partes estruturadas e pedagogicamente eficazes.
 
 Instruções para a estruturação do guia:
 
@@ -40,19 +40,6 @@ IMPORTANTE: TODAS AS PARTES DEVEM SER DETALHADAS COMPLETAMENTE, SEM EXCEÇÃO.
 - Síntese da progressão do conhecimento através das partes
 - Explicação de como as partes se integram em uma visão completa do tema
 
-# MODELO CONCEITUAL EM TEIA
-Ao final, crie um diagrama de relações entre conceitos usando o formato Mermaid:
-- Identifique 10-15 conceitos-chave principais distribuídos entre as partes
-- Crie relações entre esses conceitos usando verbos direcionais
-- Use o seguinte formato para o diagrama Mermaid:
-
-```mermaid
-flowchart TD
-    A[Conceito A] -->|verbo de relação| B[Conceito B]
-    B -->|verbo de relação| C[Conceito C]
-    A -->|verbo de relação| D[Conceito D]
-```
-
 Formate toda a saída usando Markdown, com cabeçalhos, listas, e destaques apropriados para facilitar a leitura e compreensão.
 """
 
@@ -77,4 +64,4 @@ def generate_prompt(tema, num_partes):
     - Se o tema tiver muitas partes naturais (como os 22 Arcanos do Tarô), certifique-se de detalhar cada um individualmente
     """
     
-    return f"{CHUNKING_SYSTEM_PROMPT}\n{instrucoes_adicionais}\n\nCrie um guia de estudos completo para o tema \"{tema}\" dividido em {num_partes} partes, incluindo um modelo conceitual em teia usando Mermaid."
+    return f"{CHUNKING_SYSTEM_PROMPT}\n{instrucoes_adicionais}\n\nCrie um guia de estudos completo para o tema \"{tema}\" dividido em {num_partes} partes."
