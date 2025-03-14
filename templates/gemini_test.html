@@ -165,29 +165,6 @@
             padding-left: 8px;
         }
         
-        /* Modo compacto para conteúdo extenso */
-        .compact-mode .formatted-content h2 + p,
-        .compact-mode .formatted-content h2 + p + p,
-        .compact-mode .formatted-content h2 + p + p + p,
-        .compact-mode .formatted-content h2 + * + ul {
-            display: none;
-        }
-        
-        .compact-mode .formatted-content h2 {
-            cursor: pointer;
-            margin-bottom: 5px;
-        }
-        
-        .compact-mode-toggle {
-            background: #7f8c8d;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-        
         /* Classes para target de links de ancoragem */
         :target {
             scroll-margin-top: 20px;
@@ -242,6 +219,46 @@
             margin: 15px 0;
             font-style: italic;
         }
+
+        /* Estilos para o botão de controle do índice */
+        .toc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .toc-toggle {
+            background: none;
+            border: none;
+            color: #7f8c8d;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .toc-toggle:hover {
+            color: #3498db;
+        }
+        
+        .toc-toggle svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+        }
+        
+        .toc-container {
+            transition: height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+        }
+        
+        .toc-collapsed .toc-container {
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -274,20 +291,25 @@
     <div class="tab-buttons">
         <button class="tab-button active" onclick="openTab(event, 'formatted')">Conteúdo</button>
         <button class="tab-button" onclick="openTab(event, 'diagram')">Diagrama em Teia</button>
-        <button class="tab-button" onclick="openTab(event, 'raw')">Markdown Bruto</button>
     </div>
     
     <div id="formatted" class="result tab-content active">
         <h3>Guia de Estudos:</h3>
         
-        <div class="view-controls">
-            <button class="compact-mode-toggle" onclick="toggleCompactMode()">Alternar Modo Compacto</button>
-        </div>
-        
         <!-- Índice automático para conteúdo extenso -->
         <div class="toc" id="table-of-contents">
-            <div class="toc-title">Índice Rápido</div>
-            <!-- Será preenchido via JavaScript -->
+            <div class="toc-header">
+                <div class="toc-title">Índice Rápido</div>
+                <button class="toc-toggle" onclick="toggleToc()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" id="toc-icon">
+                        <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                    </svg>
+                    <span id="toc-toggle-text">Ocultar</span>
+                </button>
+            </div>
+            <div class="toc-container">
+                <!-- Será preenchido via JavaScript -->
+            </div>
         </div>
         
         <div class="formatted-content">{{ html_result }}</div>
@@ -306,11 +328,6 @@
                 <p>Nenhum diagrama em teia gerado para este tema.</p>
             {% endif %}
         </div>
-    </div>
-    
-    <div id="raw" class="result tab-content">
-        <h3>Código Markdown:</h3>
-        <div class="markdown-content">{{ result }}</div>
     </div>
     {% endif %}
     
@@ -365,26 +382,27 @@
         }
     }
     
-    // Variável para rastrear o estado do modo compacto
-    let isCompactMode = false;
-    
-    // Função para alternar o modo compacto
-    function toggleCompactMode() {
-        const contentDiv = document.querySelector('.formatted-content');
-        if (isCompactMode) {
-            contentDiv.classList.remove('compact-mode');
-            document.querySelector('.compact-mode-toggle').textContent = 'Ativar Modo Compacto';
+    // Função para alternar a visibilidade do índice
+    function toggleToc() {
+        const tocElement = document.getElementById('table-of-contents');
+        const tocContainer = document.querySelector('#table-of-contents .toc-container');
+        const tocToggleText = document.getElementById('toc-toggle-text');
+        
+        if (tocContainer.style.display === 'none') {
+            // Mostrar o índice
+            tocContainer.style.display = 'block';
+            tocToggleText.textContent = 'Ocultar';
         } else {
-            contentDiv.classList.add('compact-mode');
-            document.querySelector('.compact-mode-toggle').textContent = 'Mostrar Tudo';
+            // Ocultar o índice
+            tocContainer.style.display = 'none';
+            tocToggleText.textContent = 'Mostrar';
         }
-        isCompactMode = !isCompactMode;
     }
     
     // Criar índice automático melhorado
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
-            const toc = document.getElementById('table-of-contents');
+            const toc = document.querySelector('#table-of-contents .toc-container');
             
             // Encontrar todas as partes (h2 que começam com "Parte")
             const parts = document.querySelectorAll('.formatted-content h2');
@@ -433,24 +451,6 @@
                         link.textContent = part.textContent;
                         link.className = 'part-link';
                         toc.appendChild(link);
-                        
-                        // Adicionar interatividade ao título da parte no modo compacto
-                        part.addEventListener('click', function() {
-                            if (document.querySelector('.formatted-content').classList.contains('compact-mode')) {
-                                // Toggle visibility of next elements
-                                let nextEl = part.nextElementSibling;
-                                let count = 0;
-                                while (nextEl && count < 5 && !nextEl.tagName.match(/^H[1-2]$/i)) {
-                                    if (nextEl.style.display === 'none' || window.getComputedStyle(nextEl).display === 'none') {
-                                        nextEl.style.display = '';
-                                    } else {
-                                        nextEl.style.display = 'none';
-                                    }
-                                    nextEl = nextEl.nextElementSibling;
-                                    count++;
-                                }
-                            }
-                        });
                     }
                 });
                 
@@ -472,7 +472,7 @@
                     toc.appendChild(link);
                 }
             } else {
-                toc.style.display = 'none';
+                document.getElementById('table-of-contents').style.display = 'none';
             }
             
             // Adicionar IDs e modificar formatação dos títulos de partes
@@ -481,6 +481,9 @@
                     if (!heading.id) heading.id = 'parte-' + index;
                 }
             });
+            
+            // Certificar-se que o container do toc esteja visível inicialmente
+            toc.style.display = 'block';
             
         }, 1000);
     });
