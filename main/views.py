@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.conf import settings
+from django.utils.safestring import mark_safe
 import google.generativeai as genai
+import markdown
 from .prompts.chunking_prompt import generate_prompt
 
 def test_gemini(request):
@@ -8,6 +10,7 @@ def test_gemini(request):
     error = None
     tema = ""
     num_partes = 2  # valor padrão
+    html_result = None
     
     try:
         # Configurar a API com a chave
@@ -23,7 +26,6 @@ def test_gemini(request):
                 if num_partes < 2:
                     error = "O número de partes deve ser maior que 1."
                     return render(request, 'gemini_test.html', {
-                        'result': result,
                         'error': error,
                         'tema': tema,
                         'num_partes': num_partes
@@ -31,7 +33,6 @@ def test_gemini(request):
             except ValueError:
                 error = "O número de partes deve ser um número inteiro válido."
                 return render(request, 'gemini_test.html', {
-                    'result': result,
                     'error': error,
                     'tema': tema,
                     'num_partes': 2
@@ -43,11 +44,15 @@ def test_gemini(request):
             # Gerar resposta
             response = model.generate_content(prompt)
             result = response.text
+            
+            # Converter markdown para HTML
+            html_result = mark_safe(markdown.markdown(result, extensions=['extra']))
     except Exception as e:
         error = str(e)
     
     return render(request, 'gemini_test.html', {
         'result': result,
+        'html_result': html_result,
         'error': error,
         'tema': tema,
         'num_partes': num_partes

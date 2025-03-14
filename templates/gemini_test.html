@@ -10,10 +10,19 @@
         .result { margin-top: 20px; padding: 15px; background-color: #f5f5f5; border-radius: 5px; }
         .error { color: red; }
         .markdown-content { white-space: pre-wrap; }
+        .formatted-content h2 { color: #2980b9; margin-top: 20px; }
+        .formatted-content h3 { color: #16a085; margin-top: 15px; }
+        .formatted-content ul { padding-left: 20px; }
+        .formatted-content strong { color: #c0392b; }
         h1 { color: #2c3e50; }
         button { background-color: #3498db; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #2980b9; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .tab-buttons { margin-top: 20px; display: flex; }
+        .tab-button { padding: 10px 15px; margin-right: 5px; background-color: #ddd; border: none; cursor: pointer; border-radius: 4px 4px 0 0; }
+        .tab-button.active { background-color: #f5f5f5; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body>
@@ -38,11 +47,43 @@
     </div>
     {% endif %}
     
-    {% if result %}
-    <div class="result">
+    {% if html_result %}
+    <div class="tab-buttons">
+        <button class="tab-button active" onclick="openTab(event, 'formatted')">Visualização Formatada</button>
+        <button class="tab-button" onclick="openTab(event, 'raw')">Markdown Bruto</button>
+    </div>
+    
+    <div id="formatted" class="result tab-content active">
         <h3>Divisão do Tema:</h3>
+        <div class="formatted-content">{{ html_result }}</div>
+    </div>
+    
+    <div id="raw" class="result tab-content">
+        <h3>Código Markdown:</h3>
         <div class="markdown-content">{{ result }}</div>
     </div>
     {% endif %}
+    
+    <script>
+    function openTab(evt, tabName) {
+        var i, tabContent, tabButtons;
+        
+        // Hide all tab content
+        tabContent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabContent.length; i++) {
+            tabContent[i].style.display = "none";
+        }
+        
+        // Remove active class from all tab buttons
+        tabButtons = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+        }
+        
+        // Show the current tab, and add an "active" class to the button
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+    </script>
 </body>
 </html>
