@@ -100,13 +100,26 @@ WSGI_APPLICATION = 'chunking.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-# Configuração do banco de dados com suporte a PostgreSQL no Railway
-DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
-        conn_max_age=600
-    )
-}
+
+# Detecta se estamos rodando no Railway
+IS_RAILWAY = 'RAILWAY_STATIC_URL' in os.environ or 'RAILWAY_SERVICE_NAME' in os.environ
+
+# Configuração do banco de dados
+if IS_RAILWAY:
+    # Usa PostgreSQL no Railway
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600
+        )
+    }
+else:
+    # Usa SQLite para desenvolvimento local
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
