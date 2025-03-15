@@ -76,7 +76,7 @@ Ao final, adicione uma conclusão como Heading 1 (# Conclusão) que sintetize tu
                 
                 prompt_parte3 = f"""Crie a introdução para um guia de estudos para o tema "{tema}" em {num_partes} partes.
 Use esta formatação:
-- Título principal como Heading 2 (##): "## Guia de Estudos: {tema} em {num_partes} Partes (Nível: Intermediário)"
+- Título principal como Heading 2 (##): "## {tema} em {num_partes} Partes"
 - Subseções como Heading 2 (##):
   - ## Contextualização (2-3 parágrafos)
   - ## Objetivos Gerais (4-5 competências em lista)"""
@@ -97,6 +97,65 @@ Use esta formatação:
                     
                     # Combinar os resultados
                     result = response3.text + "\n\n" + response1.text + "\n\n" + response2.text
+                except Exception as api_error:
+                    if "429" in str(api_error):
+                        error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
+                        return render(request, 'index.html', {
+                            'error': error,
+                            'tema': tema,
+                            'num_partes': num_partes,
+                            'quota_exceeded': True
+                        })
+                    else:
+                        raise api_error
+            # Para temas muito complexos que podem resultar em respostas truncadas
+            elif tema.lower() in ['inteligência artificial', 'inteligencia artificial', 'machine learning', 
+                                 'deep learning', 'cloud computing', 'cybersecurity']:
+                # Para temas complexos, vamos gerar cada parte separadamente para garantir completude
+                try:
+                    # Configuração para garantir respostas completas
+                    generation_config = genai.GenerationConfig(
+                        temperature=0.7,
+                        top_p=0.95,
+                        top_k=40,
+                        max_output_tokens=8192,
+                    )
+                    
+                    # Gerar introdução
+                    intro_prompt = f"""Crie apenas a introdução para um guia de estudos sobre "{tema}" em {num_partes} partes.
+Use esta formatação:
+- Título principal como Heading 1 (#): "# {tema} em {num_partes} Partes"
+- Subseções como Heading 2 (##):
+  - ## Contextualização (2-3 parágrafos)
+  - ## Objetivos Gerais (4-5 competências em lista)"""
+                    
+                    intro_response = model.generate_content(intro_prompt, generation_config=generation_config)
+                    result = intro_response.text + "\n\n"
+                    
+                    # Gerar cada parte individualmente
+                    for i in range(1, num_partes + 1):
+                        parte_prompt = f"""Crie APENAS a parte {i} de um guia de estudos sobre "{tema}".
+Use esta formatação:
+- Título da parte como Heading 1 (#): "# Parte {i}: [Título Descritivo]"
+- **Objetivo de Aprendizagem:** (1 parágrafo)
+- **Tópicos Principais:** (lista de 3-5 itens com descrições)
+- **Conceitos-chave:** (lista de termos)
+- **Pergunta de Reflexão:** (questão instigante)
+
+IMPORTANTE: Crie APENAS esta parte, sem introdução ou partes adicionais."""
+                        
+                        parte_response = model.generate_content(parte_prompt, generation_config=generation_config)
+                        result += parte_response.text + "\n\n"
+                    
+                    # Gerar conclusão
+                    conclusion_prompt = f"""Crie apenas a conclusão para um guia de estudos sobre "{tema}" em {num_partes} partes.
+Use esta formatação:
+- Título como Heading 1 (#): "# Conclusão"
+Sintetize a progressão do conhecimento através das partes e explique como elas se integram."""
+                    
+                    conclusion_response = model.generate_content(conclusion_prompt, generation_config=generation_config)
+                    result += conclusion_response.text
+                    
                 except Exception as api_error:
                     if "429" in str(api_error):
                         error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
@@ -148,7 +207,13 @@ Use esta formatação:
                         raise api_error
             
             # Converter markdown para HTML
-            html_result = mark_safe(markdown.markdown(result, extensions=['extra', 'fenced_code']))
+            if result:
+                # Usar safe para garantir que o HTML não é escapado
+                html_result = mark_safe(markdown.markdown(result, extensions=['extra', 'fenced_code']))
+                
+                # Verificar se temos um resultado válido
+                if not html_result or not str(html_result).strip():
+                    error = "Erro: Não foi possível gerar o HTML do conteúdo."
     except requests.exceptions.HTTPError as http_error:
         if http_error.response.status_code == 429:
             error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
@@ -157,11 +222,14 @@ Use esta formatação:
     except Exception as e:
         error = str(e)
     
-    return render(request, 'index.html', {
+    context = {
         'result': result,
         'html_result': html_result,
         'error': error,
         'tema': tema,
         'num_partes': num_partes,
-        'quota_exceeded': "429" in str(error) if error else False
-    })
+        'quota_exceeded': "429" in str(error) if error else False,
+        'has_content': bool(html_result)
+    }
+    
+    return render(request, 'index.html', context)

@@ -11,7 +11,7 @@ Use a seguinte hierarquia de formatação:
 
 # SEÇÃO INICIAL
 ## Título principal
-Comece com: "# Guia de Estudos: [TEMA] em [NÚMERO] Partes (Nível: Intermediário)"
+Comece com: "# [TEMA] em [NÚMERO] Partes"
 
 ## Contextualização
 - Visão geral concisa do tema (2-3 parágrafos)
@@ -62,6 +62,7 @@ def generate_prompt(tema, num_partes):
     - NÃO use placeholders ou texto indicando "continuar estrutura para as partes X a Y"
     - NÃO use reticências ou outras indicações para omitir conteúdo
     - Se o tema tiver muitas partes naturais (como os 22 Arcanos do Tarô), certifique-se de detalhar cada um individualmente
+    - É ESSENCIAL que você forneça TODAS as partes completas e a conclusão sem truncar conteúdo
     """
     
     return f"{CHUNKING_SYSTEM_PROMPT}\n{instrucoes_adicionais}\n\nCrie um guia de estudos completo para o tema \"{tema}\" dividido em {num_partes} partes."
