@@ -2,7 +2,7 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "pip install -r requirements.txt -r railway-requirements.txt && python manage.py collectstatic --noinput"
+    "buildCommand": "python manage.py collectstatic --noinput"
   },
   "deploy": {
     "startCommand": "gunicorn chunking.wsgi --log-file -",
