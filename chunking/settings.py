@@ -34,13 +34,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-z=wdk_lvex+(jq1qe(6y7a&%wb4zf5g(lyu6o5-ith-e87jn3g')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') != 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1', 'chunker.up.railway.app').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,chunker.up.railway.app').split(',')
 
 # Adiciona o domínio do Railway automaticamente
 if 'RAILWAY_STATIC_URL' in os.environ:
-    ALLOWED_HOSTS.append('.railway.app')
+    ALLOWED_HOSTS.extend(['*.railway.app', 'railway.app'])
 
 
 # Application definition
