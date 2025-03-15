@@ -27,7 +27,7 @@ def test_gemini(request):
                 num_partes = int(request.POST.get('num_partes', '2'))
                 if num_partes < 2:
                     error = "O número de partes deve ser maior que 1."
-                    return render(request, 'gemini_test.html', {
+                    return render(request, 'index.html', {
                         'error': error,
                         'tema': tema,
                         'num_partes': num_partes
@@ -35,14 +35,14 @@ def test_gemini(request):
                 # Adicionando limite máximo de partes
                 if num_partes > 22:
                     error = "O número máximo de partes permitido é 22."
-                    return render(request, 'gemini_test.html', {
+                    return render(request, 'index.html', {
                         'error': error,
                         'tema': tema,
                         'num_partes': 22  # Redefinindo para o máximo permitido
                     })
             except ValueError:
                 error = "O número de partes deve ser um número inteiro válido."
-                return render(request, 'gemini_test.html', {
+                return render(request, 'index.html', {
                     'error': error,
                     'tema': tema,
                     'num_partes': 2
@@ -100,7 +100,7 @@ Use esta formatação:
                 except Exception as api_error:
                     if "429" in str(api_error):
                         error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
-                        return render(request, 'gemini_test.html', {
+                        return render(request, 'index.html', {
                             'error': error,
                             'tema': tema,
                             'num_partes': num_partes,
@@ -138,7 +138,7 @@ Use esta formatação:
                 except Exception as api_error:
                     if "429" in str(api_error):
                         error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
-                        return render(request, 'gemini_test.html', {
+                        return render(request, 'index.html', {
                             'error': error,
                             'tema': tema,
                             'num_partes': num_partes,
@@ -157,7 +157,7 @@ Use esta formatação:
     except Exception as e:
         error = str(e)
     
-    return render(request, 'gemini_test.html', {
+    return render(request, 'index.html', {
         'result': result,
         'html_result': html_result,
         'error': error,

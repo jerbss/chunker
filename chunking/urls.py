@@ -19,5 +19,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('gemini/', include('main.urls')),
+    path('', include('main.urls')),  # Mudança aqui: a raiz agora inclui as URLs do app main
 ]
