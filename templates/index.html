@@ -3,99 +3,116 @@
 <head>
     <title>ChunkMaster | Divide & Aprenda</title>
     {% load static %}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-    <div class="app-header animate__animated animate__fadeIn">
-        <h1>Chunk<span class="highlight">Master</span></h1>
-        <p>Transforme temas complexos em <span class="chunk-text">chunks</span> digestíveis para facilitar seu aprendizado</p>
-    </div>
+    <div class="container">
+        <div class="app-header animate__animated animate__fadeIn">
+            <h1>Chunk<span class="highlight">Master</span></h1>
+            <p>Transforme temas complexos em <span class="chunk-text">chunks</span> digestíveis para facilitar seu aprendizado</p>
+        </div>
 
-    <div class="form-container animate__animated animate__fadeInUp">
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label>O que você quer <span class="chunk-text">chunkar</span> hoje?</label>
-                <input type="text" name="tema" value="{{ tema }}" required placeholder="Ex: Física Quântica, Literatura Brasileira, Machine Learning...">
-            </div>
-            <div class="form-group">
-                <label>Número de <span class="chunk-text">chunks</span>:</label>
-                <input type="number" name="num_partes" value="{{ num_partes }}" min="2" max="22" required>
-                <small style="color:#777;">Mínimo: 2, Máximo: 22</small>
-                <div id="parts-warning" style="display:none; color:#e74c3c; margin-top:5px;">
-                    <strong>Nota:</strong> Muitos chunks podem levar mais tempo para gerar.
+        <div class="form-container animate__animated animate__fadeInUp">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label>O que você quer <span class="chunk-text">chunkar</span> hoje?</label>
+                        <input type="text" name="tema" class="form-control" value="{{ tema }}" required placeholder="Ex: Física Quântica, Literatura Brasileira, Machine Learning...">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Número de <span class="chunk-text">chunks</span>:</label>
+                        <input type="number" name="num_partes" class="form-control" value="{{ num_partes }}" min="2" max="22" required>
+                        <small class="text-muted">Mínimo: 2, Máximo: 22</small>
+                        <div id="parts-warning" style="display:none;" class="text-danger mt-1">
+                            <strong>Nota:</strong> Muitos chunks podem levar mais tempo para gerar.
+                        </div>
+                    </div>
                 </div>
+                <button type="submit" class="btn chunk-button" {% if quota_exceeded %}disabled title="API indisponível no momento"{% endif %}>
+                    <span class="chunk-icon">⧉</span> Chunk!
+                </button>
+            </form>
+        </div>
+        
+        {% if error %}
+        <div class="alert alert-danger">
+            <h4 class="alert-heading">Erro:</h4>
+            <p>{{ error }}</p>
+            {% if quota_exceeded %}
+            <hr>
+            <div class="quota-info">
+                <h5 style="color: #ff6f00;">O que isso significa?</h5>
+                <p>A API do Google Gemini tem limites de uso gratuito:</p>
+                <ul>
+                    <li>60 solicitações por minuto</li>
+                    <li>Número limitado de solicitações por dia</li>
+                </ul>
+                <p>Opções para resolver:</p>
+                <ol>
+                    <li>Aguardar alguns minutos e tentar novamente</li>
+                    <li>Obter uma nova chave de API em <a href="https://ai.google.dev/" target="_blank">Google AI Studio</a></li>
+                    <li>Atualizar para um plano pago no Google Cloud</li>
+                </ol>
             </div>
-            <button type="submit" class="chunk-button" {% if quota_exceeded %}disabled title="API indisponível no momento"{% endif %}>
-                <span class="chunk-icon">⧉</span> Chunk!
-            </button>
-        </form>
-    </div>
-    
-    {% if error %}
-    <div class="result error">
-        <h3>Erro:</h3>
-        <p>{{ error }}</p>
-        {% if quota_exceeded %}
-        <div style="margin-top: 15px; padding: 10px; background-color: #fff8e1; border-left: 4px solid #ffc107; border-radius: 4px;">
-            <h4 style="margin-top: 0; color: #ff6f00;">O que isso significa?</h4>
-            <p>A API do Google Gemini tem limites de uso gratuito:</p>
-            <ul>
-                <li>60 solicitações por minuto</li>
-                <li>Número limitado de solicitações por dia</li>
-            </ul>
-            <p>Opções para resolver:</p>
-            <ol>
-                <li>Aguardar alguns minutos e tentar novamente</li>
-                <li>Obter uma nova chave de API em <a href="https://ai.google.dev/" target="_blank">Google AI Studio</a></li>
-                <li>Atualizar para um plano pago no Google Cloud</li>
-            </ol>
+            {% endif %}
         </div>
         {% endif %}
-    </div>
-    {% endif %}
-    
-    {% if html_result %}
-    <div class="result">
-        <div class="toc" id="table-of-contents">
-            <div class="toc-header">
-                <div class="toc-title">Navegue pelos <span class="chunk-text">chunks</span></div>
-                <button class="toc-toggle" onclick="toggleToc()">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" id="toc-icon">
-                        <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-                    </svg>
-                    <span id="toc-toggle-text">Ocultar</span>
-                </button>
+        
+        {% if html_result %}
+        <div class="result-container">
+            <!-- Índice de navegação -->
+            <div class="toc card mb-4" id="table-of-contents">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="toc-title">Navegue pelos <span class="chunk-text">chunks</span></div>
+                    <button class="btn btn-sm btn-outline-secondary toc-toggle" onclick="toggleToc()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
+                            <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+                        </svg>
+                        <span id="toc-toggle-text">Ocultar</span>
+                    </button>
+                </div>
+                <div class="card-body toc-container">
+                    <!-- Será preenchido via JavaScript -->
+                </div>
             </div>
-            <div class="toc-container">
-                <!-- Será preenchido via JavaScript -->
+            
+            <!-- Conteúdo HTML que será processado pelo JS -->
+            <div id="html-content" style="display:none">{{ html_result|safe }}</div>
+            
+            <!-- Bootstrap Grid para Cards -->
+            <div class="masonry-grid" id="cards-container">
+                <!-- Os cards serão gerados via JavaScript -->
+            </div>
+            
+            <!-- Fallback content container -->
+            <div id="fallback-content" class="fallback-content card">
+                <div class="card-header">
+                    <h3>Seu conteúdo <span class="chunk-text">chunkado</span>:</h3>
+                </div>
+                <div class="card-body formatted-content-visible">
+                    {{ html_result|safe }}
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-outline-secondary expand-button" onclick="toggleFallbackContent()">Expandir/Recolher</button>
+                </div>
             </div>
         </div>
+        {% endif %}
         
-        <!-- Conteúdo HTML que será processado pelo JS -->
-        <div id="html-content" style="display:none">{{ html_result|safe }}</div>
-        
-        <!-- Cards Container -->
-        <div id="cards-container" class="cards-container">
-            <!-- Os cards serão gerados via JavaScript -->
-        </div>
-        
-        <!-- Debug info -->
-        <div class="debug-info" id="debug-info"></div>
-        
-        <!-- Fallback content container -->
-        <div id="fallback-content" class="fallback-content">
-            <h3>Seu conteúdo <span class="chunk-text">chunkado</span>:</h3>
-            <div class="formatted-content-visible">{{ html_result|safe }}</div>
-            <button class="expand-button" onclick="toggleFallbackContent()">Expandir/Recolher</button>
-        </div>
+        <footer class="site-footer">
+            <p>© 2024 ChunkMaster | Simplificando o aprendizado através de chunks inteligentes</p>
+        </footer>
     </div>
-    {% endif %}
     
-    <footer class="site-footer">
-        <p>© 2024 ChunkMaster | Simplificando o aprendizado através de chunks inteligentes</p>
-    </footer>
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Opcional: Masonry para layout de grade dinâmica -->
+    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
     
     <script>
     // Mostrar aviso para muitas partes
@@ -112,16 +129,13 @@
     
     // Função para alternar a visibilidade do índice
     function toggleToc() {
-        const tocElement = document.getElementById('table-of-contents');
         const tocContainer = document.querySelector('#table-of-contents .toc-container');
         const tocToggleText = document.getElementById('toc-toggle-text');
         
         if (tocContainer.style.display === 'none') {
-            // Mostrar o índice
             tocContainer.style.display = 'block';
             tocToggleText.textContent = 'Ocultar';
         } else {
-            // Ocultar o índice
             tocContainer.style.display = 'none';
             tocToggleText.textContent = 'Mostrar';
         }
@@ -130,12 +144,20 @@
     // Função para expandir/recolher cards
     function toggleCardExpansion(cardId) {
         const card = document.getElementById(cardId);
-        if (card.classList.contains('expanded')) {
-            card.classList.remove('expanded');
-            card.querySelector('.expand-button').textContent = 'Mostrar mais';
+        const cardBody = card.querySelector('.card-body');
+        const expandBtn = card.querySelector('.expand-button');
+        
+        if (cardBody.classList.contains('collapsed')) {
+            cardBody.classList.remove('collapsed');
+            expandBtn.textContent = 'Mostrar menos';
         } else {
-            card.classList.add('expanded');
-            card.querySelector('.expand-button').textContent = 'Mostrar menos';
+            cardBody.classList.add('collapsed');
+            expandBtn.textContent = 'Mostrar mais';
+        }
+        
+        // Atualizar layout do Masonry
+        if (window.msnry) {
+            setTimeout(() => window.msnry.layout(), 100);
         }
     }
     
@@ -143,7 +165,7 @@
     function toggleFallbackContent() {
         var content = document.querySelector('.formatted-content-visible');
         if (content.style.maxHeight === 'none') {
-            content.style.maxHeight = '600px';
+            content.style.maxHeight = '500px';
         } else {
             content.style.maxHeight = 'none';
         }
@@ -171,9 +193,12 @@
                 createTableOfContents();
                 
                 // Verificar se os cards foram criados
-                if (document.querySelectorAll('.card').length > 0) {
+                if (document.querySelectorAll('.chunk-card').length > 0) {
                     // Cards criados com sucesso, podemos esconder o fallback
                     document.getElementById('fallback-content').style.display = 'none';
+                    
+                    // Inicializar Masonry após os cards serem criados
+                    initMasonry();
                 }
                 
                 // Remover o elemento temporário
@@ -201,31 +226,47 @@
         // Encontrar todas as seções h2
         const sections = content.querySelectorAll('h2');
         
-        // Primeiro, criar o card de introdução
+        // Primeiro, criar o card de introdução para Contextualização
         let introHtml = '';
+        let introSections = [];
+        
         for (let i = 0; i < sections.length; i++) {
             const section = sections[i];
-            if (section.textContent.toLowerCase().includes('parte')) {
-                break; // Paramos quando encontramos a primeira parte
+            if (section.textContent.toLowerCase().includes('contexto') || 
+                section.textContent.toLowerCase().includes('objetivo')) {
+                introSections.push(section);
+                
+                // Adicionar o título e conteúdo relacionado
+                introHtml += section.outerHTML;
+                let nextNode = section.nextElementSibling;
+                while (nextNode && nextNode.tagName !== 'H2') {
+                    introHtml += nextNode.outerHTML;
+                    nextNode = nextNode.nextElementSibling;
+                }
             }
-            introHtml += section.outerHTML;
-            let nextNode = section.nextElementSibling;
-            while (nextNode && nextNode.tagName !== 'H2') {
-                introHtml += nextNode.outerHTML;
-                nextNode = nextNode.nextElementSibling;
+            
+            // Parar quando encontramos a primeira parte
+            if (section.textContent.toLowerCase().includes('parte')) {
+                break;
             }
         }
         
         if (introHtml) {
             const introCard = document.createElement('div');
-            introCard.className = 'card card-full-width card-intro card-expandable';
+            introCard.className = 'chunk-card context-card';
             introCard.id = 'card-intro';
             introCard.innerHTML = `
-                <div class="card-header">
-                    <h3 class="card-title">${mainTitleText}</h3>
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h3 class="card-title mb-0">${mainTitleText}</h3>
+                    </div>
+                    <div class="card-body collapsed">
+                        ${introHtml}
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-outline-info expand-button" onclick="toggleCardExpansion('card-intro')">Mostrar mais</button>
+                    </div>
                 </div>
-                <div class="card-content">${introHtml}</div>
-                <button class="expand-button" onclick="toggleCardExpansion('card-intro')">Mostrar mais</button>
             `;
             cardsContainer.appendChild(introCard);
         }
@@ -236,23 +277,44 @@
         
         for (let i = 0; i < sections.length; i++) {
             const section = sections[i];
+            
             if (section.textContent.toLowerCase().includes('parte')) {
                 if (currentPart) {
                     parts.push(currentPart);
                 }
+                
+                // Iniciar uma nova parte
                 currentPart = {
                     title: section.textContent,
                     content: '',
-                    html: section.outerHTML
+                    html: section.outerHTML,
+                    size: 'medium' // Tamanho padrão
                 };
+                
+                // Determinar o tamanho do card com base no conteúdo
+                let nextNode = section.nextElementSibling;
+                let contentLength = 0;
+                
+                while (nextNode && nextNode.tagName !== 'H2') {
+                    contentLength += (nextNode.textContent || '').length;
+                    nextNode = nextNode.nextElementSibling;
+                }
+                
+                // Definir tamanho com base no comprimento do conteúdo
+                if (contentLength > 1000) {
+                    currentPart.size = 'large';
+                } else if (contentLength < 400) {
+                    currentPart.size = 'small';
+                }
+                
             } else if (section.textContent.toLowerCase().includes('conclusão')) {
                 // Quando encontramos a conclusão, finalizamos a parte atual
                 if (currentPart) {
                     parts.push(currentPart);
                 }
                 break;
-            } else if (currentPart) {
-                // Adicione esta seção à parte atual
+            } else if (currentPart && !introSections.includes(section)) {
+                // Adicione esta seção à parte atual se não for uma seção de introdução
                 currentPart.html += section.outerHTML;
             }
             
@@ -260,16 +322,19 @@
             if (currentPart) {
                 let nextNode = section.nextElementSibling;
                 while (nextNode && nextNode.tagName !== 'H2') {
-                    currentPart.html += nextNode.outerHTML;
-                    // Extrair objetivos e conceitos-chave
-                    if (nextNode.innerHTML && nextNode.innerHTML.includes('<strong>Objetivo de Aprendizagem:</strong>')) {
-                        currentPart.objective = nextNode.innerHTML.replace('<strong>Objetivo de Aprendizagem:</strong>', '').trim();
-                    }
-                    if (nextNode.innerHTML && nextNode.innerHTML.includes('<strong>Conceitos-chave:</strong>')) {
-                        currentPart.concepts = nextNode.innerHTML.replace('<strong>Conceitos-chave:</strong>', '').trim();
-                    }
-                    if (nextNode.innerHTML && nextNode.innerHTML.includes('<strong>Pergunta de Reflexão:</strong>')) {
-                        currentPart.question = nextNode.innerHTML.replace('<strong>Pergunta de Reflexão:</strong>', '').trim();
+                    if (section.textContent.toLowerCase().includes('parte')) {
+                        currentPart.html += nextNode.outerHTML;
+                        
+                        // Extrair objetivos e conceitos-chave
+                        if (nextNode.innerHTML && nextNode.innerHTML.includes('<strong>Objetivo de Aprendizagem:</strong>')) {
+                            currentPart.objective = nextNode.innerHTML.replace('<strong>Objetivo de Aprendizagem:</strong>', '').trim();
+                        }
+                        if (nextNode.innerHTML && nextNode.innerHTML.includes('<strong>Conceitos-chave:</strong>')) {
+                            currentPart.concepts = nextNode.innerHTML.replace('<strong>Conceitos-chave:</strong>', '').trim();
+                        }
+                        if (nextNode.innerHTML && nextNode.innerHTML.includes('<strong>Pergunta de Reflexão:</strong>')) {
+                            currentPart.question = nextNode.innerHTML.replace('<strong>Pergunta de Reflexão:</strong>', '').trim();
+                        }
                     }
                     nextNode = nextNode.nextElementSibling;
                 }
@@ -281,11 +346,24 @@
             parts.push(currentPart);
         }
         
-        // Criar os cards para cada parte
+        // Criar os cards para cada parte com classes diferentes baseadas no tamanho
         parts.forEach((part, index) => {
-            // Extract and process content for each part
             const partCard = document.createElement('div');
-            partCard.className = 'card card-part card-expandable';
+            
+            // Definir classes baseadas no tamanho para grid layout
+            let sizeClass;
+            switch(part.size) {
+                case 'large':
+                    sizeClass = 'col-md-8 col-lg-6';
+                    break;
+                case 'small':
+                    sizeClass = 'col-md-4 col-lg-3';
+                    break;
+                default: // medium
+                    sizeClass = 'col-md-6 col-lg-4';
+            }
+            
+            partCard.className = `chunk-card ${sizeClass}`;
             partCard.id = `card-part-${index + 1}`;
             
             // Extract badges (concepts) if they exist
@@ -293,7 +371,7 @@
             if (part.concepts) {
                 const concepts = part.concepts.split(',').map(c => c.trim());
                 badgesHtml = concepts.slice(0, 3).map(concept => 
-                    `<span class="card-badge">${concept}</span>`
+                    `<span class="badge bg-secondary me-1">${concept}</span>`
                 ).join('');
             }
             
@@ -301,25 +379,27 @@
             let reflectionHtml = '';
             if (part.question) {
                 reflectionHtml = `
-                    <div class="reflection-box">
+                    <div class="reflection-box mt-3 border-start border-warning ps-2">
                         <strong>Reflexão:</strong> ${part.question}
                     </div>
                 `;
             }
             
             partCard.innerHTML = `
-                <div class="card-header">
-                    <h3 class="card-title">${part.title}</h3>
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="card-title mb-0">${part.title}</h3>
+                    </div>
+                    <div class="card-body collapsed">
+                        ${part.objective ? `<p class="objective-text">${part.objective}</p>` : ''}
+                        ${part.html}
+                        ${reflectionHtml}
+                    </div>
+                    <div class="card-footer">
+                        <div class="mb-2">${badgesHtml}</div>
+                        <button class="btn btn-outline-success expand-button" onclick="toggleCardExpansion('card-part-${index + 1}')">Mostrar mais</button>
+                    </div>
                 </div>
-                <div class="card-content">
-                    ${part.objective ? `<p>${part.objective}</p>` : ''}
-                    ${part.html}
-                    ${reflectionHtml}
-                </div>
-                <div class="card-footer">
-                    ${badgesHtml}
-                </div>
-                <button class="expand-button" onclick="toggleCardExpansion('card-part-${index + 1}')">Mostrar mais</button>
             `;
             cardsContainer.appendChild(partCard);
         });
@@ -337,14 +417,20 @@
             }
             
             const conclusionCard = document.createElement('div');
-            conclusionCard.className = 'card card-full-width card-conclusion card-expandable';
+            conclusionCard.className = 'chunk-card conclusion-card';
             conclusionCard.id = 'card-conclusion';
             conclusionCard.innerHTML = `
-                <div class="card-header">
-                    <h3 class="card-title">Conclusão</h3>
+                <div class="card h-100">
+                    <div class="card-header bg-purple text-white">
+                        <h3 class="card-title mb-0">Conclusão</h3>
+                    </div>
+                    <div class="card-body collapsed">
+                        ${conclusionHtml}
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-outline-purple expand-button" onclick="toggleCardExpansion('card-conclusion')">Mostrar mais</button>
+                    </div>
                 </div>
-                <div class="card-content">${conclusionHtml}</div>
-                <button class="expand-button" onclick="toggleCardExpansion('card-conclusion')">Mostrar mais</button>
             `;
             cardsContainer.appendChild(conclusionCard);
         }
@@ -356,58 +442,92 @@
         
         // Use the cards we've created as the basis for the TOC
         const introCard = document.getElementById('card-intro');
-        const partCards = document.querySelectorAll('.card-part');
+        const partCards = document.querySelectorAll('.chunk-card:not(#card-intro):not(#card-conclusion)');
         const conclusionCard = document.getElementById('card-conclusion');
         
         if (introCard) {
             const introTitle = introCard.querySelector('.card-title').textContent;
             const titleLink = document.createElement('a');
             titleLink.href = '#card-intro';
+            titleLink.className = 'toc-section d-block fw-bold text-info mb-2';
             titleLink.textContent = introTitle;
-            titleLink.className = 'toc-section';
             toc.appendChild(titleLink);
             
             // Add subsections if we want
             const introSubsections = introCard.querySelectorAll('h2');
-            introSubsections.forEach((heading, index) => {
-                if (!heading.id) heading.id = 'intro-section-' + index;
-                const link = document.createElement('a');
-                link.href = '#' + heading.id;
-                link.textContent = heading.textContent;
-                toc.appendChild(link);
-            });
+            if (introSubsections.length > 0) {
+                const subList = document.createElement('ul');
+                subList.className = 'list-unstyled ms-3 mb-3';
+                
+                introSubsections.forEach((heading, index) => {
+                    if (!heading.id) heading.id = 'intro-section-' + index;
+                    const item = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = '#' + heading.id;
+                    link.className = 'text-decoration-none';
+                    link.textContent = heading.textContent;
+                    item.appendChild(link);
+                    subList.appendChild(item);
+                });
+                
+                toc.appendChild(subList);
+            }
         }
         
         // Add parts section
         if (partCards.length > 0) {
             const partsHeader = document.createElement('div');
-            partsHeader.className = 'toc-section';
+            partsHeader.className = 'fw-bold text-success mb-2';
             partsHeader.textContent = 'Chunks de Estudo';
             toc.appendChild(partsHeader);
+            
+            const partsList = document.createElement('ul');
+            partsList.className = 'list-unstyled ms-3 mb-3';
             
             // Add each part
             partCards.forEach((card, index) => {
                 const title = card.querySelector('.card-title').textContent;
+                const item = document.createElement('li');
                 const link = document.createElement('a');
                 link.href = '#card-part-' + (index + 1);
+                link.className = 'text-decoration-none border-start border-success ps-2';
                 link.textContent = title;
-                link.className = 'part-link';
-                toc.appendChild(link);
+                item.appendChild(link);
+                partsList.appendChild(item);
             });
+            
+            toc.appendChild(partsList);
         }
         
         // Add conclusion
         if (conclusionCard) {
             const conclusionHeader = document.createElement('div');
-            conclusionHeader.className = 'toc-section';
+            conclusionHeader.className = 'fw-bold text-purple mb-2';
             conclusionHeader.textContent = 'Conclusão';
             toc.appendChild(conclusionHeader);
             
             const link = document.createElement('a');
             link.href = '#card-conclusion';
-            link.textContent = 'Conclusão';
+            link.className = 'text-decoration-none ms-3';
+            link.textContent = 'Conclusão e Fechamento';
             toc.appendChild(link);
         }
+    }
+    
+    // Inicializar o Masonry para layout em grade
+    function initMasonry() {
+        // Inicializa o Masonry com opções
+        window.msnry = new Masonry('#cards-container', {
+            itemSelector: '.chunk-card',
+            columnWidth: '.chunk-card',
+            percentPosition: true,
+            gutter: 20
+        });
+        
+        // Atualizar layout do Masonry quando as imagens carregarem
+        window.addEventListener('load', () => {
+            window.msnry.layout();
+        });
     }
     {% endif %}
     </script>
