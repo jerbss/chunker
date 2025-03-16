@@ -230,24 +230,40 @@
         let introHtml = '';
         let introSections = [];
         
+        // Capturar o conteúdo antes da primeira parte, que deve incluir Contextualização e Objetivos
+        let capturedIntroduction = false;
+        
         for (let i = 0; i < sections.length; i++) {
             const section = sections[i];
-            if (section.textContent.toLowerCase().includes('contexto') || 
-                section.textContent.toLowerCase().includes('objetivo')) {
+            
+            // Verificar se esta seção faz parte da introdução (antes de começar as partes)
+            if (!section.textContent.toLowerCase().includes('parte')) {
+                // Adicionar o título h2 e todo seu conteúdo subsequente até o próximo h2
                 introSections.push(section);
-                
-                // Adicionar o título e conteúdo relacionado
                 introHtml += section.outerHTML;
+                
                 let nextNode = section.nextElementSibling;
                 while (nextNode && nextNode.tagName !== 'H2') {
                     introHtml += nextNode.outerHTML;
                     nextNode = nextNode.nextElementSibling;
                 }
-            }
-            
-            // Parar quando encontramos a primeira parte
-            if (section.textContent.toLowerCase().includes('parte')) {
+                
+                capturedIntroduction = true;
+            } else {
+                // Quando chegamos à primeira parte, paramos de capturar a introdução
                 break;
+            }
+        }
+        
+        // Se não encontramos nenhuma seção introdutória mas temos conteúdo antes da primeira parte
+        // (caso o modelo não tenha usado h2 para Contextualização), capturar manualmente
+        if (!capturedIntroduction && mainTitle) {
+            let nextNode = mainTitle.nextElementSibling;
+            while (nextNode && !nextNode.textContent.toLowerCase().includes('parte')) {
+                if (nextNode.tagName !== 'H2') {
+                    introHtml += nextNode.outerHTML;
+                }
+                nextNode = nextNode.nextElementSibling;
             }
         }
         

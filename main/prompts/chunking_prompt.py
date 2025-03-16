@@ -57,6 +57,8 @@ def generate_prompt(tema, num_partes):
     # Instruções mais explícitas para garantir detalhamento completo
     instrucoes_adicionais = """
     ATENÇÃO ESPECIAL:
+    - Certifique-se de incluir a seção de CONTEXTUALIZAÇÃO completa no início, antes dos objetivos gerais
+    - A contextualização deve incluir: visão geral do tema, relevância prática, público-alvo e tempo estimado
     - Você DEVE detalhar TODAS as partes completamente (de 1 até {num_partes})
     - Cada parte deve seguir exatamente a mesma estrutura com o mesmo nível de detalhamento
     - NÃO use placeholders ou texto indicando "continuar estrutura para as partes X a Y"
