@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Erro - ChunkMaster</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f5f7fa;
+        }
+        .error-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-top: 50px;
+            border-top: 4px solid #e74c3c;
+        }
+        h1 {
+            color: #e74c3c;
+        }
+        .chunk-icon {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        .chunk-text {
+            color: #3498db;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="chunk-icon">⚠️</div>
+        <h1>Ops! Não conseguimos <span class="chunk-text">chunkar</span> isso</h1>
+        <p>Tivemos um problema ao processar sua solicitação de chunks.</p>
+        <p>Não se preocupe! Você pode voltar e tentar novamente com outro tema ou número de chunks.</p>
+        
+        <a href="/" class="back-button">Voltar para o ChunkMaster</a>
+    </div>
+</body>
+</html>

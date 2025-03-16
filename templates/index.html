@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Divisão de Temas com Gemini</title>
+    <title>ChunkMaster | Divide & Aprenda</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 </head>
 <body>
-    <div class="app-header">
-        <h1>Guia de Estudos Inteligente</h1>
-        <p>Divida qualquer tema em partes estruturadas para facilitar seu aprendizado</p>
+    <div class="app-header animate__animated animate__fadeIn">
+        <h1>Chunk<span class="highlight">Master</span></h1>
+        <p>Transforme temas complexos em <span class="chunk-text">chunks</span> digestíveis para facilitar seu aprendizado</p>
     </div>
 
-    <div class="form-container">
+    <div class="form-container animate__animated animate__fadeInUp">
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
-                <label>Tema Principal:</label>
-                <input type="text" name="tema" value="{{ tema }}" required placeholder="Ex: Futebol, HTML 5, Python, Mitaka Asa">
+                <label>O que você quer <span class="chunk-text">chunkar</span> hoje?</label>
+                <input type="text" name="tema" value="{{ tema }}" required placeholder="Ex: Física Quântica, Literatura Brasileira, Machine Learning...">
             </div>
             <div class="form-group">
-                <label>Número de Partes:</label>
+                <label>Número de <span class="chunk-text">chunks</span>:</label>
                 <input type="number" name="num_partes" value="{{ num_partes }}" min="2" max="22" required>
                 <small style="color:#777;">Mínimo: 2, Máximo: 22</small>
                 <div id="parts-warning" style="display:none; color:#e74c3c; margin-top:5px;">
-                    <strong>Nota:</strong> Conteúdos com muitas partes podem levar mais tempo para gerar.
+                    <strong>Nota:</strong> Muitos chunks podem levar mais tempo para gerar.
                 </div>
             </div>
-            <button type="submit" {% if quota_exceeded %}disabled title="API indisponível no momento"{% endif %}>Gerar Guia de Estudos</button>
+            <button type="submit" class="chunk-button" {% if quota_exceeded %}disabled title="API indisponível no momento"{% endif %}>
+                <span class="chunk-icon">⧉</span> Chunk!
+            </button>
         </form>
     </div>
     
@@ -57,7 +60,7 @@
     <div class="result">
         <div class="toc" id="table-of-contents">
             <div class="toc-header">
-                <div class="toc-title">Índice Rápido</div>
+                <div class="toc-title">Navegue pelos <span class="chunk-text">chunks</span></div>
                 <button class="toc-toggle" onclick="toggleToc()">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" id="toc-icon">
                         <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
@@ -83,12 +86,16 @@
         
         <!-- Fallback content container -->
         <div id="fallback-content" class="fallback-content">
-            <h3>Conteúdo do Guia de Estudos:</h3>
+            <h3>Seu conteúdo <span class="chunk-text">chunkado</span>:</h3>
             <div class="formatted-content-visible">{{ html_result|safe }}</div>
             <button class="expand-button" onclick="toggleFallbackContent()">Expandir/Recolher</button>
         </div>
     </div>
     {% endif %}
+    
+    <footer class="site-footer">
+        <p>© 2024 ChunkMaster | Simplificando o aprendizado através de chunks inteligentes</p>
+    </footer>
     
     <script>
     // Mostrar aviso para muitas partes
@@ -189,7 +196,7 @@
         
         // Extrair o título principal (h1)
         const mainTitle = content.querySelector('h1');
-        let mainTitleText = mainTitle ? mainTitle.textContent : 'Guia de Estudos';
+        let mainTitleText = mainTitle ? mainTitle.textContent : 'ChunkMaster';
         
         // Encontrar todas as seções h2
         const sections = content.querySelectorAll('h2');
@@ -375,7 +382,7 @@
         if (partCards.length > 0) {
             const partsHeader = document.createElement('div');
             partsHeader.className = 'toc-section';
-            partsHeader.textContent = 'Partes do Estudo';
+            partsHeader.textContent = 'Chunks de Estudo';
             toc.appendChild(partsHeader);
             
             // Add each part

@@ -220,7 +220,7 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
         else:
             error = f"Erro HTTP: {http_error}"
     except Exception as e:
-        error = str(e)
+        error = f"Ops! Não conseguimos chunkar esse tema. Erro: {str(e)}"
     
     context = {
         'result': result,
@@ -229,7 +229,8 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
         'tema': tema,
         'num_partes': num_partes,
         'quota_exceeded': "429" in str(error) if error else False,
-        'has_content': bool(html_result)
+        'has_content': bool(html_result),
+        'app_title': 'ChunkMaster'  # Adicionando título da aplicação ao contexto
     }
     
     return render(request, 'index.html', context)

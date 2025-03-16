@@ -1,14 +1,120 @@
-body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f5f7fa; }
-.form-group { margin-bottom: 15px; }
-input[type="text"] { width: 100%; padding: 8px; box-sizing: border-box; }
-input[type="number"] { width: 100px; padding: 8px; }
+/* Base styles */
+:root {
+    --primary-color: #3498db;
+    --primary-dark: #2980b9;
+    --secondary-color: #27ae60;
+    --accent-color: #f39c12;
+    --text-color: #2c3e50;
+    --light-bg: #f5f7fa;
+    --card-bg: #ffffff;
+    --shadow: 0 4px 15px rgba(0,0,0,0.1);
+    --hover-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    --border-radius: 8px;
+    --transition-speed: 0.3s;
+}
+
+body { 
+    font-family: 'Segoe UI', Arial, sans-serif; 
+    max-width: 1200px; 
+    margin: 0 auto; 
+    padding: 20px; 
+    background-color: var(--light-bg);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* Enhanced form elements */
+.form-group { 
+    margin-bottom: 20px; 
+}
+
+input[type="text"] { 
+    width: 100%; 
+    padding: 12px; 
+    box-sizing: border-box; 
+    border: 2px solid #ddd;
+    border-radius: var(--border-radius);
+    transition: border var(--transition-speed) ease;
+    font-size: 16px;
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+input[type="number"] { 
+    width: 120px; 
+    padding: 12px; 
+    border: 2px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 16px;
+    transition: border var(--transition-speed) ease;
+}
+
+input[type="number"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* Chunking button styles */
+.chunk-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, background-color 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.chunk-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.chunk-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+}
+
+.chunk-icon {
+    margin-right: 8px;
+    font-size: 22px;
+}
+
+/* Chunk text highlight */
+.chunk-text {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.highlight {
+    color: var(--secondary-color);
+}
+
+body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: var(--light-bg); color: var(--text-color); line-height: 1.6; }
+.form-group { margin-bottom: 20px; }
+input[type="text"] { width: 100%; padding: 12px; box-sizing: border-box; border: 2px solid #ddd; border-radius: var(--border-radius); transition: border var(--transition-speed) ease; font-size: 16px; }
+input[type="text"]:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); }
+input[type="number"] { width: 120px; padding: 12px; border: 2px solid #ddd; border-radius: var(--border-radius); font-size: 16px; transition: border var(--transition-speed) ease; }
+input[type="number"]:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); }
 .result { margin-top: 20px; }
 .error { color: red; }
 .markdown-content { white-space: pre-wrap; }
 h1 { color: #2c3e50; }
 button { background-color: #3498db; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
 button:hover { background-color: #2980b9; }
-label { display: block; margin-bottom: 5px; font-weight: bold; }
+label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 17px; }
 
 /* Card Layout System */
 .cards-container {
@@ -19,11 +125,11 @@ label { display: block; margin-bottom: 5px; font-weight: bold; }
 }
 
 .card {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    padding: 20px;
-    transition: all 0.3s ease;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 25px;
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -31,7 +137,7 @@ label { display: block; margin-bottom: 5px; font-weight: bold; }
 }
 
 .card:hover {
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow: var(--hover-shadow);
     transform: translateY(-5px);
 }
 
@@ -41,11 +147,11 @@ label { display: block; margin-bottom: 5px; font-weight: bold; }
 
 .card-intro {
     background-color: #f1f9ff;
-    border-left: 5px solid #3498db;
+    border-left: 5px solid var(--primary-color);
 }
 
 .card-part {
-    border-top: 5px solid #27ae60;
+    border-top: 5px solid var(--secondary-color);
 }
 
 .card-conclusion {
@@ -241,26 +347,39 @@ label { display: block; margin-bottom: 5px; font-weight: bold; }
 /* Novos estilos para o formulário */
 .form-container {
     background-color: white;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
     margin-bottom: 30px;
+    border-top: 4px solid var(--primary-color);
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.form-container:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--hover-shadow);
 }
 
 .app-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(52, 152, 219, 0.2);
 }
 
 .app-header h1 {
-    font-size: 28px;
+    font-size: 42px;
     font-weight: 700;
-    color: #3498db;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
 }
 
 .app-header p {
     color: #7f8c8d;
-    font-size: 16px;
+    font-size: 18px;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 /* Estilo para o conteúdo de fallback */
@@ -345,4 +464,14 @@ label { display: block; margin-bottom: 5px; font-weight: bold; }
     width: 16px;
     height: 16px;
     margin-right: 5px;
+}
+
+/* Footer */
+.site-footer {
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 60px;
+    border-top: 1px solid #eee;
+    color: #7f8c8d;
+    font-size: 14px;
 }
