@@ -68,7 +68,7 @@
                             </div>
                         </div>
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="submit" class="btn btn-primary btn-lg" {% if quota_exceeded %}disabled{% endif %}>
+                            <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-magic me-2"></i>Gerar Chunks!
                             </button>
                         </div>
@@ -82,43 +82,7 @@
             <div class="alert alert-danger shadow">
                 <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Erro</h4>
                 <p>{{ error }}</p>
-                {% if quota_exceeded %}
-                <hr>
-                <div class="bg-light p-3 rounded">
-                    <h5 class="text-warning"><i class="fas fa-info-circle me-2"></i>Limite de API atingido</h5>
-                    {% if daily_limit %}
-                    <p>Você atingiu o limite diário gratuito:</p>
-                    <ul>
-                        <li>Máximo de 50 solicitações por dia</li>
-                        <li>O limite é renovado todo dia</li>
-                    </ul>
-                    {% else %}
-                    <p>A API do Google Gemini tem limites de uso gratuito:</p>
-                    <ul>
-                        <li>2 solicitações por minuto</li>
-                        <li>50 solicitações por dia</li>
-                    </ul>
-                    {% endif %}
-                    <p class="mb-0">
-                        {% if daily_limit %}
-                        Por favor, tente novamente amanhã ou considere atualizar para um plano pago.
-                        {% else %}
-                        Aguarde um momento e tente novamente.
-                        {% endif %}
-                    </p>
-                    
-                    <!-- Novo card com link para o modo de demonstração -->
-                    <div class="card bg-white mt-3">
-                        <div class="card-body">
-                            <h5 class="card-title">Quer ver como funciona a interface?</h5>
-                            <p>Experimente nossa página de demonstração com dados de amostra:</p>
-                            <a href="{% url 'demo_page' %}" class="btn btn-success">
-                                <i class="fas fa-desktop me-1"></i> Ver demonstração
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
+                <!-- Removida a seção de link para demonstração -->
             </div>
         </section>
         {% endif %}
