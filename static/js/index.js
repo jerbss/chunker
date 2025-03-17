@@ -364,6 +364,19 @@ function processPartSections(partSections) {
             }
         });
 
+        // Remover o objetivo de aprendizagem do conteúdo
+        const objectiveElements = tempDiv.querySelectorAll('strong');
+        objectiveElements.forEach(el => {
+            if (el.textContent.includes('Objetivo de Aprendizagem:')) {
+                let parent = el.parentNode;
+                if (parent.tagName === 'P') {
+                    parent.remove();
+                } else {
+                    el.remove();
+                }
+            }
+        });
+
         part.content = tempDiv.innerHTML;
         
         // Debug log
