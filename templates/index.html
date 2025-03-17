@@ -86,12 +86,26 @@
                 <hr>
                 <div class="bg-light p-3 rounded">
                     <h5 class="text-warning"><i class="fas fa-info-circle me-2"></i>Limite de API atingido</h5>
+                    {% if daily_limit %}
+                    <p>Você atingiu o limite diário gratuito:</p>
+                    <ul>
+                        <li>Máximo de 50 solicitações por dia</li>
+                        <li>O limite é renovado todo dia</li>
+                    </ul>
+                    {% else %}
                     <p>A API do Google Gemini tem limites de uso gratuito:</p>
                     <ul>
-                        <li>60 solicitações por minuto</li>
-                        <li>Número limitado de solicitações por dia</li>
+                        <li>2 solicitações por minuto</li>
+                        <li>50 solicitações por dia</li>
                     </ul>
-                    <p class="mb-0">Tente novamente em alguns minutos ou atualize para um plano pago.</p>
+                    {% endif %}
+                    <p class="mb-0">
+                        {% if daily_limit %}
+                        Por favor, tente novamente amanhã ou considere atualizar para um plano pago.
+                        {% else %}
+                        Aguarde um momento e tente novamente.
+                        {% endif %}
+                    </p>
                 </div>
                 {% endif %}
             </div>

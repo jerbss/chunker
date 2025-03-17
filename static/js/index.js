@@ -359,10 +359,75 @@ function processPartSections(partSections) {
             });
             
             part.content = tempDiv.innerHTML;
+        }
+
+        // Remover duplicação de objetivos e reflexões
+        if (part.objective || part.reflection) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = part.content;
+
+            // Função para remover elementos com texto específico
+            const removeElementsWithText = (selector, text) => {
+                const elements = tempDiv.querySelectorAll(selector);
+                elements.forEach(el => {
+                    if (el.textContent.includes(text)) {
+                        el.remove();
+                    }
+                });
+            };
+
+            // Função para remover qualquer elemento que contenha o texto exato
+            const removeElementsContainingExactText = (text) => {
+                if (!text) return;
+                
+                // Obter todos os elementos que podem conter texto
+                const allTextElements = tempDiv.querySelectorAll('p, div, span, li, h3, h4, h5, h6');
+                
+                allTextElements.forEach(el => {
+                    // Normalizar o texto para comparação (remover espaços extras)
+                    const normalizedElText = el.textContent.trim().replace(/\s+/g, ' ');
+                    const normalizedSearchText = text.trim().replace(/\s+/g, ' ');
+                    
+                    // Se o elemento contém exatamente o texto que queremos remover
+                    if (normalizedElText === normalizedSearchText) {
+                        el.remove();
+                    }
+                });
+            };
             
-            if (DEBUG.enabled) {
-                console.log("Conteúdo da primeira parte após limpeza:", part.content.substring(0, 100) + '...');
+            // Função para remover parágrafos completos que contêm o texto
+            const removeParagraphsWithText = (text) => {
+                if (!text) return;
+                const paragraphs = tempDiv.querySelectorAll('p');
+                paragraphs.forEach(p => {
+                    if (p.textContent.includes(text)) {
+                        p.remove();
+                    }
+                });
+            };
+
+            // Remover elementos com "Objetivo de Aprendizagem:"
+            if (part.objective) {
+                removeElementsWithText('strong', 'Objetivo de Aprendizagem:');
+                removeParagraphsWithText('Objetivo de Aprendizagem:');
+                removeElementsWithText('strong', 'Objetivo:');
+                removeParagraphsWithText('Objetivo:');
+                
+                // Remover também parágrafos com o texto exato do objetivo
+                removeElementsContainingExactText(part.objective);
             }
+
+            // Remover elementos com "Pergunta de Reflexão:"
+            if (part.reflection) {
+                removeElementsWithText('strong', 'Pergunta de Reflexão:');
+                removeParagraphsWithText('Pergunta de Reflexão:');
+                
+                // Remover também parágrafos com o texto exato da reflexão
+                removeElementsContainingExactText(part.reflection + '?');
+                removeElementsContainingExactText(part.reflection);
+            }
+
+            part.content = tempDiv.innerHTML;
         }
         
         // Debug log
@@ -393,7 +458,9 @@ function createCards() {
     // Card de Introdução
     if (state.introContent) {
         const introCard = createIntroCard();
-        cardsContainer.appendChild(introCard);
+        if (introCard) {
+            cardsContainer.appendChild(introCard);
+        }
     }
     
     // Divisor de partes
@@ -401,11 +468,18 @@ function createCards() {
         const partsDivider = createSectionDivider('PARTES', 'success');
         cardsContainer.appendChild(partsDivider);
         
+        // Criar wrapper row para os cards de partes
+        const partsRow = document.createElement('div');
+        partsRow.className = 'row g-4'; // g-4 para manter o mesmo espaçamento
+        
         // Cards de Partes
         state.parts.forEach((part, index) => {
             const partCard = createPartCard(part, index);
-            cardsContainer.appendChild(partCard);
+            partsRow.appendChild(partCard); // Adicionar ao wrapper row em vez do container
         });
+        
+        // Adicionar a row completa ao container
+        cardsContainer.appendChild(partsRow);
     }
     
     // Divisor de conclusão
@@ -439,10 +513,15 @@ function createSectionDivider(title, colorClass) {
  * Cria o card de introdução
  */
 function createIntroCard() {
+    // Se a introdução estiver vazia, não criar o card
+    if (!state.introContent || !state.introContent.trim()) {
+        return null;
+    }
+
     const card = document.createElement('div');
     card.className = 'col-12 mb-4';
     card.id = 'card-intro';
-    
+
     card.innerHTML = `
         <div class="card shadow h-100">
             <div class="card-header bg-primary text-white">
@@ -461,11 +540,10 @@ function createIntroCard() {
             </div>
         </div>
     `;
-    
-    // Adicionar evento para expandir/recolher
+
     const expandBtn = card.querySelector('.expand-btn');
     expandBtn.addEventListener('click', handleExpandCollapse);
-    
+
     return card;
 }
 
@@ -475,16 +553,7 @@ function createIntroCard() {
 function createPartCard(part, index) {
     const partNumber = index + 1;
     const cardId = `card-part-${partNumber}`;
-    
-    // Determinar tamanho do card baseado no conteúdo
-    const contentLength = part.content.length;
-    let colClass = 'col-md-6 col-lg-6';
-    
-    if (contentLength > 1500) {
-        colClass = 'col-12';
-    } else if (contentLength < 500) {
-        colClass = 'col-md-4 col-lg-4';
-    }
+    const colClass = 'col-12'; // Usa largura total, igual à introdução e conclusão
     
     const card = document.createElement('div');
     card.className = `${colClass} mb-4`;
@@ -496,11 +565,11 @@ function createPartCard(part, index) {
         .map(concept => `<span class="badge bg-light text-success me-1 mb-1">${concept}</span>`)
         .join('');
     
-    // Criar bloco de reflexão se existir
+    // Criar bloco de reflexão se existir (agora com melhor formatação e posição)
     const reflectionBlock = part.reflection 
         ? `<div class="mt-3 p-3 border-start border-warning bg-light">
                <strong class="text-warning"><i class="fas fa-lightbulb me-1"></i>Reflexão:</strong> 
-               <p class="mb-0 mt-1">${part.reflection}</p>
+               <p class="mb-0 mt-1">${part.reflection}${!part.reflection.endsWith('?') ? '?' : ''}</p>
            </div>`
         : '';
     
@@ -519,12 +588,12 @@ function createPartCard(part, index) {
             
             <div class="card-body collapsed-content" style="max-height: 250px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, black 80%, transparent 100%);">
                 ${part.content}
-                ${reflectionBlock}
             </div>
             
             <div class="card-footer bg-light">
                 <div class="mb-2">${conceptBadges}</div>
-                <button class="btn btn-outline-success expand-btn" data-target="${cardId}">
+                ${part.reflection ? reflectionBlock : ''}
+                <button class="btn btn-outline-success expand-btn mt-2" data-target="${cardId}">
                     <i class="fas fa-chevron-down me-1"></i>Expandir
                 </button>
             </div>

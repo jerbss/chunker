@@ -18,10 +18,33 @@ def test_gemini(request):
         # Configurar a API com a chave
         genai.configure(api_key=settings.GEMINI_API_KEY)
         
-        # Usar o modelo específico solicitado
-        model = genai.GenerativeModel("models/gemini-1.5-pro")
-        
         if request.method == 'POST':
+            # Adicionar verificação de limite diário
+            try:
+                test_response = model.generate_content("test")
+                if "429" in str(test_response):
+                    error = "Limite diário de 50 requisições atingido. Por favor, tente novamente amanhã ou atualize para um plano pago."
+                    return render(request, 'index.html', {
+                        'error': error,
+                        'tema': tema,
+                        'num_partes': num_partes,
+                        'quota_exceeded': True,
+                        'daily_limit': True  # Nova flag para limite diário
+                    })
+            except Exception as quota_error:
+                if "429" in str(quota_error):
+                    error = "Limite diário de 50 requisições atingido. Por favor, tente novamente amanhã ou atualize para um plano pago."
+                    return render(request, 'index.html', {
+                        'error': error,
+                        'tema': tema,
+                        'num_partes': num_partes,
+                        'quota_exceeded': True,
+                        'daily_limit': True
+                    })
+                
+            # Usar o modelo específico solicitado
+            model = genai.GenerativeModel("models/gemini-1.5-pro")
+            
             tema = request.POST.get('tema', '')
             try:
                 num_partes = int(request.POST.get('num_partes', '2'))
