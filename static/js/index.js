@@ -258,6 +258,24 @@ function extractContent(element) {
     // Processar partes
     state.parts = processPartSections(partSections);
     
+    // Verificação adicional para evitar partes com título duplicado ou sem título correto
+    if (state.parts.length > 0) {
+        // Remover partes que têm o mesmo título que o título principal
+        state.parts = state.parts.filter(part => 
+            part.title !== state.mainTitle && part.title.trim() !== "");
+        
+        // Se ainda não temos partes após a filtragem, criar pelo menos uma parte genérica
+        if (state.parts.length === 0) {
+            state.parts.push({
+                title: `Parte 1: ${state.mainTitle}`,
+                content: "<p>Conteúdo desta parte.</p>",
+                objective: "Compreender os conceitos fundamentais.",
+                concepts: ["Conceito 1", "Conceito 2", "Conceito 3"],
+                reflection: "Como aplicar este conhecimento?"
+            });
+        }
+    }
+    
     // Processar conclusão
     if (conclusionSection) {
         let conclusionHtml = conclusionSection.outerHTML;
@@ -294,13 +312,13 @@ function processPartSections(partSections) {
         
         const part = {
             title: section.textContent.trim(),
-            content: section.outerHTML,
+            content: '',  // Inicializa vazio para adicionar apenas o conteúdo sem o título
             objective: null,
             concepts: [],
             reflection: null
         };
         
-        // Capturar todo o conteúdo até a próxima seção H1
+        // Pular o H1 inicial (título) e começar a capturar a partir do próximo elemento
         let nextElement = section.nextElementSibling;
         while (nextElement && nextElement.tagName !== 'H1') {
             // Adicionar o elemento ao conteúdo da parte
@@ -324,111 +342,29 @@ function processPartSections(partSections) {
             
             nextElement = nextElement.nextElementSibling;
         }
-        
-        // Evitar duplicação do título principal e conteúdo da introdução na primeira parte
-        if (i === 0 && state.introContent && part.content.includes(state.mainTitle)) {
-            // Criar um elemento temporário para remover o título e contextualização duplicados
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = part.content;
-            
-            // Remover h1 e h2 duplicados
-            const h1Elements = tempDiv.querySelectorAll('h1');
-            const h2Elements = tempDiv.querySelectorAll('h2');
-            
-            h1Elements.forEach(el => {
-                if (el.textContent.trim() === state.mainTitle) {
-                    el.remove();
-                }
-            });
-            
-            h2Elements.forEach(el => {
-                if (el.textContent.trim() === 'Contextualização' || 
-                    el.textContent.trim() === 'Objetivos Gerais de Aprendizado' || 
-                    el.textContent.trim().includes('Objetivos Gerais')) {
-                    // Remover o elemento e todos os conteúdos até o próximo h2 ou h1
-                    let currentEl = el;
-                    while (currentEl && 
-                           currentEl.nextElementSibling && 
-                           currentEl.nextElementSibling.tagName !== 'H1' &&
-                           currentEl.nextElementSibling.tagName !== 'H2') {
-                        const nextToRemove = currentEl.nextElementSibling;
-                        currentEl.parentNode.removeChild(nextToRemove);
-                    }
-                    el.remove();
-                }
-            });
-            
-            part.content = tempDiv.innerHTML;
+
+        // Remover o título da parte do conteúdo
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = part.content;
+        const firstH1 = tempDiv.querySelector('h1');
+        if (firstH1 && firstH1.textContent.trim() === part.title) {
+            firstH1.remove();
         }
 
-        // Remover duplicação de objetivos e reflexões
-        if (part.objective || part.reflection) {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = part.content;
-
-            // Função para remover elementos com texto específico
-            const removeElementsWithText = (selector, text) => {
-                const elements = tempDiv.querySelectorAll(selector);
-                elements.forEach(el => {
-                    if (el.textContent.includes(text)) {
-                        el.remove();
-                    }
-                });
-            };
-
-            // Função para remover qualquer elemento que contenha o texto exato
-            const removeElementsContainingExactText = (text) => {
-                if (!text) return;
-                
-                // Obter todos os elementos que podem conter texto
-                const allTextElements = tempDiv.querySelectorAll('p, div, span, li, h3, h4, h5, h6');
-                
-                allTextElements.forEach(el => {
-                    // Normalizar o texto para comparação (remover espaços extras)
-                    const normalizedElText = el.textContent.trim().replace(/\s+/g, ' ');
-                    const normalizedSearchText = text.trim().replace(/\s+/g, ' ');
-                    
-                    // Se o elemento contém exatamente o texto que queremos remover
-                    if (normalizedElText === normalizedSearchText) {
-                        el.remove();
-                    }
-                });
-            };
-            
-            // Função para remover parágrafos completos que contêm o texto
-            const removeParagraphsWithText = (text) => {
-                if (!text) return;
-                const paragraphs = tempDiv.querySelectorAll('p');
-                paragraphs.forEach(p => {
-                    if (p.textContent.includes(text)) {
-                        p.remove();
-                    }
-                });
-            };
-
-            // Remover elementos com "Objetivo de Aprendizagem:"
-            if (part.objective) {
-                removeElementsWithText('strong', 'Objetivo de Aprendizagem:');
-                removeParagraphsWithText('Objetivo de Aprendizagem:');
-                removeElementsWithText('strong', 'Objetivo:');
-                removeParagraphsWithText('Objetivo:');
-                
-                // Remover também parágrafos com o texto exato do objetivo
-                removeElementsContainingExactText(part.objective);
+        // Remover a pergunta de reflexão do conteúdo
+        const reflectionElements = tempDiv.querySelectorAll('strong');
+        reflectionElements.forEach(el => {
+            if (el.textContent.includes('Reflexão:')) {
+                let parent = el.parentNode;
+                if (parent.tagName === 'P') {
+                    parent.remove();
+                } else {
+                    el.remove();
+                }
             }
+        });
 
-            // Remover elementos com "Pergunta de Reflexão:"
-            if (part.reflection) {
-                removeElementsWithText('strong', 'Pergunta de Reflexão:');
-                removeParagraphsWithText('Pergunta de Reflexão:');
-                
-                // Remover também parágrafos com o texto exato da reflexão
-                removeElementsContainingExactText(part.reflection + '?');
-                removeElementsContainingExactText(part.reflection);
-            }
-
-            part.content = tempDiv.innerHTML;
-        }
+        part.content = tempDiv.innerHTML;
         
         // Debug log
         if (DEBUG.enabled) {
@@ -573,6 +509,11 @@ function createPartCard(part, index) {
            </div>`
         : '';
     
+    // Verificar se há conteúdo real no corpo do card, caso contrário, adicionar um placeholder
+    const bodyContent = (part.content && part.content.trim()) 
+        ? part.content 
+        : '<p class="text-muted">Este card contém os principais conceitos e tópicos relacionados a esta parte do conteúdo.</p>';
+    
     card.innerHTML = `
         <div class="card shadow h-100">
             <div class="card-header bg-success text-white">
@@ -587,7 +528,7 @@ function createPartCard(part, index) {
             }
             
             <div class="card-body collapsed-content" style="max-height: 250px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, black 80%, transparent 100%);">
-                ${part.content}
+                ${bodyContent}
             </div>
             
             <div class="card-footer bg-light">
