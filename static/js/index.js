@@ -325,6 +325,46 @@ function processPartSections(partSections) {
             nextElement = nextElement.nextElementSibling;
         }
         
+        // Evitar duplicação do título principal e conteúdo da introdução na primeira parte
+        if (i === 0 && state.introContent && part.content.includes(state.mainTitle)) {
+            // Criar um elemento temporário para remover o título e contextualização duplicados
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = part.content;
+            
+            // Remover h1 e h2 duplicados
+            const h1Elements = tempDiv.querySelectorAll('h1');
+            const h2Elements = tempDiv.querySelectorAll('h2');
+            
+            h1Elements.forEach(el => {
+                if (el.textContent.trim() === state.mainTitle) {
+                    el.remove();
+                }
+            });
+            
+            h2Elements.forEach(el => {
+                if (el.textContent.trim() === 'Contextualização' || 
+                    el.textContent.trim() === 'Objetivos Gerais de Aprendizado' || 
+                    el.textContent.trim().includes('Objetivos Gerais')) {
+                    // Remover o elemento e todos os conteúdos até o próximo h2 ou h1
+                    let currentEl = el;
+                    while (currentEl && 
+                           currentEl.nextElementSibling && 
+                           currentEl.nextElementSibling.tagName !== 'H1' &&
+                           currentEl.nextElementSibling.tagName !== 'H2') {
+                        const nextToRemove = currentEl.nextElementSibling;
+                        currentEl.parentNode.removeChild(nextToRemove);
+                    }
+                    el.remove();
+                }
+            });
+            
+            part.content = tempDiv.innerHTML;
+            
+            if (DEBUG.enabled) {
+                console.log("Conteúdo da primeira parte após limpeza:", part.content.substring(0, 100) + '...');
+            }
+        }
+        
         // Debug log
         if (DEBUG.enabled) {
             console.log(`Parte processada: ${part.title}`, {
