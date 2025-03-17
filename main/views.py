@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.conf import settings
 from django.utils.safestring import mark_safe
-import google.generativeai as genai
 import markdown
 import re
 import requests
 from .prompts.chunking_prompt import generate_prompt
+from openai import OpenAI
 
 def test_gemini(request):
     result = None
@@ -15,25 +15,24 @@ def test_gemini(request):
     html_result = None
     
     try:
-        # Configurar a API com a chave
-        genai.configure(api_key=settings.GEMINI_API_KEY)
+        # Configurar o cliente OpenAI para ZukiJourney
+        client = OpenAI(
+            base_url="https://api.zukijourney.com/v1",
+            api_key=settings.ZUKI_API_KEY
+        )
         
         if request.method == 'POST':
             # Adicionar verificação de limite diário
             try:
-                test_response = model.generate_content("test")
-                if "429" in str(test_response):
-                    error = "Limite diário de 50 requisições atingido. Por favor, tente novamente amanhã ou atualize para um plano pago."
-                    return render(request, 'index.html', {
-                        'error': error,
-                        'tema': tema,
-                        'num_partes': num_partes,
-                        'quota_exceeded': True,
-                        'daily_limit': True  # Nova flag para limite diário
-                    })
+                # Teste simples para verificar se a API está respondendo
+                test_response = client.chat.completions.create(
+                    model="gemini-2.0-flash-thinking-exp-01-21",
+                    messages=[{"role": "user", "content": "test"}],
+                    max_tokens=10
+                )
             except Exception as quota_error:
                 if "429" in str(quota_error):
-                    error = "Limite diário de 50 requisições atingido. Por favor, tente novamente amanhã ou atualize para um plano pago."
+                    error = "Limite diário de requisições atingido. Por favor, tente novamente mais tarde ou atualize para um plano pago."
                     return render(request, 'index.html', {
                         'error': error,
                         'tema': tema,
@@ -41,10 +40,14 @@ def test_gemini(request):
                         'quota_exceeded': True,
                         'daily_limit': True
                     })
+                elif "401" in str(quota_error):
+                    error = "Chave de API inválida ou expirada. Por favor, verifique sua chave da ZukiJourney."
+                    return render(request, 'index.html', {
+                        'error': error,
+                        'tema': tema,
+                        'num_partes': num_partes
+                    })
                 
-            # Usar o modelo específico solicitado
-            model = genai.GenerativeModel("models/gemini-1.5-pro")
-            
             tema = request.POST.get('tema', '')
             try:
                 num_partes = int(request.POST.get('num_partes', '2'))
@@ -71,9 +74,9 @@ def test_gemini(request):
                     'num_partes': 2
                 })
             
-            # Se o número de partes for grande, vamos usar uma estratégia diferente
+            # Prepara o prompt baseado no número de partes
             if num_partes > 10:
-                # Dividir em duas solicitações para conseguir detalhes completos
+                # Dividir em múltiplas solicitações para temas com muitas partes
                 meio = num_partes // 2
                 prompt_parte1 = f"""Crie um guia de estudos para o tema "{tema}" detalhando COMPLETAMENTE apenas as partes de 1 até {meio}.
 
@@ -104,25 +107,37 @@ Use esta formatação:
   - ## Contextualização (2-3 parágrafos)
   - ## Objetivos Gerais (4-5 competências em lista)"""
                 
-                # Configuração correta para o modelo Gemini
-                generation_config = genai.GenerationConfig(
-                    temperature=0.7,
-                    top_p=0.95,
-                    top_k=40,
-                    max_output_tokens=8192,
-                )
-                
                 try:
-                    # Gerar as três partes com a configuração correta
-                    response1 = model.generate_content(prompt_parte1, generation_config=generation_config)
-                    response2 = model.generate_content(prompt_parte2, generation_config=generation_config)  
-                    response3 = model.generate_content(prompt_parte3, generation_config=generation_config)
+                    # Gerar as três partes
+                    response1 = client.chat.completions.create(
+                        model="gemini-2.0-flash-thinking-exp-01-21",
+                        messages=[{"role": "user", "content": prompt_parte1}],
+                        max_tokens=4096,
+                        temperature=0.7
+                    )
+                    
+                    response2 = client.chat.completions.create(
+                        model="gemini-2.0-flash-thinking-exp-01-21",
+                        messages=[{"role": "user", "content": prompt_parte2}],
+                        max_tokens=4096,
+                        temperature=0.7
+                    )
+                    
+                    response3 = client.chat.completions.create(
+                        model="gemini-2.0-flash-thinking-exp-01-21",
+                        messages=[{"role": "user", "content": prompt_parte3}],
+                        max_tokens=4096,
+                        temperature=0.7
+                    )
                     
                     # Combinar os resultados
-                    result = response3.text + "\n\n" + response1.text + "\n\n" + response2.text
+                    result = (response3.choices[0].message.content + "\n\n" + 
+                              response1.choices[0].message.content + "\n\n" + 
+                              response2.choices[0].message.content)
+                    
                 except Exception as api_error:
                     if "429" in str(api_error):
-                        error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
+                        error = "Quota da API excedida. Você atingiu o limite de solicitações para a API. Por favor, tente novamente mais tarde."
                         return render(request, 'index.html', {
                             'error': error,
                             'tema': tema,
@@ -131,19 +146,12 @@ Use esta formatação:
                         })
                     else:
                         raise api_error
+            
             # Para temas muito complexos que podem resultar em respostas truncadas
             elif tema.lower() in ['inteligência artificial', 'inteligencia artificial', 'machine learning', 
                                  'deep learning', 'cloud computing', 'cybersecurity']:
                 # Para temas complexos, vamos gerar cada parte separadamente para garantir completude
                 try:
-                    # Configuração para garantir respostas completas
-                    generation_config = genai.GenerationConfig(
-                        temperature=0.7,
-                        top_p=0.95,
-                        top_k=40,
-                        max_output_tokens=8192,
-                    )
-                    
                     # Gerar introdução
                     intro_prompt = f"""Crie apenas a introdução para um guia de estudos sobre "{tema}" em {num_partes} partes.
 Use esta formatação:
@@ -152,8 +160,14 @@ Use esta formatação:
   - ## Contextualização (2-3 parágrafos)
   - ## Objetivos Gerais (4-5 competências em lista)"""
                     
-                    intro_response = model.generate_content(intro_prompt, generation_config=generation_config)
-                    result = intro_response.text + "\n\n"
+                    intro_response = client.chat.completions.create(
+                        model="gemini-2.0-flash-thinking-exp-01-21",
+                        messages=[{"role": "user", "content": intro_prompt}],
+                        max_tokens=2048,
+                        temperature=0.7
+                    )
+                    
+                    result = intro_response.choices[0].message.content + "\n\n"
                     
                     # Gerar cada parte individualmente
                     for i in range(1, num_partes + 1):
@@ -167,8 +181,14 @@ Use esta formatação:
 
 IMPORTANTE: Crie APENAS esta parte, sem introdução ou partes adicionais."""
                         
-                        parte_response = model.generate_content(parte_prompt, generation_config=generation_config)
-                        result += parte_response.text + "\n\n"
+                        parte_response = client.chat.completions.create(
+                            model="gemini-2.0-flash-thinking-exp-01-21",
+                            messages=[{"role": "user", "content": parte_prompt}],
+                            max_tokens=2048,
+                            temperature=0.7
+                        )
+                        
+                        result += parte_response.choices[0].message.content + "\n\n"
                     
                     # Gerar conclusão
                     conclusion_prompt = f"""Crie apenas a conclusão para um guia de estudos sobre "{tema}" em {num_partes} partes.
@@ -176,12 +196,18 @@ Use esta formatação:
 - Título como Heading 1 (#): "# Conclusão"
 Sintetize a progressão do conhecimento através das partes e explique como elas se integram."""
                     
-                    conclusion_response = model.generate_content(conclusion_prompt, generation_config=generation_config)
-                    result += conclusion_response.text
+                    conclusion_response = client.chat.completions.create(
+                        model="gemini-2.0-flash-thinking-exp-01-21",
+                        messages=[{"role": "user", "content": conclusion_prompt}],
+                        max_tokens=2048,
+                        temperature=0.7
+                    )
+                    
+                    result += conclusion_response.choices[0].message.content
                     
                 except Exception as api_error:
                     if "429" in str(api_error):
-                        error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
+                        error = "Quota da API excedida. Você atingiu o limite de solicitações para a API. Por favor, tente novamente mais tarde."
                         return render(request, 'index.html', {
                             'error': error,
                             'tema': tema,
@@ -194,32 +220,19 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                 # Para poucos tópicos, usar abordagem normal
                 prompt = generate_prompt(tema, num_partes)
                 
-                # Configuração correta para o modelo Gemini
-                generation_config = genai.GenerationConfig(
-                    temperature=0.7,
-                    top_p=0.95,
-                    top_k=40,
-                    max_output_tokens=8192,
-                )
-                
-                # Safety settings como parâmetro separado
-                safety_settings = [
-                    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-                    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-                    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-                    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-                ]
-                
                 try:
-                    response = model.generate_content(
-                        prompt,
-                        generation_config=generation_config,
-                        safety_settings=safety_settings
+                    response = client.chat.completions.create(
+                        model="gemini-2.0-flash-thinking-exp-01-21",
+                        messages=[{"role": "user", "content": prompt}],
+                        max_tokens=8192,
+                        temperature=0.7
                     )
-                    result = response.text
+                    
+                    result = response.choices[0].message.content
+                    
                 except Exception as api_error:
                     if "429" in str(api_error):
-                        error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
+                        error = "Quota da API excedida. Você atingiu o limite de solicitações para a API. Por favor, tente novamente mais tarde."
                         return render(request, 'index.html', {
                             'error': error,
                             'tema': tema,
@@ -242,7 +255,7 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                     error = "Erro: Não foi possível gerar o HTML do conteúdo."
     except requests.exceptions.HTTPError as http_error:
         if http_error.response.status_code == 429:
-            error = "Quota da API excedida. Você atingiu o limite de solicitações para a API Gemini. Por favor, tente novamente mais tarde ou utilize uma chave de API diferente."
+            error = "Quota da API excedida. Você atingiu o limite de solicitações para a API. Por favor, tente novamente mais tarde."
         else:
             error = f"Erro HTTP: {http_error}"
     except Exception as e:

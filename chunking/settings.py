@@ -21,6 +21,8 @@ load_dotenv(os.path.join(Path(__file__).resolve().parent.parent, '.env'))
 # Configurações do Gemini
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 GEMINI_PRODUCT_NUMBER = os.environ.get('GEMINI_PRODUCT_NUMBER')
+# Configuração da ZukiJourney
+ZUKI_API_KEY = os.environ.get('ZUKI_API_KEY')
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
