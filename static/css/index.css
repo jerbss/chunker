@@ -328,6 +328,38 @@ body {
     margin-bottom: 15px;
 }
 
+/* ========== Debugging ========== */
+.debug-outline h1 {
+    border: 2px solid red;
+    padding: 5px;
+    margin: 5px 0;
+}
+
+.debug-outline h2 {
+    border: 2px solid blue;
+    padding: 5px;
+    margin: 5px 0;
+}
+
+.debug-outline strong {
+    background-color: yellow;
+}
+
+/* Melhorias para os cards gerados */
+.card-objective {
+    background-color: rgba(39, 174, 96, 0.1);
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.card-concepts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
 /* ========== Responsividade ========== */
 @media (min-width: 992px) {
     .context-card {

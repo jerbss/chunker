@@ -9,6 +9,14 @@ Use a seguinte hierarquia de formatação:
 - Subseções (Título do guia, Contextualização, etc) → use Heading 2 (##)
 - Estruturas internas de cada parte → use destaque em negrito (**Termo:**) sem heading
 
+**FORMATO OBRIGATÓRIO:**
+- Use `# Título` para seções principais (ex: `# [TEMA] em [NÚMERO] Partes`)
+- Use `## Subtítulo` para subseções (ex: `## Contextualização`, `## Objetivos Gerais`)
+- Use `# Parte X: [Título]` para cada parte numerada
+- Use `**negrito**` para rótulos (ex: `**Conceitos-chave:** Termo1, Termo2`)
+- Use listas com `-` para tópicos e conceitos.
+- SEMPRE use exatamente esta estrutura de formatação para permitir o processamento correto.
+
 # SEÇÃO INICIAL
 ## Título principal
 Comece com: "# [TEMA] em [NÚMERO] Partes"
@@ -65,6 +73,8 @@ def generate_prompt(tema, num_partes):
     - NÃO use reticências ou outras indicações para omitir conteúdo
     - Se o tema tiver muitas partes naturais (como os 22 Arcanos do Tarô), certifique-se de detalhar cada um individualmente
     - É ESSENCIAL que você forneça TODAS as partes completas e a conclusão sem truncar conteúdo
+    - SEMPRE use a formatação Markdown exatamente como especificada para garantir processamento correto
+    - NUNCA altere a estrutura de cabeçalhos (# para títulos principais, ## para subtítulos)
     """
     
     return f"{CHUNKING_SYSTEM_PROMPT}\n{instrucoes_adicionais}\n\nCrie um guia de estudos completo para o tema \"{tema}\" dividido em {num_partes} partes."

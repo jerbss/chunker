@@ -209,7 +209,10 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
             # Converter markdown para HTML
             if result:
                 # Usar safe para garantir que o HTML não é escapado
-                html_result = mark_safe(markdown.markdown(result, extensions=['extra', 'fenced_code']))
+                html_result = mark_safe(markdown.markdown(
+                    result, 
+                    extensions=['extra', 'fenced_code', 'tables', 'nl2br', 'sane_lists']
+                ))
                 
                 # Verificar se temos um resultado válido
                 if not html_result or not str(html_result).strip():

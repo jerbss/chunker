@@ -12,6 +12,13 @@ const state = {
     masonry: null
 };
 
+// Configuração global para debugging
+const DEBUG = {
+    enabled: false,   // Ative para depuração
+    logStructure: true,
+    highlightElements: true
+};
+
 // Quando o DOM estiver carregado, iniciar o processamento
 document.addEventListener('DOMContentLoaded', () => {
     // Configurar o aviso para muitos chunks
@@ -23,6 +30,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Configurar comportamentos da interface
     setupUIBehaviors();
 });
+
+/**
+ * Ativa o modo de depuração para identificar problemas
+ */
+function enableDebugMode() {
+    DEBUG.enabled = true;
+    
+    // Aplicar classe de debug para visualizar estrutura HTML
+    if (DEBUG.highlightElements) {
+        const contentContainer = document.getElementById('html-content-container');
+        if (contentContainer) {
+            contentContainer.classList.add('debug-outline');
+        }
+    }
+    
+    console.info("🔍 Modo de depuração ativado");
+    return "Modo de depuração ativado. Verifique o console para mais informações.";
+}
 
 /**
  * Configura avisos e interações iniciais
@@ -74,11 +99,71 @@ function setupUIBehaviors() {
 }
 
 /**
+ * Função para diagnóstico da estrutura HTML
+ */
+function analyzeHtmlStructure() {
+    const contentContainer = document.getElementById('html-content-container');
+    if (!contentContainer) {
+        console.error("Container de conteúdo não encontrado!");
+        return;
+    }
+    
+    const structure = {
+        h1: [],
+        h2: [],
+        h3: [],
+        strong: [],
+        ul: [],
+        ol: [],
+        complete: contentContainer.innerHTML.substring(0, 500) + '...'
+    };
+    
+    // Analisar headers H1
+    contentContainer.querySelectorAll('h1').forEach((h1, index) => {
+        structure.h1.push({
+            index,
+            text: h1.textContent,
+            nextElementType: h1.nextElementSibling ? h1.nextElementSibling.tagName : 'NONE'
+        });
+    });
+    
+    // Analisar headers H2
+    contentContainer.querySelectorAll('h2').forEach((h2, index) => {
+        structure.h2.push({
+            index,
+            text: h2.textContent,
+            nextElementType: h2.nextElementSibling ? h2.nextElementSibling.tagName : 'NONE'
+        });
+    });
+    
+    // Analisar elementos strong
+    contentContainer.querySelectorAll('strong').forEach((strong, index) => {
+        if (index < 10) { // limitar para não sobrecarregar
+            structure.strong.push({
+                index,
+                text: strong.textContent
+            });
+        }
+    });
+    
+    console.table(structure.h1);
+    console.table(structure.h2);
+    console.log("Análise da estrutura HTML:", structure);
+    
+    return structure;
+}
+
+/**
  * Processa o conteúdo HTML
  */
 function processContent() {
     const contentContainer = document.getElementById('html-content-container');
     if (!contentContainer) return;
+    
+    // Analisar a estrutura HTML para diagnóstico se debugging estiver ativo
+    if (DEBUG.enabled && DEBUG.logStructure) {
+        analyzeHtmlStructure();
+    }
     
     try {
         // Criar elemento temporário para processar o HTML
@@ -113,45 +198,56 @@ function extractContent(element) {
     const mainTitle = element.querySelector('h1');
     state.mainTitle = mainTitle ? mainTitle.textContent.trim() : 'ChunkMaster';
     
-    // Encontrar todas as seções h2
-    const sections = element.querySelectorAll('h2');
+    // Encontrar todas as seções h1 e h2
+    const h1Sections = element.querySelectorAll('h1');
+    const h2Sections = element.querySelectorAll('h2');
     
     // Variáveis para processamento
     let introContentHtml = '';
     let partSections = [];
     let conclusionSection = null;
     
-    // Classificar todas as seções
-    for (const section of sections) {
+    // Classificar todas as seções h1 (titulo principal, partes e conclusão)
+    h1Sections.forEach(section => {
         const sectionText = section.textContent.toLowerCase();
         
         if (sectionText.includes('parte')) {
+            // É uma parte numerada
             partSections.push(section);
         } 
         else if (sectionText.includes('conclus')) {
+            // É a conclusão
             conclusionSection = section;
-        } 
-        else {
-            // Seção de introdução
+        }
+        // O título principal já foi capturado acima
+    });
+    
+    // Processar seções h2 (contextualização e objetivos gerais)
+    h2Sections.forEach(section => {
+        const sectionText = section.textContent.toLowerCase();
+        
+        if (sectionText.includes('contextualiza') || sectionText.includes('objetivos')) {
+            // Pertence à introdução
             const sectionClone = section.cloneNode(true);
             introContentHtml += sectionClone.outerHTML;
             
-            // Capturar conteúdo até a próxima seção h2
+            // Capturar conteúdo até a próxima seção (h1 ou h2)
             let nextElement = section.nextElementSibling;
-            while (nextElement && nextElement.tagName !== 'H2') {
+            while (nextElement && nextElement.tagName !== 'H2' && nextElement.tagName !== 'H1') {
                 introContentHtml += nextElement.outerHTML;
                 nextElement = nextElement.nextElementSibling;
             }
         }
-    }
+    });
     
-    // Se não encontramos conteúdo de introdução nas seções h2, capturar conteúdo entre h1 e primeira parte
+    // Se não temos conteúdo de introdução das seções h2, pegar tudo entre h1 principal e primeira parte
     if (!introContentHtml && mainTitle) {
         let nextElement = mainTitle.nextElementSibling;
-        while (nextElement && (nextElement.tagName !== 'H2' || !nextElement.textContent.toLowerCase().includes('parte'))) {
-            if (nextElement.tagName !== 'H2' || !nextElement.textContent.toLowerCase().includes('conclus')) {
-                introContentHtml += nextElement.outerHTML;
-            }
+        while (nextElement && 
+              !(nextElement.tagName === 'H1' && 
+                (nextElement.textContent.toLowerCase().includes('parte') || 
+                 nextElement.textContent.toLowerCase().includes('conclus')))) {
+            introContentHtml += nextElement.outerHTML;
             nextElement = nextElement.nextElementSibling;
         }
     }
@@ -174,6 +270,16 @@ function extractContent(element) {
         
         state.conclusion = conclusionHtml;
     }
+    
+    // Log para debugging
+    if (DEBUG.enabled) {
+        console.log("Extração concluída:", {
+            title: state.mainTitle,
+            intro: !!state.introContent,
+            parts: state.parts.length,
+            conclusion: !!state.conclusion
+        });
+    }
 }
 
 /**
@@ -194,29 +300,39 @@ function processPartSections(partSections) {
             reflection: null
         };
         
-        // Capturar todo o conteúdo até a próxima seção
+        // Capturar todo o conteúdo até a próxima seção H1
         let nextElement = section.nextElementSibling;
-        while (nextElement && (nextElement !== nextSection && nextElement.tagName !== 'H2')) {
+        while (nextElement && nextElement.tagName !== 'H1') {
             // Adicionar o elemento ao conteúdo da parte
             part.content += nextElement.outerHTML;
             
             // Extrair metadados se existirem
-            const elementContent = nextElement.innerHTML || '';
+            const elementText = nextElement.textContent || '';
             
-            if (elementContent.includes('Objetivo de Aprendizagem:')) {
-                part.objective = elementContent.split('Objetivo de Aprendizagem:')[1].trim();
+            if (elementText.includes('Objetivo de Aprendizagem:')) {
+                part.objective = elementText.split('Objetivo de Aprendizagem:')[1].trim();
             }
             
-            if (elementContent.includes('Conceitos-chave:')) {
-                const conceptsText = elementContent.split('Conceitos-chave:')[1].trim();
+            if (elementText.includes('Conceitos-chave:')) {
+                const conceptsText = elementText.split('Conceitos-chave:')[1].trim();
                 part.concepts = conceptsText.split(',').map(c => c.trim()).filter(c => c);
             }
             
-            if (elementContent.includes('Pergunta de Reflexão:')) {
-                part.reflection = elementContent.split('Pergunta de Reflexão:')[1].trim();
+            if (elementText.includes('Pergunta de Reflexão:')) {
+                part.reflection = elementText.split('Pergunta de Reflexão:')[1].trim();
             }
             
             nextElement = nextElement.nextElementSibling;
+        }
+        
+        // Debug log
+        if (DEBUG.enabled) {
+            console.log(`Parte processada: ${part.title}`, {
+                objective: !!part.objective,
+                conceptsCount: part.concepts.length,
+                reflection: !!part.reflection,
+                contentSize: part.content.length
+            });
         }
         
         parts.push(part);
