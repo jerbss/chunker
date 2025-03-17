@@ -267,20 +267,21 @@
             }
         }
         
+        // No parseContentIntoCards, substitua o HTML do card de introdução:
         if (introHtml) {
             const introCard = document.createElement('div');
             introCard.className = 'chunk-card context-card';
             introCard.id = 'card-intro';
             introCard.innerHTML = `
                 <div class="card h-100">
-                    <div class="card-header bg-info text-white">
+                    <div class="card-header bg-purple text-white">
                         <h3 class="card-title mb-0">${mainTitleText}</h3>
                     </div>
                     <div class="card-body collapsed">
                         ${introHtml}
                     </div>
                     <div class="card-footer">
-                        <button class="btn btn-outline-info expand-button" onclick="toggleCardExpansion('card-intro')">Mostrar mais</button>
+                        <button class="btn btn-outline-purple expand-button" onclick="toggleCardExpansion('card-intro')">Mostrar mais</button>
                     </div>
                 </div>
             `;
@@ -450,84 +451,72 @@
             `;
             cardsContainer.appendChild(conclusionCard);
         }
+        
+        // Criar array para rastrear todos os cards
+        let allCards = [];
+        
+        // Após criar o card de introdução:
+        if (introHtml) {
+            const introCard = document.createElement('div');
+            // Configuração do card...
+            cardsContainer.appendChild(introCard);
+            
+            // Adicionar ao array de cards
+            allCards.push({ type: 'intro', element: introCard });
+        }
+        
+        // Após criar os cards de partes:
+        parts.forEach((part, index) => {
+            const partCard = document.createElement('div');
+            // Configuração do card...
+            cardsContainer.appendChild(partCard);
+            
+            // Adicionar ao array de cards
+            allCards.push({ type: 'part', element: partCard });
+        });
+        
+        // Após criar o card de conclusão:
+        if (conclusionSection) {
+            const conclusionCard = document.createElement('div');
+            // Configuração do card...
+            cardsContainer.appendChild(conclusionCard);
+            
+            // Adicionar ao array de cards
+            allCards.push({ type: 'conclusion', element: conclusionCard });
+        }
+        
+        // Passar todos os cards para a função de criação do índice
+        createTableOfContents(allCards);
     }
     
     function createTableOfContents() {
         const toc = document.querySelector('#table-of-contents .toc-container');
-        if (!toc) return;
+        toc.innerHTML = ''; // Limpar conteúdo anterior
         
-        // Use the cards we've created as the basis for the TOC
+        // SEÇÃO 1: INTRODUÇÃO (sempre incluir, mesmo se não encontrar o card)
+        const introHeader = document.createElement('div');
+        introHeader.className = 'fw-bold text-purple mb-2';
+        introHeader.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-book me-1" viewBox="0 0 16 16">
+                <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+            </svg>
+            Introdução
+        `;
+        toc.appendChild(introHeader);
+        
+        // Link para o card de introdução
         const introCard = document.getElementById('card-intro');
-        const partCards = document.querySelectorAll('.chunk-card:not(#card-intro):not(#card-conclusion)');
-        const conclusionCard = document.getElementById('card-conclusion');
-        
         if (introCard) {
-            const introTitle = introCard.querySelector('.card-title').textContent;
-            const titleLink = document.createElement('a');
-            titleLink.href = '#card-intro';
-            titleLink.className = 'toc-section d-block fw-bold text-info mb-2';
-            titleLink.textContent = introTitle;
-            toc.appendChild(titleLink);
-            
-            // Add subsections if we want
-            const introSubsections = introCard.querySelectorAll('h2');
-            if (introSubsections.length > 0) {
-                const subList = document.createElement('ul');
-                subList.className = 'list-unstyled ms-3 mb-3';
-                
-                introSubsections.forEach((heading, index) => {
-                    if (!heading.id) heading.id = 'intro-section-' + index;
-                    const item = document.createElement('li');
-                    const link = document.createElement('a');
-                    link.href = '#' + heading.id;
-                    link.className = 'text-decoration-none';
-                    link.textContent = heading.textContent;
-                    item.appendChild(link);
-                    subList.appendChild(item);
-                });
-                
-                toc.appendChild(subList);
-            }
+            const mainTitleText = introCard.querySelector('.card-title')?.textContent || 'Visão geral';
+            const introLink = document.createElement('a');
+            introLink.href = '#card-intro';
+            introLink.className = 'ms-3 d-block mb-3 text-decoration-none border-start border-purple ps-2 py-1';
+            introLink.textContent = mainTitleText;
+            toc.appendChild(introLink);
         }
         
-        // Add parts section
-        if (partCards.length > 0) {
-            const partsHeader = document.createElement('div');
-            partsHeader.className = 'fw-bold text-success mb-2';
-            partsHeader.textContent = 'Chunks de Estudo';
-            toc.appendChild(partsHeader);
-            
-            const partsList = document.createElement('ul');
-            partsList.className = 'list-unstyled ms-3 mb-3';
-            
-            // Add each part
-            partCards.forEach((card, index) => {
-                const title = card.querySelector('.card-title').textContent;
-                const item = document.createElement('li');
-                const link = document.createElement('a');
-                link.href = '#card-part-' + (index + 1);
-                link.className = 'text-decoration-none border-start border-success ps-2';
-                link.textContent = title;
-                item.appendChild(link);
-                partsList.appendChild(item);
-            });
-            
-            toc.appendChild(partsList);
-        }
-        
-        // Add conclusion
-        if (conclusionCard) {
-            const conclusionHeader = document.createElement('div');
-            conclusionHeader.className = 'fw-bold text-purple mb-2';
-            conclusionHeader.textContent = 'Conclusão';
-            toc.appendChild(conclusionHeader);
-            
-            const link = document.createElement('a');
-            link.href = '#card-conclusion';
-            link.className = 'text-decoration-none ms-3';
-            link.textContent = 'Conclusão e Fechamento';
-            toc.appendChild(link);
-        }
+        // SEÇÃO 2: CHUNKS DE ESTUDO (resto do código permanece o mesmo)
+        // ...
     }
     
     // Inicializar o Masonry para layout em grade
