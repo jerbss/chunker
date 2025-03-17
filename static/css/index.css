@@ -147,6 +147,37 @@ body {
     box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 
+/* ========== Divisores de seção ========== */
+.section-block {
+    margin-bottom: 30px;
+}
+
+.section-divider {
+    position: relative;
+    text-align: center;
+    margin: 30px 0;
+    height: 1px;
+    background-color: #e0e0e0;
+}
+
+.section-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--light-bg);
+    padding: 0 15px;
+    font-weight: bold;
+    font-size: 1.25rem;
+    color: var(--primary-dark);
+    letter-spacing: 1px;
+}
+
+.section-title {
+    letter-spacing: 1px;
+    font-size: 1.1rem;
+}
+
 /* Cards específicos */
 .context-card {
     grid-column: 1 / -1; /* Span todas as colunas por padrão */
@@ -170,6 +201,10 @@ body {
     background-color: var(--purple-color) !important;
 }
 
+.bg-info {
+    background-color: #17a2b8 !important;
+}
+
 .btn-outline-purple {
     color: var(--purple-color);
     border-color: var(--purple-color);
@@ -177,6 +212,16 @@ body {
 
 .btn-outline-purple:hover {
     background-color: var(--purple-color);
+    color: white;
+}
+
+.btn-outline-info {
+    color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-outline-info:hover {
+    background-color: #17a2b8;
     color: white;
 }
 
@@ -310,6 +355,11 @@ body {
     .chunk-card {
         width: 100%;
         margin-bottom: 20px;
+    }
+    
+    .section-label {
+        font-size: 1rem;
+        padding: 0 10px;
     }
 }
 
