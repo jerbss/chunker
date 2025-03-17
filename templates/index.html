@@ -1,121 +1,183 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
     <title>ChunkMaster | Divide & Aprenda</title>
     {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <!-- Animate CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
 </head>
 <body>
-    <div class="container">
-        <div class="app-header animate__animated animate__fadeIn">
-            <h1>Chunk<span class="highlight">Master</span></h1>
-            <p>Transforme temas complexos em <span class="chunk-text">chunks</span> digestíveis para facilitar seu aprendizado</p>
+    <header class="bg-primary text-white py-4 mb-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0 animate__animated animate__fadeIn">
+                        <i class="fas fa-cubes me-2"></i>Chunk<span class="text-success">Master</span>
+                    </h1>
+                    <p class="lead mb-0">Transforme temas complexos em blocos digestíveis para facilitar seu aprendizado</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <span class="badge rounded-pill bg-light text-dark">
+                        <i class="fas fa-brain me-1"></i> Processamento com IA
+                    </span>
+                </div>
+            </div>
         </div>
+    </header>
 
-        <div class="form-container animate__animated animate__fadeInUp">
-            <form method="post">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-md-8 mb-3">
-                        <label>O que você quer <span class="chunk-text">chunkar</span> hoje?</label>
-                        <input type="text" name="tema" class="form-control" value="{{ tema }}" required placeholder="Ex: Física Quântica, Literatura Brasileira, Machine Learning...">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label>Número de <span class="chunk-text">chunks</span>:</label>
-                        <input type="number" name="num_partes" class="form-control" value="{{ num_partes }}" min="2" max="22" required>
-                        <small class="text-muted">Mínimo: 2, Máximo: 22</small>
-                        <div id="parts-warning" style="display:none;" class="text-danger mt-1">
-                            <strong>Nota:</strong> Muitos chunks podem levar mais tempo para gerar.
+    <main class="container">
+        <!-- Formulário para geração de conteúdo -->
+        <section class="form-section">
+            <div class="card shadow mb-5 animate__animated animate__fadeIn">
+                <div class="card-body p-4">
+                    <form method="post" id="chunk-form">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-lg-8 mb-3">
+                                <label class="form-label fw-bold">O que você quer aprender hoje?</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-primary text-white">
+                                        <i class="fas fa-lightbulb"></i>
+                                    </span>
+                                    <input type="text" name="tema" class="form-control" value="{{ tema }}" required
+                                        placeholder="Ex: Inteligência Artificial, História do Brasil, Física Quântica...">
+                                </div>
+                            </div>
+                            <div class="col-lg-4 mb-3">
+                                <label class="form-label fw-bold">Número de chunks:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="fas fa-layer-group"></i>
+                                    </span>
+                                    <input type="number" name="num_partes" class="form-control" value="{{ num_partes|default:5 }}" min="2" max="12" required>
+                                </div>
+                                <div class="form-text">
+                                    Mínimo: 2, Máximo recomendado: 12
+                                    <div id="parts-warning" class="text-danger d-none mt-1">
+                                        <i class="fas fa-exclamation-circle"></i> Muitos chunks podem demorar mais para processar.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary btn-lg" {% if quota_exceeded %}disabled{% endif %}>
+                                <i class="fas fa-magic me-2"></i>Gerar Chunks!
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        {% if error %}
+        <section class="alert-section mb-5">
+            <div class="alert alert-danger shadow">
+                <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Erro</h4>
+                <p>{{ error }}</p>
+                {% if quota_exceeded %}
+                <hr>
+                <div class="bg-light p-3 rounded">
+                    <h5 class="text-warning"><i class="fas fa-info-circle me-2"></i>Limite de API atingido</h5>
+                    <p>A API do Google Gemini tem limites de uso gratuito:</p>
+                    <ul>
+                        <li>60 solicitações por minuto</li>
+                        <li>Número limitado de solicitações por dia</li>
+                    </ul>
+                    <p class="mb-0">Tente novamente em alguns minutos ou atualize para um plano pago.</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if html_result %}
+        <section id="result-container" class="mb-5">
+            <!-- Conteúdo oculto que será processado -->
+            <div id="html-content-container" class="d-none">{{ html_result|safe }}</div>
+            
+            <div class="row">
+                <!-- Sidebar navegação (TOC) -->
+                <div class="col-lg-3 mb-4 mb-lg-0">
+                    <div class="card shadow toc-container sticky-lg-top" style="top: 1rem">
+                        <div class="card-header bg-primary text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Navegação</h5>
+                                <button class="btn btn-sm btn-light" id="toc-toggle">
+                                    <i class="fas fa-chevron-up"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body" id="toc-content">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                            <p class="text-muted">Gerando navegação...</p>
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn chunk-button" {% if quota_exceeded %}disabled title="API indisponível no momento"{% endif %}>
-                    <span class="chunk-icon">⧉</span> Chunk!
-                </button>
-            </form>
-        </div>
-        
-        {% if error %}
-        <div class="alert alert-danger">
-            <h4 class="alert-heading">Erro:</h4>
-            <p>{{ error }}</p>
-            {% if quota_exceeded %}
-            <hr>
-            <div class="quota-info">
-                <h5 style="color: #ff6f00;">O que isso significa?</h5>
-                <p>A API do Google Gemini tem limites de uso gratuito:</p>
-                <ul>
-                    <li>60 solicitações por minuto</li>
-                    <li>Número limitado de solicitações por dia</li>
-                </ul>
-                <p>Opções para resolver:</p>
-                <ol>
-                    <li>Aguardar alguns minutos e tentar novamente</li>
-                    <li>Obter uma nova chave de API em <a href="https://ai.google.dev/" target="_blank">Google AI Studio</a></li>
-                    <li>Atualizar para um plano pago no Google Cloud</li>
-                </ol>
+                
+                <!-- Conteúdo principal -->
+                <div class="col-lg-9">
+                    <!-- Inicialmente mostra um loading spinner -->
+                    <div id="loading-container" class="text-center py-5">
+                        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <h3 class="mt-3">Processando seu conteúdo</h3>
+                        <p class="text-muted">Aguarde enquanto criamos os chunks para você...</p>
+                    </div>
+                    
+                    <!-- Container para os cards (inicialmente vazio) -->
+                    <div id="cards-container" class="row g-4"></div>
+                    
+                    <!-- Fallback content (apenas visível se JS falhar) -->
+                    <div id="fallback-content" class="card shadow d-none">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="card-title">Seu conteúdo</h3>
+                        </div>
+                        <div class="card-body overflow-auto" style="max-height: 600px">
+                            {{ html_result|safe }}
+                        </div>
+                    </div>
+                </div>
             </div>
-            {% endif %}
-        </div>
+        </section>
         {% endif %}
-        
-        {% if html_result %}
-        <div class="result-container">
-            <!-- Índice de navegação -->
-            <div class="toc card mb-4" id="table-of-contents">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div class="toc-title">Navegue pelos <span class="chunk-text">chunks</span></div>
-                    <button class="btn btn-sm btn-outline-secondary toc-toggle" onclick="toggleToc()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
-                            <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
-                        </svg>
-                        <span id="toc-toggle-text">Ocultar</span>
-                    </button>
+    </main>
+
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0">&copy; 2024 ChunkMaster | Simplificando o aprendizado</p>
                 </div>
-                <div class="card-body toc-container">
-                    <!-- Será preenchido via JavaScript -->
-                </div>
-            </div>
-            
-            <!-- Conteúdo HTML que será processado pelo JS -->
-            <div id="html-content" style="display:none">{{ html_result|safe }}</div>
-            
-            <!-- Bootstrap Grid para Cards -->
-            <div class="masonry-grid" id="cards-container">
-                <!-- Os cards serão gerados via JavaScript -->
-            </div>
-            
-            <!-- Fallback content container -->
-            <div id="fallback-content" class="fallback-content card">
-                <div class="card-header">
-                    <h3>Seu conteúdo <span class="chunk-text">chunkado</span>:</h3>
-                </div>
-                <div class="card-body formatted-content-visible">
-                    {{ html_result|safe }}
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-outline-secondary expand-button" onclick="toggleFallbackContent()">Expandir/Recolher</button>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="#" class="text-decoration-none text-muted me-3">
+                        <i class="fas fa-question-circle"></i> Ajuda
+                    </a>
+                    <a href="#" class="text-decoration-none text-muted">
+                        <i class="fas fa-info-circle"></i> Sobre
+                    </a>
                 </div>
             </div>
         </div>
-        {% endif %}
-        
-        <footer class="site-footer">
-            <p>© 2024 ChunkMaster | Simplificando o aprendizado através de chunks inteligentes</p>
-        </footer>
-    </div>
-    
+    </footer>
+
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Opcional: Masonry para layout de grade dinâmica -->
-    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
     
-    <!-- Inclusão do arquivo JavaScript externo -->
     {% if html_result %}
+    <!-- Masonry para layout de grade dinâmica -->
+    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
+    <!-- Custom JS -->
     <script src="{% static 'js/index.js' %}"></script>
     {% endif %}
 </body>
