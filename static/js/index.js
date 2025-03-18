@@ -377,17 +377,11 @@ function processPartSections(partSections) {
             }
         });
 
-        part.content = tempDiv.innerHTML;
+        // Remover marcadores de lista indesejados
+        part.content = tempDiv.innerHTML.replace(/^(\s*--\s*Tópicos Principais:)/m, '')
+                                         .replace(/(\s*--\s*Conceitos-chave:)$/m, '');
         
-        // Debug log
-        if (DEBUG.enabled) {
-            console.log(`Parte processada: ${part.title}`, {
-                objective: !!part.objective,
-                conceptsCount: part.concepts.length,
-                reflection: !!part.reflection,
-                contentSize: part.content.length
-            });
-        }
+        part.content = part.content.trim();
         
         parts.push(part);
     }
