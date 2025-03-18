@@ -1,8 +1,8 @@
-# ChunkMaster - Technical Design Document
+# Chunkify - Technical Design Document
 
 ## Visão Geral do Projeto
 
-ChunkMaster é uma aplicação web que divide temas complexos em partes menores e mais digestíveis chamadas "chunks". O sistema utiliza modelos de linguagem de IA (Gemini da Google e Zuki Journey API) para gerar guias de estudo estruturados a partir de um tema especificado pelo usuário. O conteúdo é organizado em seções (introdução, partes numeradas e conclusão) e apresentado em uma interface de fácil navegação.
+Chunkify é uma aplicação web que divide temas complexos em partes menores e mais digestíveis chamadas "chunks". O sistema utiliza modelos de linguagem de IA (Gemini da Google e Zuki Journey API) para gerar guias de estudo estruturados a partir de um tema especificado pelo usuário. O conteúdo é organizado em seções (introdução, partes numeradas e conclusão) e apresentado em uma interface de fácil navegação.
 
 ## Arquitetura Técnica
 

@@ -1,5 +1,5 @@
 /**
- * ChunkMaster - Sistema de processamento e exibição de conteúdo em chunks
+ * Chunkify - Sistema de processamento e exibição de conteúdo em chunks
  * Este script processa o conteúdo HTML gerado pela IA e o exibe em cards organizados
  */
 
@@ -196,7 +196,7 @@ function processContent() {
 function extractContent(element) {
     // Extrair título principal
     const mainTitle = element.querySelector('h1');
-    state.mainTitle = mainTitle ? mainTitle.textContent.trim() : 'ChunkMaster';
+    state.mainTitle = mainTitle ? mainTitle.textContent.trim() : 'Chunkify';
     
     // Encontrar todas as seções h1 e h2
     const h1Sections = element.querySelectorAll('h1');
@@ -479,7 +479,7 @@ function createIntroCard() {
                     <span class="badge bg-light text-primary">Introdução</span>
                 </div>
             </div>
-            <div class="card-body collapsed-content" style="max-height: 250px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, black 80%, transparent 100%);">
+            <div class="card-body">
                 ${state.introContent}
             </div>
         </div>
@@ -532,7 +532,7 @@ function createPartCard(part, index) {
                 </div>` : ''
             }
             
-            <div class="card-body collapsed-content" style="max-height: 250px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, black 80%, transparent 100%);">
+            <div class="card-body">
                 ${bodyContent}
             </div>
             
@@ -562,7 +562,7 @@ function createConclusionCard() {
                     <span class="badge bg-light text-primary">Síntese</span>
                 </div>
             </div>
-            <div class="card-body collapsed-content" style="max-height: 250px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, black 80%, transparent 100%);">
+            <div class="card-body">
                 ${state.conclusion}
             </div>
         </div>

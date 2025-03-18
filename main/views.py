@@ -455,7 +455,7 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
         'tema': tema,
         'num_partes': num_partes,
         'has_content': bool(html_result),
-        'app_title': 'ChunkMaster',
+        'app_title': 'Chunkify',  # Alterado de 'ChunkMaster' para 'Chunkify'
         'used_fallback': use_gemini_fallback  # Adicionar indicador de fallback para UI
     }
     
