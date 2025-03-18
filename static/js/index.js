@@ -475,7 +475,7 @@ function createIntroCard() {
         <div class="card shadow h-100">
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">${state.mainTitle}</h3>
+                    <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">${state.mainTitle}</h3>
                     <span class="badge bg-light text-primary">Introdução</span>
                 </div>
             </div>
@@ -509,7 +509,7 @@ function createPartCard(part, index) {
     // Criar bloco de reflexão se existir (agora com melhor formatação e posição)
     const reflectionBlock = part.reflection 
         ? `<div class="mt-3 p-3 border-start border-warning bg-light">
-               <strong class="text-warning"><i class="fas fa-lightbulb me-1"></i>Reflexão:</strong> 
+               <strong class="text-warning" style="font-family: 'Exo 2', sans-serif; font-weight: 600;"><i class="fas fa-lightbulb me-1"></i>Reflexão:</strong> 
                <p class="mb-0 mt-1">${part.reflection}${!part.reflection.endsWith('?') ? '?' : ''}</p>
            </div>`
         : '';
@@ -522,12 +522,12 @@ function createPartCard(part, index) {
     card.innerHTML = `
         <div class="card shadow h-100">
             <div class="card-header bg-success text-white">
-                <h3 class="mb-0">${part.title}</h3>
+                <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">${part.title}</h3>
             </div>
             
             ${part.objective ? 
                 `<div class="card-img-top text-center py-3 bg-light">
-                    <span class="text-success"><i class="fas fa-bullseye me-1"></i>Objetivo:</span>
+                    <span class="text-success" style="font-family: 'Exo 2', sans-serif; font-weight: 600;"><i class="fas fa-bullseye me-1"></i>Objetivo:</span>
                     <p class="mb-0 px-3">${part.objective}</p>
                 </div>` : ''
             }
@@ -558,7 +558,7 @@ function createConclusionCard() {
         <div class="card shadow h-100">
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">Conclusão</h3>
+                    <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">Conclusão</h3>
                     <span class="badge bg-light text-primary">Síntese</span>
                 </div>
             </div>
@@ -590,7 +590,7 @@ function createTableOfContents() {
         introItem.innerHTML = `
             <a href="#card-intro" class="d-flex align-items-center text-decoration-none text-primary">
                 <i class="fas fa-book-open me-2"></i>
-                <span>${state.mainTitle}</span>
+                <span style="font-family: 'Exo 2', sans-serif; font-weight: 500;">${state.mainTitle}</span>
             </a>
         `;
         nav.appendChild(introItem);
@@ -600,6 +600,8 @@ function createTableOfContents() {
     if (state.parts.length > 0) {
         const partsHeader = document.createElement('h6');
         partsHeader.className = 'text-uppercase text-muted mt-4 mb-2 border-top pt-2';
+        partsHeader.style.fontFamily = "'Exo 2', sans-serif";
+        partsHeader.style.fontWeight = "700";
         partsHeader.innerHTML = '<i class="fas fa-layer-group me-1"></i> Partes';
         nav.appendChild(partsHeader);
         
@@ -614,7 +616,7 @@ function createTableOfContents() {
             partItem.innerHTML = `
                 <a href="#card-part-${partNumber}" class="d-flex align-items-center text-decoration-none text-success">
                     <span class="me-2">${partNumber}.</span>
-                    <span>${part.title}</span>
+                    <span style="font-family: 'Exo 2', sans-serif; font-weight: 500;">${part.title}</span>
                 </a>
             `;
             partsList.appendChild(partItem);
@@ -630,7 +632,7 @@ function createTableOfContents() {
         conclusionItem.innerHTML = `
             <a href="#card-conclusion" class="d-flex align-items-center text-decoration-none text-primary">
                 <i class="fas fa-flag-checkered me-2"></i>
-                <span>Conclusão</span>
+                <span style="font-family: 'Exo 2', sans-serif; font-weight: 500;">Conclusão</span>
             </a>
         `;
         nav.appendChild(conclusionItem);
