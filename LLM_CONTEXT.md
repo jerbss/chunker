@@ -87,5 +87,24 @@ A aplicação segue uma arquitetura MVC (Model-View-Controller) implementada com
   - Pergunta de reflexão
 - Navegação lateral (TOC) fixa e recolhível
 
+### Fontes e Pesos
+
+1. **Fontes e Pesos**
+    1.1. **Exo 2** (Títulos e Interface)
+
+        | Peso | Uso Recomendado                  | Fallback |
+        | ---- | -------------------------------- | -------- |
+        | 400  | Textos longos em interfaces      | Arial    |
+        | 500  | Botões e labels importantes      | Arial    |
+        | 600  | Títulos de seções e cards       | Arial    |
+        | 700  | Títulos principais e destaques   | Arial    |
+
+    1.2. **Inter** (Corpo de Texto)
+
+        | Peso | Uso Recomendado          | Fallback    |
+        | ---- | ------------------------ | ----------- |
+        | 400  | Parágrafos e textos longos | system-ui   |
+        | 500  | Destaques e citações     | system-ui   |
+
 ## Estrutura de Arquivos Principal
 

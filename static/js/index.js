@@ -379,7 +379,7 @@ function processPartSections(partSections) {
 
         // Remover marcadores de lista indesejados
         part.content = tempDiv.innerHTML.replace(/^(\s*--\s*Tópicos Principais:)/m, '')
-                                         .replace(/(\s*--\s*Conceitos-chave:)$/m, '');
+                                         .replace(/(\s*Conceitos-chave:\s*--)$/m, '');
         
         part.content = part.content.trim();
         
