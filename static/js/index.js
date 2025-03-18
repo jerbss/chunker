@@ -482,16 +482,8 @@ function createIntroCard() {
             <div class="card-body collapsed-content" style="max-height: 250px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, black 80%, transparent 100%);">
                 ${state.introContent}
             </div>
-            <div class="card-footer bg-light">
-                <button class="btn btn-outline-primary expand-btn" data-target="card-intro">
-                    <i class="fas fa-chevron-down me-1"></i>Expandir
-                </button>
-            </div>
         </div>
     `;
-
-    const expandBtn = card.querySelector('.expand-btn');
-    expandBtn.addEventListener('click', handleExpandCollapse);
 
     return card;
 }
@@ -547,16 +539,9 @@ function createPartCard(part, index) {
             <div class="card-footer bg-light">
                 <div class="mb-2">${conceptBadges}</div>
                 ${part.reflection ? reflectionBlock : ''}
-                <button class="btn btn-outline-success expand-btn mt-2" data-target="${cardId}">
-                    <i class="fas fa-chevron-down me-1"></i>Expandir
-                </button>
             </div>
         </div>
     `;
-    
-    // Adicionar evento para expandir/recolher
-    const expandBtn = card.querySelector('.expand-btn');
-    expandBtn.addEventListener('click', handleExpandCollapse);
     
     return card;
 }
@@ -580,60 +565,10 @@ function createConclusionCard() {
             <div class="card-body collapsed-content" style="max-height: 250px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, black 80%, transparent 100%);">
                 ${state.conclusion}
             </div>
-            <div class="card-footer bg-light">
-                <button class="btn btn-outline-primary expand-btn" data-target="card-conclusion">
-                    <i class="fas fa-chevron-down me-1"></i>Expandir
-                </button>
-            </div>
         </div>
     `;
     
-    // Adicionar evento para expandir/recolher
-    const expandBtn = card.querySelector('.expand-btn');
-    expandBtn.addEventListener('click', handleExpandCollapse);
-    
     return card;
-}
-
-/**
- * Manipulador de evento para expandir/recolher cards
- */
-function handleExpandCollapse() {
-    const cardId = this.getAttribute('data-target');
-    const card = document.getElementById(cardId);
-    
-    if (!card) return;
-    
-    const cardBody = card.querySelector('.card-body');
-    const icon = this.querySelector('i');
-    
-    if (cardBody.classList.contains('collapsed-content')) {
-        // Expandir
-        cardBody.classList.remove('collapsed-content');
-        cardBody.style.maxHeight = '';
-        cardBody.style.overflow = '';
-        cardBody.style.maskImage = '';
-        cardBody.style.webkitMaskImage = '';
-        
-        this.innerHTML = `<i class="fas fa-chevron-up me-1"></i>Recolher`;
-    } else {
-        // Colapsar
-        cardBody.classList.add('collapsed-content');
-        cardBody.style.maxHeight = '250px';
-        cardBody.style.overflow = 'hidden';
-        cardBody.style.maskImage = 'linear-gradient(to bottom, black 80%, transparent 100%)';
-        cardBody.style.webkitMaskImage = 'linear-gradient(to bottom, black 80%, transparent 100%)';
-        
-        this.innerHTML = `<i class="fas fa-chevron-down me-1"></i>Expandir`;
-        
-        // Scroll para o topo do card
-        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    
-    // Atualizar layout do Masonry
-    if (state.masonry) {
-        setTimeout(() => state.masonry.layout(), 100);
-    }
 }
 
 /**
