@@ -20,6 +20,7 @@ def test_gemini(request):
     tema = ""
     num_partes = 2
     html_result = None
+    use_gemini_fallback = False  # Mover para fora do bloco POST para evitar o UnboundLocalError
     
     # Verificar se o sistema está em modo de manutenção (por exemplo, sem créditos)
     maintenance_mode = os.path.exists(os.path.join(settings.BASE_DIR, 'maintenance_mode'))
@@ -40,8 +41,6 @@ def test_gemini(request):
         
         # Configurar o cliente Gemini (será usado como fallback)
         genai.configure(api_key=settings.GEMINI_API_KEY)
-        
-        use_gemini_fallback = False  # Flag para indicar se devemos usar o fallback
         
         if request.method == 'POST':
             tema = request.POST.get('tema', '')
@@ -86,7 +85,9 @@ def test_gemini(request):
             # Função para processar com Gemini (fallback)
             def process_with_gemini():
                 nonlocal result
+                nonlocal use_gemini_fallback  # Importante: acessar a variável do escopo externo
                 logger.info("Usando API Gemini como fallback")
+                use_gemini_fallback = True  # Atualizar a flag
                 
                 # Gerar o prompt uma vez
                 prompt = generate_prompt(tema, num_partes)
@@ -274,7 +275,7 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                         )
                     
                         result += conclusion_response.choices[0].message.content
-                    
+                        
                 except Exception as api_error:
                     # Log detalhado do erro
                     logger.error(f"API Error: {str(api_error)}")
