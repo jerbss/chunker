@@ -9,6 +9,7 @@ import traceback
 from .prompts.chunking_prompt import generate_prompt
 from openai import OpenAI
 import os
+import google.generativeai as genai
 
 # Configurar o logger
 logger = logging.getLogger(__name__)
@@ -31,11 +32,16 @@ def test_gemini(request):
         })
     
     try:
-        # Configurar o cliente OpenAI para ZukiJourney
-        client = OpenAI(
+        # Configurar ambos os clientes, mas começar com Zuki
+        zuki_client = OpenAI(
             base_url="https://api.zukijourney.com/v1",
             api_key=settings.ZUKI_API_KEY
         )
+        
+        # Configurar o cliente Gemini (será usado como fallback)
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        
+        use_gemini_fallback = False  # Flag para indicar se devemos usar o fallback
         
         if request.method == 'POST':
             tema = request.POST.get('tema', '')
@@ -77,6 +83,27 @@ def test_gemini(request):
                     'num_partes': 2
                 })
             
+            # Função para processar com Gemini (fallback)
+            def process_with_gemini():
+                nonlocal result
+                logger.info("Usando API Gemini como fallback")
+                
+                # Gerar o prompt uma vez
+                prompt = generate_prompt(tema, num_partes)
+                
+                # Configurar o modelo Gemini
+                gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+                
+                # Fazer a requisição ao Gemini
+                gemini_response = gemini_model.generate_content(prompt)
+                
+                # Verificar se a resposta foi gerada com sucesso
+                if gemini_response and hasattr(gemini_response, 'text'):
+                    result = gemini_response.text
+                    logger.info(f"Resposta recebida do Gemini com {len(result) if result else 0} caracteres")
+                else:
+                    raise Exception("Resposta inválida do Gemini.")
+            
             # Prepara o prompt baseado no número de partes
             if num_partes > 10:
                 # Dividir em múltiplas solicitações para temas com muitas partes
@@ -111,33 +138,36 @@ Use esta formatação:
   - ## Objetivos Gerais (4-5 competências em lista)"""
                 
                 try:
-                    # Gerar as três partes
-                    response1 = client.chat.completions.create(
-                        model="gemini-2.0-flash-thinking-exp-01-21",
-                        messages=[{"role": "user", "content": prompt_parte1}],
-                        max_tokens=4096,
-                        temperature=0.7
-                    )
-                    
-                    response2 = client.chat.completions.create(
-                        model="gemini-2.0-flash-thinking-exp-01-21",
-                        messages=[{"role": "user", "content": prompt_parte2}],
-                        max_tokens=4096,
-                        temperature=0.7
-                    )
-                    
-                    response3 = client.chat.completions.create(
-                        model="gemini-2.0-flash-thinking-exp-01-21",
-                        messages=[{"role": "user", "content": prompt_parte3}],
-                        max_tokens=4096,
-                        temperature=0.7
-                    )
-                    
-                    # Combinar os resultados
-                    result = (response3.choices[0].message.content + "\n\n" + 
-                              response1.choices[0].message.content + "\n\n" + 
-                              response2.choices[0].message.content)
-                    
+                    if use_gemini_fallback:
+                        process_with_gemini()
+                    else:
+                        # Gerar as três partes usando Zuki
+                        response1 = zuki_client.chat.completions.create(
+                            model="gemini-2.0-flash-thinking-exp-01-21",
+                            messages=[{"role": "user", "content": prompt_parte1}],
+                            max_tokens=4096,
+                            temperature=0.7
+                        )
+                        
+                        response2 = zuki_client.chat.completions.create(
+                            model="gemini-2.0-flash-thinking-exp-01-21",
+                            messages=[{"role": "user", "content": prompt_parte2}],
+                            max_tokens=4096,
+                            temperature=0.7
+                        )
+                        
+                        response3 = zuki_client.chat.completions.create(
+                            model="gemini-2.0-flash-thinking-exp-01-21",
+                            messages=[{"role": "user", "content": prompt_parte3}],
+                            max_tokens=4096,
+                            temperature=0.7
+                        )
+                        
+                        # Combinar os resultados
+                        result = (response3.choices[0].message.content + "\n\n" + 
+                                  response1.choices[0].message.content + "\n\n" + 
+                                  response2.choices[0].message.content)
+                        
                 except Exception as api_error:
                     # Log detalhado do erro
                     logger.error(f"API Error: {str(api_error)}")
@@ -145,7 +175,21 @@ Use esta formatação:
                     
                     # Determinar o tipo de erro para uma mensagem mais informativa
                     error_msg = str(api_error).lower()
-                    if "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
+                    if "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
+                        # Tentar fallback para Gemini
+                        logger.info("Detectado erro de créditos insuficientes, tentando fallback para Gemini")
+                        try:
+                            use_gemini_fallback = True
+                            process_with_gemini()
+                        except Exception as gemini_error:
+                            logger.error(f"Gemini API Error: {str(gemini_error)}")
+                            error = "Créditos insuficientes e o fallback também falhou. Por favor, tente novamente mais tarde."
+                            return render(request, 'index.html', {
+                                'error': error,
+                                'tema': tema,
+                                'num_partes': num_partes
+                            })
+                    elif "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
                         error = "O tema foi bloqueado pelo filtro de conteúdo da API. Por favor, tente outro tema."
                     elif "rate limit" in error_msg or "quota" in error_msg:
                         error = "Limite de requisições da API atingido. Por favor, tente novamente em alguns minutos."
@@ -155,8 +199,6 @@ Use esta formatação:
                         error = "A requisição excedeu o tempo limite. Por favor, tente novamente ou escolha um tema menos complexo."
                     elif "invalid" in error_msg and "character" in error_msg:
                         error = "O tema contém caracteres inválidos ou especiais. Por favor, simplifique o texto."
-                    elif "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
-                        error = "Créditos insuficientes para completar a solicitação. Por favor, tente novamente mais tarde."
                     else:
                         # Se estiver em modo de desenvolvimento, mostrar o erro real
                         if settings.DEBUG:
@@ -164,38 +206,42 @@ Use esta formatação:
                         else:
                             error = "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde."
                     
-                    logger.info(f"Mensagem de erro exibida: {error}")
-                    return render(request, 'index.html', {
-                        'error': error,
-                        'tema': tema,
-                        'num_partes': num_partes
-                    })
+                    if not use_gemini_fallback:  # Só renderizar se não estiver usando fallback
+                        logger.info(f"Mensagem de erro exibida: {error}")
+                        return render(request, 'index.html', {
+                            'error': error,
+                            'tema': tema,
+                            'num_partes': num_partes
+                        })
             
             # Para temas muito complexos que podem resultar em respostas truncadas
             elif tema.lower() in ['inteligência artificial', 'inteligencia artificial', 'machine learning', 
                                  'deep learning', 'cloud computing', 'cybersecurity']:
                 # Para temas complexos, vamos gerar cada parte separadamente para garantir completude
                 try:
-                    # Gerar introdução
-                    intro_prompt = f"""Crie apenas a introdução para um guia de estudos sobre "{tema}" em {num_partes} partes.
+                    if use_gemini_fallback:
+                        process_with_gemini()
+                    else:
+                        # Gerar introdução usando Zuki
+                        intro_prompt = f"""Crie apenas a introdução para um guia de estudos sobre "{tema}" em {num_partes} partes.
 Use esta formatação:
 - Título principal como Heading 1 (#): "# {tema} em {num_partes} Partes"
 - Subseções como Heading 2 (##):
   - ## Contextualização (2-3 parágrafos)
   - ## Objetivos Gerais (4-5 competências em lista)"""
                     
-                    intro_response = client.chat.completions.create(
-                        model="gemini-2.0-flash-thinking-exp-01-21",
-                        messages=[{"role": "user", "content": intro_prompt}],
-                        max_tokens=2048,
-                        temperature=0.7
-                    )
+                        intro_response = zuki_client.chat.completions.create(
+                            model="gemini-2.0-flash-thinking-exp-01-21",
+                            messages=[{"role": "user", "content": intro_prompt}],
+                            max_tokens=2048,
+                            temperature=0.7
+                        )
                     
-                    result = intro_response.choices[0].message.content + "\n\n"
+                        result = intro_response.choices[0].message.content + "\n\n"
                     
-                    # Gerar cada parte individualmente
-                    for i in range(1, num_partes + 1):
-                        parte_prompt = f"""Crie APENAS a parte {i} de um guia de estudos sobre "{tema}".
+                        # Gerar cada parte individualmente
+                        for i in range(1, num_partes + 1):
+                            parte_prompt = f"""Crie APENAS a parte {i} de um guia de estudos sobre "{tema}".
 Use esta formatação:
 - Título da parte como Heading 1 (#): "# Parte {i}: [Título Descritivo]"
 - **Objetivo de Aprendizagem:** (1 parágrafo)
@@ -205,29 +251,29 @@ Use esta formatação:
 
 IMPORTANTE: Crie APENAS esta parte, sem introdução ou partes adicionais."""
                         
-                        parte_response = client.chat.completions.create(
-                            model="gemini-2.0-flash-thinking-exp-01-21",
-                            messages=[{"role": "user", "content": parte_prompt}],
-                            max_tokens=2048,
-                            temperature=0.7
-                        )
+                            parte_response = zuki_client.chat.completions.create(
+                                model="gemini-2.0-flash-thinking-exp-01-21",
+                                messages=[{"role": "user", "content": parte_prompt}],
+                                max_tokens=2048,
+                                temperature=0.7
+                            )
                         
-                        result += parte_response.choices[0].message.content + "\n\n"
+                            result += parte_response.choices[0].message.content + "\n\n"
                     
-                    # Gerar conclusão
-                    conclusion_prompt = f"""Crie apenas a conclusão para um guia de estudos sobre "{tema}" em {num_partes} partes.
+                        # Gerar conclusão
+                        conclusion_prompt = f"""Crie apenas a conclusão para um guia de estudos sobre "{tema}" em {num_partes} partes.
 Use esta formatação:
 - Título como Heading 1 (#): "# Conclusão"
 Sintetize a progressão do conhecimento através das partes e explique como elas se integram."""
                     
-                    conclusion_response = client.chat.completions.create(
-                        model="gemini-2.0-flash-thinking-exp-01-21",
-                        messages=[{"role": "user", "content": conclusion_prompt}],
-                        max_tokens=2048,
-                        temperature=0.7
-                    )
+                        conclusion_response = zuki_client.chat.completions.create(
+                            model="gemini-2.0-flash-thinking-exp-01-21",
+                            messages=[{"role": "user", "content": conclusion_prompt}],
+                            max_tokens=2048,
+                            temperature=0.7
+                        )
                     
-                    result += conclusion_response.choices[0].message.content
+                        result += conclusion_response.choices[0].message.content
                     
                 except Exception as api_error:
                     # Log detalhado do erro
@@ -236,7 +282,21 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                     
                     # Determinar o tipo de erro para uma mensagem mais informativa
                     error_msg = str(api_error).lower()
-                    if "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
+                    if "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
+                        # Tentar fallback para Gemini
+                        logger.info("Detectado erro de créditos insuficientes, tentando fallback para Gemini")
+                        try:
+                            use_gemini_fallback = True
+                            process_with_gemini()
+                        except Exception as gemini_error:
+                            logger.error(f"Gemini API Error: {str(gemini_error)}")
+                            error = "Créditos insuficientes e o fallback também falhou. Por favor, tente novamente mais tarde."
+                            return render(request, 'index.html', {
+                                'error': error,
+                                'tema': tema,
+                                'num_partes': num_partes
+                            })
+                    elif "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
                         error = "O tema foi bloqueado pelo filtro de conteúdo da API. Por favor, tente outro tema."
                     elif "rate limit" in error_msg or "quota" in error_msg:
                         error = "Limite de requisições da API atingido. Por favor, tente novamente em alguns minutos."
@@ -246,8 +306,6 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                         error = "A requisição excedeu o tempo limite. Por favor, tente novamente ou escolha um tema menos complexo."
                     elif "invalid" in error_msg and "character" in error_msg:
                         error = "O tema contém caracteres inválidos ou especiais. Por favor, simplifique o texto."
-                    elif "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
-                        error = "Créditos insuficientes para completar a solicitação. Por favor, tente novamente mais tarde."
                     else:
                         # Se estiver em modo de desenvolvimento, mostrar o erro real
                         if settings.DEBUG:
@@ -255,27 +313,33 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                         else:
                             error = "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde."
                     
-                    logger.info(f"Mensagem de erro exibida: {error}")
-                    return render(request, 'index.html', {
-                        'error': error,
-                        'tema': tema,
-                        'num_partes': num_partes
-                    })
+                    if not use_gemini_fallback:  # Só renderizar se não estiver usando fallback
+                        logger.info(f"Mensagem de erro exibida: {error}")
+                        return render(request, 'index.html', {
+                            'error': error,
+                            'tema': tema,
+                            'num_partes': num_partes
+                        })
             else:
                 # Para poucos tópicos, usar abordagem normal
                 prompt = generate_prompt(tema, num_partes)
                 
                 try:
                     logger.info(f"Enviando prompt para a API: tema='{tema}', num_partes={num_partes}")
-                    response = client.chat.completions.create(
-                        model="gemini-2.0-flash-thinking-exp-01-21",
-                        messages=[{"role": "user", "content": prompt}],
-                        max_tokens=8192,
-                        temperature=0.7
-                    )
                     
-                    result = response.choices[0].message.content
-                    logger.info(f"Resposta recebida da API com {len(result) if result else 0} caracteres")
+                    if use_gemini_fallback:
+                        process_with_gemini()
+                    else:
+                        # Usar Zuki
+                        response = zuki_client.chat.completions.create(
+                            model="gemini-2.0-flash-thinking-exp-01-21",
+                            messages=[{"role": "user", "content": prompt}],
+                            max_tokens=8192,
+                            temperature=0.7
+                        )
+                        
+                        result = response.choices[0].message.content
+                        logger.info(f"Resposta recebida da API Zuki com {len(result) if result else 0} caracteres")
                     
                 except Exception as api_error:
                     # Log detalhado do erro
@@ -284,7 +348,21 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                     
                     # Determinar o tipo de erro para uma mensagem mais informativa
                     error_msg = str(api_error).lower()
-                    if "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
+                    if "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
+                        # Tentar fallback para Gemini
+                        logger.info("Detectado erro de créditos insuficientes, tentando fallback para Gemini")
+                        try:
+                            use_gemini_fallback = True
+                            process_with_gemini()
+                        except Exception as gemini_error:
+                            logger.error(f"Gemini API Error: {str(gemini_error)}")
+                            error = "Créditos insuficientes e o fallback também falhou. Por favor, tente novamente mais tarde."
+                            return render(request, 'index.html', {
+                                'error': error,
+                                'tema': tema,
+                                'num_partes': num_partes
+                            })
+                    elif "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
                         error = "O tema foi bloqueado pelo filtro de conteúdo da API. Por favor, tente outro tema."
                     elif "rate limit" in error_msg or "quota" in error_msg:
                         error = "Limite de requisições da API atingido. Por favor, tente novamente em alguns minutos."
@@ -294,8 +372,6 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                         error = "A requisição excedeu o tempo limite. Por favor, tente novamente ou escolha um tema menos complexo."
                     elif "invalid" in error_msg and "character" in error_msg:
                         error = "O tema contém caracteres inválidos ou especiais. Por favor, simplifique o texto."
-                    elif "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
-                        error = "Créditos insuficientes para completar a solicitação. Por favor, tente novamente mais tarde."
                     else:
                         # Se estiver em modo de desenvolvimento, mostrar o erro real
                         if settings.DEBUG:
@@ -303,12 +379,13 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                         else:
                             error = "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde."
                     
-                    logger.info(f"Mensagem de erro exibida: {error}")
-                    return render(request, 'index.html', {
-                        'error': error,
-                        'tema': tema,
-                        'num_partes': num_partes
-                    })
+                    if not use_gemini_fallback:  # Só renderizar se não estiver usando fallback
+                        logger.info(f"Mensagem de erro exibida: {error}")
+                        return render(request, 'index.html', {
+                            'error': error,
+                            'tema': tema,
+                            'num_partes': num_partes
+                        })
             
             # Converter markdown para HTML
             if result:
@@ -351,7 +428,8 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
         'tema': tema,
         'num_partes': num_partes,
         'has_content': bool(html_result),
-        'app_title': 'ChunkMaster'
+        'app_title': 'ChunkMaster',
+        'used_fallback': use_gemini_fallback  # Adicionar indicador de fallback para UI
     }
     
     return render(request, 'index.html', context)
