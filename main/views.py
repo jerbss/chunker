@@ -4,8 +4,14 @@ from django.utils.safestring import mark_safe
 import markdown
 import re
 import requests
+import logging
+import traceback
 from .prompts.chunking_prompt import generate_prompt
 from openai import OpenAI
+import os
+
+# Configurar o logger
+logger = logging.getLogger(__name__)
 
 def test_gemini(request):
     result = None
@@ -13,6 +19,16 @@ def test_gemini(request):
     tema = ""
     num_partes = 2
     html_result = None
+    
+    # Verificar se o sistema está em modo de manutenção (por exemplo, sem créditos)
+    maintenance_mode = os.path.exists(os.path.join(settings.BASE_DIR, 'maintenance_mode'))
+    if maintenance_mode:
+        error = "O serviço está temporariamente indisponível para manutenção. Por favor, tente novamente mais tarde."
+        return render(request, 'index.html', {
+            'error': error,
+            'tema': tema,
+            'num_partes': num_partes
+        })
     
     try:
         # Configurar o cliente OpenAI para ZukiJourney
@@ -23,6 +39,19 @@ def test_gemini(request):
         
         if request.method == 'POST':
             tema = request.POST.get('tema', '')
+            
+            # Log do tema recebido para diagnóstico
+            logger.info(f"Tema recebido: '{tema}' (tamanho: {len(tema)} caracteres)")
+            
+            # Verificar se o tema é muito longo
+            if (len(tema) > 200):
+                error = f"O tema é muito longo ({len(tema)} caracteres). Por favor, reduza para no máximo 200 caracteres."
+                return render(request, 'index.html', {
+                    'error': error,
+                    'tema': tema,
+                    'num_partes': num_partes
+                })
+                
             try:
                 num_partes = int(request.POST.get('num_partes', '2'))
                 if num_partes < 2:
@@ -109,8 +138,33 @@ Use esta formatação:
                               response1.choices[0].message.content + "\n\n" + 
                               response2.choices[0].message.content)
                     
-                except Exception:
-                    error = "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde."
+                except Exception as api_error:
+                    # Log detalhado do erro
+                    logger.error(f"API Error: {str(api_error)}")
+                    logger.error(traceback.format_exc())
+                    
+                    # Determinar o tipo de erro para uma mensagem mais informativa
+                    error_msg = str(api_error).lower()
+                    if "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
+                        error = "O tema foi bloqueado pelo filtro de conteúdo da API. Por favor, tente outro tema."
+                    elif "rate limit" in error_msg or "quota" in error_msg:
+                        error = "Limite de requisições da API atingido. Por favor, tente novamente em alguns minutos."
+                    elif "context length" in error_msg or "too many tokens" in error_msg or "maximum token" in error_msg:
+                        error = "O tema solicitado é muito complexo ou extenso. Por favor, tente um tema mais específico ou reduza o número de partes."
+                    elif "timeout" in error_msg or "deadline" in error_msg:
+                        error = "A requisição excedeu o tempo limite. Por favor, tente novamente ou escolha um tema menos complexo."
+                    elif "invalid" in error_msg and "character" in error_msg:
+                        error = "O tema contém caracteres inválidos ou especiais. Por favor, simplifique o texto."
+                    elif "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
+                        error = "Créditos insuficientes para completar a solicitação. Por favor, tente novamente mais tarde."
+                    else:
+                        # Se estiver em modo de desenvolvimento, mostrar o erro real
+                        if settings.DEBUG:
+                            error = f"Erro na API: {str(api_error)}"
+                        else:
+                            error = "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde."
+                    
+                    logger.info(f"Mensagem de erro exibida: {error}")
                     return render(request, 'index.html', {
                         'error': error,
                         'tema': tema,
@@ -175,8 +229,33 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                     
                     result += conclusion_response.choices[0].message.content
                     
-                except Exception:
-                    error = "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde."
+                except Exception as api_error:
+                    # Log detalhado do erro
+                    logger.error(f"API Error: {str(api_error)}")
+                    logger.error(traceback.format_exc())
+                    
+                    # Determinar o tipo de erro para uma mensagem mais informativa
+                    error_msg = str(api_error).lower()
+                    if "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
+                        error = "O tema foi bloqueado pelo filtro de conteúdo da API. Por favor, tente outro tema."
+                    elif "rate limit" in error_msg or "quota" in error_msg:
+                        error = "Limite de requisições da API atingido. Por favor, tente novamente em alguns minutos."
+                    elif "context length" in error_msg or "too many tokens" in error_msg or "maximum token" in error_msg:
+                        error = "O tema solicitado é muito complexo ou extenso. Por favor, tente um tema mais específico ou reduza o número de partes."
+                    elif "timeout" in error_msg or "deadline" in error_msg:
+                        error = "A requisição excedeu o tempo limite. Por favor, tente novamente ou escolha um tema menos complexo."
+                    elif "invalid" in error_msg and "character" in error_msg:
+                        error = "O tema contém caracteres inválidos ou especiais. Por favor, simplifique o texto."
+                    elif "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
+                        error = "Créditos insuficientes para completar a solicitação. Por favor, tente novamente mais tarde."
+                    else:
+                        # Se estiver em modo de desenvolvimento, mostrar o erro real
+                        if settings.DEBUG:
+                            error = f"Erro na API: {str(api_error)}"
+                        else:
+                            error = "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde."
+                    
+                    logger.info(f"Mensagem de erro exibida: {error}")
                     return render(request, 'index.html', {
                         'error': error,
                         'tema': tema,
@@ -187,6 +266,7 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                 prompt = generate_prompt(tema, num_partes)
                 
                 try:
+                    logger.info(f"Enviando prompt para a API: tema='{tema}', num_partes={num_partes}")
                     response = client.chat.completions.create(
                         model="gemini-2.0-flash-thinking-exp-01-21",
                         messages=[{"role": "user", "content": prompt}],
@@ -195,9 +275,35 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                     )
                     
                     result = response.choices[0].message.content
+                    logger.info(f"Resposta recebida da API com {len(result) if result else 0} caracteres")
                     
-                except Exception:
-                    error = "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde."
+                except Exception as api_error:
+                    # Log detalhado do erro
+                    logger.error(f"API Error: {str(api_error)}")
+                    logger.error(traceback.format_exc())
+                    
+                    # Determinar o tipo de erro para uma mensagem mais informativa
+                    error_msg = str(api_error).lower()
+                    if "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
+                        error = "O tema foi bloqueado pelo filtro de conteúdo da API. Por favor, tente outro tema."
+                    elif "rate limit" in error_msg or "quota" in error_msg:
+                        error = "Limite de requisições da API atingido. Por favor, tente novamente em alguns minutos."
+                    elif "context length" in error_msg or "too many tokens" in error_msg or "maximum token" in error_msg:
+                        error = "O tema solicitado é muito complexo ou extenso. Por favor, tente um tema mais específico ou reduza o número de partes."
+                    elif "timeout" in error_msg or "deadline" in error_msg:
+                        error = "A requisição excedeu o tempo limite. Por favor, tente novamente ou escolha um tema menos complexo."
+                    elif "invalid" in error_msg and "character" in error_msg:
+                        error = "O tema contém caracteres inválidos ou especiais. Por favor, simplifique o texto."
+                    elif "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
+                        error = "Créditos insuficientes para completar a solicitação. Por favor, tente novamente mais tarde."
+                    else:
+                        # Se estiver em modo de desenvolvimento, mostrar o erro real
+                        if settings.DEBUG:
+                            error = f"Erro na API: {str(api_error)}"
+                        else:
+                            error = "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde."
+                    
+                    logger.info(f"Mensagem de erro exibida: {error}")
                     return render(request, 'index.html', {
                         'error': error,
                         'tema': tema,
@@ -206,19 +312,37 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
             
             # Converter markdown para HTML
             if result:
-                # Usar safe para garantir que o HTML não é escapado
-                html_result = mark_safe(markdown.markdown(
-                    result, 
-                    extensions=['extra', 'fenced_code', 'tables', 'nl2br', 'sane_lists']
-                ))
-                
-                # Verificar se temos um resultado válido
-                if not html_result or not str(html_result).strip():
-                    error = "Erro: Não foi possível gerar o conteúdo solicitado."
-    except requests.exceptions.HTTPError:
-        error = "Erro de conexão. Por favor, tente novamente mais tarde."
-    except Exception:
-        error = "Ops! Não conseguimos processar esse tema. Por favor, tente novamente mais tarde."
+                try:
+                    # Usar safe para garantir que o HTML não é escapado
+                    html_result = mark_safe(markdown.markdown(
+                        result, 
+                        extensions=['extra', 'fenced_code', 'tables', 'nl2br', 'sane_lists']
+                    ))
+                    
+                    # Verificar se temos um resultado válido
+                    if not html_result or not str(html_result).strip():
+                        logger.warning("Resultado HTML vazio ou inválido")
+                        error = "Erro: Não foi possível gerar o conteúdo solicitado. Resultado vazio."
+                except Exception as md_error:
+                    logger.error(f"Erro na conversão Markdown: {str(md_error)}")
+                    error = "Erro na formatação do conteúdo. Por favor, tente novamente."
+                    
+    except requests.exceptions.HTTPError as http_error:
+        logger.error(f"HTTP Error: {str(http_error)}")
+        error = "Erro de conexão com o serviço de IA. Por favor, tente novamente mais tarde."
+    except requests.exceptions.ConnectionError as conn_error:
+        logger.error(f"Connection Error: {str(conn_error)}")
+        error = "Não foi possível conectar ao serviço de IA. Verifique sua conexão de internet."
+    except requests.exceptions.Timeout as timeout_error:
+        logger.error(f"Timeout Error: {str(timeout_error)}")
+        error = "A requisição excedeu o tempo limite. Por favor, tente novamente mais tarde."
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        logger.error(traceback.format_exc())
+        if settings.DEBUG:
+            error = f"Erro inesperado: {str(e)}"
+        else:
+            error = "Ops! Não conseguimos processar esse tema. Por favor, tente novamente mais tarde."
     
     context = {
         'result': result,
@@ -231,5 +355,3 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
     }
     
     return render(request, 'index.html', context)
-
-# Função demo_page removida, já que o template demo.html será excluído
