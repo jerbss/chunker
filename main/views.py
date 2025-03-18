@@ -34,13 +34,39 @@ def test_gemini(request):
     
     try:
         # Configurar ambos os clientes, mas começar com Zuki
-        zuki_client = OpenAI(
-            base_url="https://api.zukijourney.com/v1",
-            api_key=settings.ZUKI_API_KEY
-        )
+        try:
+            # Inicialização segura do cliente OpenAI
+            client_kwargs = {
+                'base_url': "https://api.zukijourney.com/v1",
+                'api_key': settings.ZUKI_API_KEY
+            }
+            # Em ambiente de produção, pode haver proxies sendo injetados automaticamente
+            zuki_client = OpenAI(**client_kwargs)
+        except TypeError as client_error:
+            logger.error(f"Erro ao inicializar cliente OpenAI: {str(client_error)}")
+            if 'proxies' in str(client_error):
+                # Tenta inicializar sem argumentos extras que possam estar sendo injetados
+                zuki_client = None
+                # Forçar o uso do fallback Gemini
+                use_gemini_fallback = True
+                logger.info("Forçando uso do fallback devido a erro na inicialização do cliente OpenAI")
+            else:
+                # Repassar o erro original se for outro tipo de problema
+                raise
         
         # Configurar o cliente Gemini (será usado como fallback)
-        genai.configure(api_key=settings.GEMINI_API_KEY)
+        try:
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+        except Exception as gemini_error:
+            logger.error(f"Erro ao configurar Gemini API: {str(gemini_error)}")
+            if not zuki_client:
+                # Se ambos falharem, não podemos continuar
+                error = "Erro na configuração dos serviços de IA. Por favor, tente novamente mais tarde."
+                return render(request, 'index.html', {
+                    'error': error,
+                    'tema': tema,
+                    'num_partes': num_partes
+                })
         
         if request.method == 'POST':
             tema = request.POST.get('tema', '')
@@ -139,7 +165,7 @@ Use esta formatação:
   - ## Objetivos Gerais (4-5 competências em lista)"""
                 
                 try:
-                    if use_gemini_fallback:
+                    if use_gemini_fallback or not zuki_client:
                         process_with_gemini()
                     else:
                         # Gerar as três partes usando Zuki
@@ -220,7 +246,7 @@ Use esta formatação:
                                  'deep learning', 'cloud computing', 'cybersecurity']:
                 # Para temas complexos, vamos gerar cada parte separadamente para garantir completude
                 try:
-                    if use_gemini_fallback:
+                    if use_gemini_fallback or not zuki_client:
                         process_with_gemini()
                     else:
                         # Gerar introdução usando Zuki
@@ -328,7 +354,7 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                 try:
                     logger.info(f"Enviando prompt para a API: tema='{tema}', num_partes={num_partes}")
                     
-                    if use_gemini_fallback:
+                    if use_gemini_fallback or not zuki_client:
                         process_with_gemini()
                     else:
                         # Usar Zuki
