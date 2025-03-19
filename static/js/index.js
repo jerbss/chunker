@@ -452,9 +452,9 @@ function createCards() {
         cardsContainer.appendChild(partsRow);
     }
     
-    // Divisor de conclusão
+    // Divisor de conclusão - mudando para "CONSIDERAÇÕES FINAIS"
     if (state.conclusion) {
-        const conclusionDivider = createSectionDivider('CONCLUSÃO', 'primary');
+        const conclusionDivider = createSectionDivider('CONSIDERAÇÕES FINAIS', 'primary');
         cardsContainer.appendChild(conclusionDivider);
         
         // Card de Conclusão
@@ -578,7 +578,7 @@ function createConclusionCard() {
         <div class="card shadow h-100">
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">Conclusão</h3>
+                    <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">Integração dos Conhecimentos</h3>
                     <span class="badge bg-light text-primary">Síntese</span>
                 </div>
             </div>
@@ -645,7 +645,7 @@ function createTableOfContents() {
         nav.appendChild(partsList);
     }
     
-    // Adicionar link para conclusão
+    // Adicionar link para conclusão - mantendo "Conclusão" apenas no TOC
     if (state.conclusion) {
         const conclusionItem = document.createElement('div');
         conclusionItem.className = 'mt-3 border-top pt-2';
