@@ -72,6 +72,15 @@ html.dark-theme input[type="number"] {
     border-color: #444444;
 }
 
+/* Melhorar legibilidade de textos auxiliares no tema escuro */
+html.dark-theme .form-text {
+    color: #bbb !important; /* Cor mais clara para ter legibilidade */
+}
+
+html.dark-theme .text-danger {
+    color: #ff6b6b !important; /* Vermelho mais claro para melhor contraste */
+}
+
 html.dark-theme .form-control:focus {
     background-color: #3a3a3a;
     color: var(--text-color);
@@ -79,9 +88,21 @@ html.dark-theme .form-control:focus {
     box-shadow: 0 0 0 0.25rem rgba(41, 98, 255, 0.25);
 }
 
+/* Ajuste para elementos do input-group */
 html.dark-theme .input-group-text {
-    background-color: var(--primary-color);
+    background-color: #333333;
+    color: var(--text-color);
     border-color: #444444;
+}
+
+html.dark-theme .input-group-text.bg-primary {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+html.dark-theme .input-group-text.bg-success {
+    background-color: var(--secondary-color) !important;
+    color: white !important;
 }
 
 /* Placeholder no tema escuro */
