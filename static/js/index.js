@@ -300,9 +300,6 @@ function extractContent(element) {
     }
 }
 
-/**
- * Processa todas as seções de partes
- */
 function processPartSections(partSections) {
     const parts = [];
     
@@ -315,7 +312,8 @@ function processPartSections(partSections) {
             content: '',  // Inicializa vazio para adicionar apenas o conteúdo sem o título
             objective: null,
             concepts: [],
-            reflection: null
+            reflection: null,
+            instructionPrompt: null // Novo campo para prompt de instrução
         };
         
         // Pular o H1 inicial (título) e começar a capturar a partir do próximo elemento
@@ -344,6 +342,10 @@ function processPartSections(partSections) {
             
             if (elementText.includes('Pergunta de Reflexão:')) {
                 part.reflection = elementText.split('Pergunta de Reflexão:')[1].trim();
+            }
+            
+            if (elementText.includes('Prompt de Instrução:')) {
+                part.instructionPrompt = elementText.split('Prompt de Instrução:')[1].trim();
             }
             
             nextElement = nextElement.nextElementSibling;
@@ -395,6 +397,19 @@ function processPartSections(partSections) {
         const conceptElements = tempDiv.querySelectorAll('strong');
         conceptElements.forEach(el => {
             if (el.textContent.includes('Conceitos-chave:')) {
+                let parent = el.parentNode;
+                if (parent.tagName === 'P') {
+                    parent.remove();
+                } else {
+                    el.remove();
+                }
+            }
+        });
+
+        // Remover o prompt de instrução do conteúdo também
+        const instructionPromptElements = tempDiv.querySelectorAll('strong');
+        instructionPromptElements.forEach(el => {
+            if (el.textContent.includes('Prompt de Instrução:')) {
                 let parent = el.parentNode;
                 if (parent.tagName === 'P') {
                     parent.remove();
@@ -534,6 +549,14 @@ function createPartCard(part, index) {
            </div>`
         : '';
     
+    // Criar bloco de prompt de instrução se existir
+    const instructionPromptBlock = part.instructionPrompt 
+        ? `<div class="mt-3 p-3 border-start border-info bg-light">
+               <strong class="text-info" style="font-family: 'Exo 2', sans-serif; font-weight: 600;"><i class="fas fa-question-circle me-1"></i>Prompt de Instrução:</strong> 
+               <p class="mb-0 mt-1">${part.instructionPrompt}</p>
+           </div>`
+        : '';
+    
     // Verificar se há conteúdo real no corpo do card, caso contrário, adicionar um placeholder
     const bodyContent = (part.content && part.content.trim()) 
         ? part.content 
@@ -559,6 +582,7 @@ function createPartCard(part, index) {
             <div class="card-footer bg-light">
                 <div class="mb-2 concepts-container">${conceptBadges}</div>
                 ${part.reflection ? reflectionBlock : ''}
+                ${part.instructionPrompt ? instructionPromptBlock : ''}
             </div>
         </div>
     `;
