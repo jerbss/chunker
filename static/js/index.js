@@ -577,7 +577,7 @@ function createPartCard(part, index) {
                        <i class="fas fa-copy"></i> Copiar
                    </button>
                </div>
-               <pre class="mb-0 mt-2 p-2 bg-white border" style="white-space: pre-wrap; border-radius: 4px;">${part.instructionPrompt}</pre>
+               <pre class="mb-0 mt-2 p-2 theme-adaptive-pre" style="white-space: pre-wrap; border-radius: 4px;">${part.instructionPrompt}</pre>
            </div>`
         : '';
     

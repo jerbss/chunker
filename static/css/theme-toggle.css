@@ -160,6 +160,19 @@ html.dark-theme .theme-toggle__lightbulb__coil {
     stroke-dashoffset: 0;
 }
 
+/* Tema adaptável para elementos pre */
+.theme-adaptive-pre {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: var(--text-color);
+}
+
+html.dark-theme .theme-adaptive-pre {
+    background-color: #333333;
+    border-color: #444444;
+    color: #e9ecef;
+}
+
 /* Responsividade */
 @media (max-width: 767px) {
     .theme-toggle {
