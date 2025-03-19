@@ -1,0 +1,147 @@
+/* Definição de temas (claro e escuro) */
+:root, html.light-theme {
+    --primary-color: #2962FF;       /* Azul Primário - 60% */
+    --primary-dark: #1E4FCC;        /* Versão mais escura do azul primário */
+    --secondary-color: #00CC99;     /* Verde Secundário - 30% */
+    --accent-color: #FF6B35;        /* Laranja de Ação - 10% */
+    --text-color: #2A2A2A;          /* Cinza Escuro para textos */
+    --light-bg: #F5F7FA;            /* Cinza Claro para fundos */
+    --card-bg: #FFFFFF;             /* Branco para cards */
+    --warning: #FF6B35;             /* Usando o laranja de acento para avisos */
+    --danger: #FF3A30;              /* Vermelho para erros */
+    --shadow: 0 4px 15px rgba(0,0,0,0.1);
+    --hover-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+html.dark-theme {
+    --primary-color: #2962FF;       /* Azul Primário mantido - 60% */
+    --primary-dark: #1E4FCC;        /* Versão mais escura do azul */
+    --secondary-color: #00B386;     /* Verde Escuro - 30% */
+    --accent-color: #FF5A1F;        /* Laranja Escuro - 10% */
+    --text-color: #F5F7FA;          /* Cinza Claro para textos no tema escuro */
+    --light-bg: #1E1E1E;            /* Preto Suave para fundo */
+    --card-bg: #2A2A2A;             /* Cinza Escuro para cards */
+    --warning: #FF5A1F;             /* Usando o laranja escuro para avisos */
+    --danger: #FF3A30;              /* Vermelho para erros */
+    --shadow: 0 4px 15px rgba(0,0,0,0.25);
+    --hover-shadow: 0 8px 25px rgba(0,0,0,0.35);
+}
+
+/* Estilos adicionais para tema escuro */
+html.dark-theme body {
+    background-color: var(--light-bg);
+    color: var(--text-color);
+}
+
+html.dark-theme .card, 
+html.dark-theme .form-container {
+    background-color: var(--card-bg);
+}
+
+html.dark-theme .card-body,
+html.dark-theme .card-footer {
+    color: var(--text-color);
+}
+
+html.dark-theme .bg-light {
+    background-color: #2A2A2A !important;
+}
+
+html.dark-theme .text-muted {
+    color: #9E9E9E !important;
+}
+
+html.dark-theme .bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+html.dark-theme .bg-success {
+    background-color: var(--secondary-color) !important;
+}
+
+html.dark-theme .text-dark {
+    color: var(--text-color) !important;
+}
+
+/* Inputs no tema escuro */
+html.dark-theme .form-control,
+html.dark-theme input[type="text"],
+html.dark-theme input[type="number"] {
+    background-color: #333333;
+    color: var(--text-color);
+    border-color: #444444;
+}
+
+html.dark-theme .form-control:focus {
+    background-color: #3a3a3a;
+    color: var(--text-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(41, 98, 255, 0.25);
+}
+
+html.dark-theme .input-group-text {
+    background-color: var(--primary-color);
+    border-color: #444444;
+}
+
+/* Placeholder no tema escuro */
+html.dark-theme .form-control::placeholder {
+    color: #999999;
+}
+
+/* Estilo do botão de alternar tema */
+.theme-toggle {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.theme-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.theme-toggle:active {
+    transform: scale(0.9);
+}
+
+.theme-toggle__lightbulb {
+    width: 24px;
+    height: 24px;
+}
+
+/* Animações para os raios da lâmpada */
+.theme-toggle__lightbulb__rays {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+html.dark-theme .theme-toggle__lightbulb__rays {
+    opacity: 0;
+}
+
+.theme-toggle__lightbulb__coil {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.3s ease;
+}
+
+html.dark-theme .theme-toggle__lightbulb__coil {
+    stroke-dashoffset: 0;
+}
+
+/* Responsividade */
+@media (max-width: 767px) {
+    .theme-toggle {
+        margin-top: 10px;
+    }
+}
