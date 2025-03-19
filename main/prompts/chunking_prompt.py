@@ -40,6 +40,7 @@ Para cada parte, inclua:
   - Tópico 3 com breve descrição
 - **Conceitos-chave:** Lista de conceitos
 - **Pergunta de Reflexão:** Uma pergunta instigante
+- **Prompt de Instrução:** Um prompt bem estruturado relacionado especificamente a essa parte, que o usuário pode copiar e colar em uma ferramenta de IA para explorar o tema em maior profundidade (2-4 linhas)
 
 IMPORTANTE: TODAS AS PARTES DEVEM SER DETALHADAS COMPLETAMENTE, SEM EXCEÇÃO.
 
@@ -69,6 +70,8 @@ def generate_prompt(tema, num_partes):
     - A contextualização deve incluir: visão geral do tema, relevância prática, público-alvo e tempo estimado
     - Você DEVE detalhar TODAS as partes completamente (de 1 até {num_partes})
     - Cada parte deve seguir exatamente a mesma estrutura com o mesmo nível de detalhamento
+    - Para cada parte, CERTIFIQUE-SE de incluir um "Prompt de Instrução:" que contenha perguntas específicas que o usuário possa fazer a uma IA para explorar aquele subtópico
+    - Os prompts de instrução devem ser específicos para cada parte e formulados como perguntas estruturadas
     - NÃO use placeholders ou texto indicando "continuar estrutura para as partes X a Y"
     - NÃO use reticências ou outras indicações para omitir conteúdo
     - Se o tema tiver muitas partes naturais (como os 22 Arcanos do Tarô), certifique-se de detalhar cada um individualmente

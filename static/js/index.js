@@ -425,6 +425,23 @@ function processPartSections(partSections) {
         
         part.content = part.content.trim();
         
+        // Gerar automaticamente um prompt de instrução se não existir
+        if (!part.instructionPrompt) {
+            // Extrair título principal sem "Parte X: "
+            let cleanTitle = part.title.replace(/^Parte \d+:\s*/i, '').trim();
+            
+            // Gerar um prompt estruturado baseado no título e conceitos
+            part.instructionPrompt = `Explique detalhadamente sobre ${cleanTitle}, abordando os seguintes aspectos:${
+                part.concepts.length > 0 
+                ? '\n\n1. ' + part.concepts.slice(0, 5).map(c => `O que é ${c} e qual sua importância?`).join('\n2. ') 
+                : ''
+            }${
+                part.objective 
+                ? '\n\nConsidere o seguinte objetivo de aprendizagem: ' + part.objective 
+                : ''
+            }\n\nForneça exemplos práticos e aplicações no mundo real.`;
+        }
+        
         parts.push(part);
     }
     
@@ -552,8 +569,15 @@ function createPartCard(part, index) {
     // Criar bloco de prompt de instrução se existir
     const instructionPromptBlock = part.instructionPrompt 
         ? `<div class="mt-3 p-3 border-start border-info bg-light">
-               <strong class="text-info" style="font-family: 'Exo 2', sans-serif; font-weight: 600;"><i class="fas fa-question-circle me-1"></i>Prompt de Instrução:</strong> 
-               <p class="mb-0 mt-1">${part.instructionPrompt}</p>
+               <div class="d-flex justify-content-between align-items-start">
+                   <strong class="text-info" style="font-family: 'Exo 2', sans-serif; font-weight: 600;">
+                       <i class="fas fa-robot me-1"></i>Prompt de Instrução
+                   </strong>
+                   <button class="btn btn-sm btn-outline-info copy-prompt" data-prompt="${encodeURIComponent(part.instructionPrompt)}">
+                       <i class="fas fa-copy"></i> Copiar
+                   </button>
+               </div>
+               <pre class="mb-0 mt-2 p-2 bg-white border" style="white-space: pre-wrap; border-radius: 4px;">${part.instructionPrompt}</pre>
            </div>`
         : '';
     
@@ -582,7 +606,7 @@ function createPartCard(part, index) {
             <div class="card-footer bg-light">
                 <div class="mb-2 concepts-container">${conceptBadges}</div>
                 ${part.reflection ? reflectionBlock : ''}
-                ${part.instructionPrompt ? instructionPromptBlock : ''}
+                ${instructionPromptBlock}
             </div>
         </div>
     `;
@@ -733,6 +757,43 @@ function hideLoadingAndCleanup() {
     // Remover elementos temporários
     document.querySelectorAll('.formatted-content, .formatted-content-visible').forEach(el => {
         if (el) el.remove();
+    });
+    
+    // Inicializar comportamentos dos cards
+    initializeCardBehaviors();
+}
+
+/**
+ * Inicializa comportamentos dinâmicos após a criação dos cards
+ */
+function initializeCardBehaviors() {
+    // Adicionar evento para botões de cópia de prompt
+    document.querySelectorAll('.copy-prompt').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const promptText = decodeURIComponent(this.getAttribute('data-prompt'));
+            
+            // Copiar para a área de transferência
+            navigator.clipboard.writeText(promptText)
+                .then(() => {
+                    // Feedback visual temporário
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                    this.classList.remove('btn-outline-info');
+                    this.classList.add('btn-success');
+                    
+                    // Restaurar após 2 segundos
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.classList.remove('btn-success');
+                        this.classList.add('btn-outline-info');
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Erro ao copiar: ', err);
+                    alert('Não foi possível copiar o texto. Por favor, copie manualmente.');
+                });
+        });
     });
 }
 
