@@ -332,8 +332,14 @@ function processPartSections(partSections) {
             }
             
             if (elementText.includes('Conceitos-chave:')) {
+                // Extrair e preparar a string completa de conceitos
                 const conceptsText = elementText.split('Conceitos-chave:')[1].trim();
-                part.concepts = conceptsText.split(',').map(c => c.trim()).filter(c => c);
+                // Dividir conceitos por vírgulas e pontos, tratar cada item individualmente
+                part.concepts = conceptsText
+                    .replace(/\.$/, '') // Remover ponto final
+                    .split(/,\s*|\.\s*/) // Dividir por vírgula ou ponto
+                    .map(c => c.trim())
+                    .filter(c => c && c.length > 0); // Filtrar itens vazios
             }
             
             if (elementText.includes('Pergunta de Reflexão:')) {
@@ -350,6 +356,14 @@ function processPartSections(partSections) {
         if (firstH1 && firstH1.textContent.trim() === part.title) {
             firstH1.remove();
         }
+
+        // Remover TODOS os parágrafos que contenham conceitos-chave, com busca mais abrangente
+        const allParagraphs = tempDiv.querySelectorAll('p');
+        allParagraphs.forEach(paragraph => {
+            if (paragraph.textContent.includes('Conceitos-chave:')) {
+                paragraph.remove();
+            }
+        });
 
         // Remover a pergunta de reflexão do conteúdo
         const reflectionElements = tempDiv.querySelectorAll('strong');
@@ -368,6 +382,19 @@ function processPartSections(partSections) {
         const objectiveElements = tempDiv.querySelectorAll('strong');
         objectiveElements.forEach(el => {
             if (el.textContent.includes('Objetivo de Aprendizagem:')) {
+                let parent = el.parentNode;
+                if (parent.tagName === 'P') {
+                    parent.remove();
+                } else {
+                    el.remove();
+                }
+            }
+        });
+
+        // Remover os conceitos-chave do conteúdo também
+        const conceptElements = tempDiv.querySelectorAll('strong');
+        conceptElements.forEach(el => {
+            if (el.textContent.includes('Conceitos-chave:')) {
                 let parent = el.parentNode;
                 if (parent.tagName === 'P') {
                     parent.remove();
@@ -494,11 +521,10 @@ function createPartCard(part, index) {
     card.className = `${colClass} mb-4`;
     card.id = cardId;
     
-    // Criar badges para conceitos
-    const conceptBadges = part.concepts
-        .slice(0, 3)
-        .map(concept => `<span class="badge bg-light text-success me-1 mb-1">${concept}</span>`)
-        .join('');
+    // Criar badges para TODOS os conceitos-chave sem limitar quantidade
+    const conceptBadges = Array.isArray(part.concepts) && part.concepts.length > 0 
+        ? part.concepts.map(concept => `<span class="badge bg-light text-success me-1 mb-1">${concept}</span>`).join('')
+        : '<span class="badge bg-light text-muted me-1 mb-1">Sem conceitos-chave definidos</span>';
     
     // Criar bloco de reflexão se existir (agora com melhor formatação e posição)
     const reflectionBlock = part.reflection 
@@ -531,7 +557,7 @@ function createPartCard(part, index) {
             </div>
             
             <div class="card-footer bg-light">
-                <div class="mb-2">${conceptBadges}</div>
+                <div class="mb-2 concepts-container">${conceptBadges}</div>
                 ${part.reflection ? reflectionBlock : ''}
             </div>
         </div>
