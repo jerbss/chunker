@@ -760,3 +760,99 @@ main.container {
         font-size: 1rem;
     }
 }
+
+/* Estilização unificada para input-groups - versão melhorada para coesão visual */
+.input-group:focus-within .input-group-text {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(41, 98, 255, 0.25);
+    z-index: 5;
+}
+
+/* Remover os estilos antigos de focus-within para input-groups */
+.input-group:focus-within .input-group-text,
+.input-group:focus-within .form-control,
+.input-group .input-group-text,
+.input-group .form-control:focus {
+    /* Reset dos estilos anteriores que causavam problemas */
+    box-shadow: none;
+    border-radius: initial;
+    border-color: initial;
+    border-left: initial;
+    border-right: initial;
+    margin-right: 0;
+}
+
+/* Novo estilo unificado para input-group com foco */
+.input-group:focus-within {
+    /* Criar um efeito visual único para todo o grupo */
+    outline: none;
+    box-shadow: 0 0 0 0.25rem rgba(41, 98, 255, 0.25);
+    border-radius: var(--border-radius);
+    overflow: hidden; /* Garante que o overflow do efeito fique contido */
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+/* Ajuste para os elementos internos quando o grupo tem foco */
+.input-group:focus-within .input-group-text,
+.input-group:focus-within .form-control {
+    /* Garantir que a borda tenha a mesma cor em ambos os elementos */
+    border-color: var(--primary-color);
+    position: relative;
+    z-index: 2; /* Garantir que os elementos fiquem visíveis */
+}
+
+/* Preservar os estilos específicos do input-group-text */
+.input-group .input-group-text {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+/* Efeito sutil de hover no ícone para melhorar feedback */
+.input-group .input-group-text:hover {
+    background-color: var(--primary-dark);
+    color: white;
+}
+
+/* Garantir que o input e o ícone pareçam uma única unidade */
+.input-group .input-group-text,
+.input-group .form-control {
+    border-top: 1px solid #ced4da;
+    border-bottom: 1px solid #ced4da;
+}
+
+.input-group .input-group-text:first-child {
+    border-left: 1px solid #ced4da;
+    border-right: none;
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+}
+
+.input-group .form-control:last-child {
+    border-right: 1px solid #ced4da;
+    border-left: none;
+    border-top-right-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+/* Tema escuro: ajustar cores de borda para melhor contraste */
+html.dark-theme .input-group .input-group-text,
+html.dark-theme .input-group .form-control {
+    border-color: #444444;
+}
+
+/* Cursor de ponteiro nos ícones para indicar clicabilidade */
+.input-group .input-group-text {
+    cursor: pointer;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.input-group .form-control:focus {
+    border-left: none;
+}
+
+/* Garantir que os elementos pareçam unidos */
+.input-group .input-group-text {
+    margin-right: -1px;
+}
+
+/* ...existing code... */

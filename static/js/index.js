@@ -96,6 +96,17 @@ function setupUIBehaviors() {
             }
         });
     }
+    
+    // Input Group interactions - fazer com que clicar nos ícones ative o input correspondente
+    document.querySelectorAll('.input-group .input-group-text').forEach(icon => {
+        icon.addEventListener('click', function() {
+            // Encontra o input mais próximo dentro do mesmo input-group
+            const input = this.closest('.input-group').querySelector('input');
+            if (input) {
+                input.focus();
+            }
+        });
+    });
 }
 
 /**
