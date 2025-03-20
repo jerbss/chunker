@@ -1348,3 +1348,27 @@ html.light-theme .brand-link:hover .text-accent {
 }
 
 /* ...existing code... */
+
+/* Ajuste de estilo no Footer para melhor UX */
+.footer {
+    background-color: var(--light-bg);
+    border-top: 1px solid #e0e0e0;
+    padding: 2rem 0;           /* maior espaçamento para facilitar o clique */
+    font-size: 0.9rem;         /* texto mais legível */
+    text-align: center;
+    color: var(--text-color);
+    box-shadow: none;          /* removendo sombra para um visual mais clean */
+}
+
+.footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;  /* feedback visual claro */
+}
+
+/* ...existing code... */
