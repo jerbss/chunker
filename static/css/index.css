@@ -667,7 +667,7 @@ main.container {
     letter-spacing: -0.04em;
     margin: 0;
     line-height: 1;
-    color: #ffffff; /* Agora usando a mesma cor do tema escuro */
+    color: #ffffff; /* Mesma cor em ambos os temas */
     text-shadow: 0 1px 1px rgba(0,0,0,0.2);
 }
 
@@ -677,7 +677,7 @@ html.dark-theme .site-title {
 }
 
 .text-accent {
-    color: var(--secondary-color);
+    color: #ff922b; /* Mesma cor em ambos os temas */
     position: relative;
 }
 
@@ -981,11 +981,7 @@ html.dark-theme .brand-link:hover {
 
 /* Destaque mais profissional para o texto principal */
 .brand-link:hover .site-title {
-    color: var(--primary-color);
-}
-
-html.dark-theme .brand-link:hover .site-title {
-    color: var(--primary-light); /* Versão mais clara da cor primária */
+    color: inherit !important;
 }
 
 /* Efeito de ênfase na parte de negócio (chunks) */
@@ -1042,7 +1038,7 @@ html.dark-theme .brand-link:hover .site-title {
     font-size: 1.8rem;
     line-height: 1;
     margin: 0;
-    color: #1a1a2e; /* Cor quase preta para máximo contraste */
+    color: #ffffff; /* Mesma cor em ambos os temas */
     text-shadow: 0 1px 1px rgba(255,255,255,0.2);
 }
 
@@ -1058,7 +1054,7 @@ html.dark-theme .site-title {
     font-weight: 500; /* Mais negrito para melhor contraste */
     opacity: 1; /* Sem transparência para garantir contraste */
     max-width: 260px;
-    color: #333333; /* Cor consistente para ambos os temas */
+    color: #e2e8f0; /* Cor consistente para ambos os temas */
 }
 
 html.dark-theme .site-tagline {
@@ -1066,7 +1062,7 @@ html.dark-theme .site-tagline {
 }
 
 .text-accent {
-    color: #d9480f; /* Cor para tema claro */
+    color: #ff922b; /* Mesma cor em ambos os temas */
     position: relative;
     text-shadow: 0 1px 1px rgba(255,255,255,0.2);
 }
