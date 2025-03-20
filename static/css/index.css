@@ -667,6 +667,13 @@ main.container {
     letter-spacing: -0.04em;
     margin: 0;
     line-height: 1;
+    color: #ffffff; /* Agora usando a mesma cor do tema escuro */
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+
+html.dark-theme .site-title {
+    color: #ffffff; /* Mesma cor - agora igual em ambos os temas */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .text-accent {
@@ -693,6 +700,17 @@ main.container {
     margin-top: 3px;
     font-weight: 300;
     letter-spacing: 0.02em;
+    font-size: 0.87rem;
+    margin: 0;
+    padding-top: 0.3rem;
+    font-weight: 500; 
+    opacity: 1;
+    max-width: 260px;
+    color: #e2e8f0; /* Agora usando a mesma cor do tema escuro */
+}
+
+html.dark-theme .site-tagline {
+    color: #e2e8f0; /* Mesma cor - agora igual em ambos os temas */
 }
 
 /* Status Indicators - Modificados para parecer menos clicáveis */
@@ -925,11 +943,63 @@ html.dark-theme .input-group .form-control {
     gap: 1rem;
     text-decoration: none;
     color: inherit; /* Reset para que herde de elementos filhos específicos */
-    transition: transform 0.2s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+}
+
+.brand-link:hover {
+    background-color: rgba(0,0,0,0.03); /* Sutil destaque de fundo */
+}
+
+html.dark-theme .brand-link:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+/* Efeito de destaque estrutural - simbolizando organização de conhecimento */
+.brand-link:hover::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0.5rem;
+    right: 0.5rem;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    border-radius: 1px;
+}
+
+/* Efeito sutil no logo ao invés de movimento */
+.brand-link:hover .logo-container {
+    box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.4);
+}
+
+/* Remover transformação existente */
+.brand-link:hover {
+    transform: none; /* Remover o translateY anterior */
+}
+
+/* Destaque mais profissional para o texto principal */
+.brand-link:hover .site-title {
+    color: var(--primary-color);
+}
+
+html.dark-theme .brand-link:hover .site-title {
+    color: var(--primary-light); /* Versão mais clara da cor primária */
+}
+
+/* Efeito de ênfase na parte de negócio (chunks) */
+.brand-link:hover .text-accent {
+    transform: scale(1.05);
+    display: inline-block;
 }
 
 .brand-link:hover {
     transform: translateY(-2px);
+}
+
+.brand-link:active {
+    transform: translateY(1px);
 }
 
 .logo-container {
@@ -1194,6 +1264,76 @@ html.dark-theme .status-badge:hover {
     .site-title {
         font-size: 1.4rem;
     }
+}
+
+/* Ajuste do efeito hover para o logo e título - mais consistente com o sistema */
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.25s ease;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    position: relative;
+}
+
+/* Efeito de hover mais sutil e acadêmico - sem movimentação */
+.brand-link:hover {
+    background-color: rgba(0,0,0,0.04); /* Sutil sombreamento de fundo */
+}
+
+html.dark-theme .brand-link:hover {
+    background-color: rgba(255,255,255,0.07);
+}
+
+/* Efeito sutil no logo similar ao botão de submit */
+.brand-link:hover .logo-container {
+    box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.3);
+}
+
+/* Destaque do título principal - consistente com outras interações do sistema */
+.brand-link:hover .site-title {
+    color: var(--primary-color);
+}
+
+html.dark-theme .brand-link:hover .site-title {
+    color: var(--primary-light);
+}
+
+/* Sutil ênfase na parte "ify" - mantendo a coerência com os cards */
+.brand-link:hover .text-accent {
+    color: var(--accent-color);
+}
+
+html.dark-theme .brand-link:hover .text-accent {
+    color: var(--accent-color);
+}
+
+/* Ativo: feedback visual consistente com os botões do sistema */
+.brand-link:active {
+    background-color: rgba(0,0,0,0.08);
+}
+
+html.dark-theme .brand-link:active {
+    background-color: rgba(255,255,255,0.1);
+}
+
+/* Remover transformações existentes conflitantes */
+.brand-link:hover,
+.brand-link:active {
+    transform: none;
+}
+
+/* Removendo efeito de hover no "ify" */
+.brand-link:hover .text-accent {
+    transform: none; /* Removido o efeito de escala */
+    color: inherit; /* Mantém a mesma cor, sem alteração no hover */
+}
+
+html.dark-theme .brand-link:hover .text-accent {
+    color: inherit; /* Mantém a mesma cor, sem alteração no hover */
 }
 
 /* ...existing code... */
