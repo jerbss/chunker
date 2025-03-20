@@ -1333,7 +1333,18 @@ html.dark-theme .brand-link:active {
 }
 
 html.dark-theme .brand-link:hover .text-accent {
+    transform: none; /* Removido o efeito de escala */
     color: inherit; /* Mantém a mesma cor, sem alteração no hover */
+}
+
+/* Remover sublinhado abaixo do "ify" */
+.text-accent:after {
+    content: none; /* Remove o pseudo-elemento */
+}
+
+/* Forçar cor padrão no hover para o "ify" no tema escuro */
+html.dark-theme .brand-link:hover .text-accent {
+    color: #ff922b !important;
 }
 
 /* ...existing code... */
