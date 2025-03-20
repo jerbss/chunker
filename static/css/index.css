@@ -1343,4 +1343,8 @@ html.dark-theme .brand-link:hover .text-accent {
     color: #ff922b !important;
 }
 
+html.light-theme .brand-link:hover .text-accent {
+    color: #ff922b !important;
+}
+
 /* ...existing code... */
