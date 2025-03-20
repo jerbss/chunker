@@ -473,13 +473,47 @@ html.dark-theme .footer {
 }
 
 .footer a {
+    position: relative;
     transition: all 0.2s ease;
     opacity: 0.8;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none !important;
+    color: var(--text-color) !important;
+}
+
+.footer a::after {
+    content: '';
+    position: absolute;
+    width: calc(100% - 20px);
+    height: 2px;
+    bottom: 0;
+    left: 10px;
+    background-color: var(--primary-color);
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease;
 }
 
 .footer a:hover {
     opacity: 1;
-    transform: translateY(-1px);
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.footer a:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+html.dark-theme .footer a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Botões desabilitados no footer */
+.footer a.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 main.container {
@@ -585,6 +619,16 @@ main.container {
     display: flex;
     align-items: center;
     gap: 0.8rem;
+    cursor: pointer; /* Indicador de clique */
+    transition: transform 0.2s ease;
+}
+
+.logo-container:hover {
+    transform: translateY(-2px); /* Leve elevação ao passar o mouse */
+}
+
+.logo-container:active {
+    transform: translateY(1px); /* Efeito de pressionar */
 }
 
 .logo-wrapper {
@@ -651,7 +695,7 @@ main.container {
     letter-spacing: 0.02em;
 }
 
-/* Status Indicators */
+/* Status Indicators - Modificados para parecer menos clicáveis */
 .header-actions {
     display: flex;
     align-items: center;
@@ -673,15 +717,15 @@ main.container {
     font-size: 0.85rem;
     font-weight: 500;
     color: white;
-    transition: all 0.2s ease;
-    cursor: default;
+    cursor: help; /* Cursor de ajuda em vez de ponteiro */
     max-width: 150px;
+    border: 1px solid transparent; /* Borda transparente inicial */
 }
 
+/* Hover mais sutil para indicar que é apenas informativo */
 .status-badge:hover {
-    background-color: rgba(255, 255, 255, 0.25);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .status-badge.is-warning {
@@ -853,6 +897,303 @@ html.dark-theme .input-group .form-control {
 /* Garantir que os elementos pareçam unidos */
 .input-group .input-group-text {
     margin-right: -1px;
+}
+
+/* ========== Header Redesenhado 2.0 ========== */
+.site-header {
+    position: relative;
+    margin-bottom: 3rem;
+    background-color: var(--light-bg);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.header-main {
+    position: relative;
+    padding: 1.2rem 0;
+    z-index: 1;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit; /* Reset para que herde de elementos filhos específicos */
+    transition: transform 0.2s ease;
+}
+
+.brand-link:hover {
+    transform: translateY(-2px);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.logo-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 60%);
+    pointer-events: none;
+}
+
+.logo-icon {
+    font-size: 1.6rem;
+}
+
+.brand-titles {
+    display: flex;
+    flex-direction: column;
+}
+
+.site-title {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 800;
+    font-size: 1.8rem;
+    line-height: 1;
+    margin: 0;
+    color: #1a1a2e; /* Cor quase preta para máximo contraste */
+    text-shadow: 0 1px 1px rgba(255,255,255,0.2);
+}
+
+html.dark-theme .site-title {
+    color: #ffffff; /* Branco para tema escuro */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.site-tagline {
+    font-size: 0.87rem;
+    margin: 0;
+    padding-top: 0.3rem;
+    font-weight: 500; /* Mais negrito para melhor contraste */
+    opacity: 1; /* Sem transparência para garantir contraste */
+    max-width: 260px;
+    color: #333333; /* Cor consistente para ambos os temas */
+}
+
+html.dark-theme .site-tagline {
+    color: #e2e8f0; /* Cinza claro para tema escuro */
+}
+
+.text-accent {
+    color: #d9480f; /* Cor para tema claro */
+    position: relative;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.2);
+}
+
+html.dark-theme .text-accent {
+    color: #ff922b; /* Cor mais clara para tema escuro */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Header Controls */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.theme-mode-switch {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0,0,0,0.05); /* Fundo levemente escuro para contraste com ícone */
+    border-radius: 30px;
+    padding: 0.3rem 0.3rem;
+    border: 1px solid rgba(0,0,0,0.15); /* Aumentado para melhor visibilidade */
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Sombra sutil para destacar do fundo */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efeito de "luz" da lâmpada acesa no tema claro */
+.theme-mode-switch::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: radial-gradient(circle at center, rgba(255, 240, 150, 0.2) 0%, transparent 70%);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+html.dark-theme .theme-mode-switch {
+    border-color: rgba(255,255,255,0.2); /* Aumentado para melhor visibilidade no modo escuro */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    background-color: rgba(255,255,255,0.1);
+}
+
+html.dark-theme .theme-mode-switch::before {
+    opacity: 0; /* Sem "luz" no tema escuro */
+}
+
+.theme-toggle {
+    background-color: transparent;
+    color: #1a1a2e; /* Cor escura para lâmpada acesa */
+    border: none;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+}
+
+html.dark-theme .theme-toggle {
+    color: #ffffff; /* Branco para garantir visibilidade no tema escuro */
+}
+
+.theme-toggle:hover {
+    background-color: rgba(0,0,0,0.08); /* Aumentado para melhor feedback visual */
+    transform: rotate(12deg);
+}
+
+html.dark-theme .theme-toggle:hover {
+    background-color: rgba(255,255,255,0.1); /* Aumentado para melhor visibilidade */
+}
+
+.theme-toggle:active {
+    transform: scale(0.9);
+}
+
+.theme-toggle__lightbulb {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+}
+
+/* Status Indicators - Melhorado contraste sem parecer botões */
+.status-indicators {
+    display: flex;
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--card-bg);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 600; /* Aumentado de 500 para 600 */
+    color: var(--text-color);
+    cursor: help;
+    border: 1px solid rgba(0,0,0,0.2); /* Aumentado contraste da borda */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Adicionada sombra sutil */
+    transition: none; /* Desabilitando transições */
+}
+
+/* Removendo completamente qualquer hover para os badges */
+.status-badge:hover {
+    background-color: var(--card-bg) !important; /* Forçando a mesma cor de fundo */
+    border-color: rgba(0,0,0,0.2) !important; /* Forçando a mesma cor de borda */
+    transform: none !important; /* Sem transformação */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important; /* Mesma sombra */
+}
+
+html.dark-theme .status-badge {
+    border-color: rgba(255,255,255,0.15); /* Maior contraste no modo escuro */
+    background-color: rgba(30, 30, 30, 0.6); /* Fundo mais escuro para contraste no modo escuro */
+}
+
+html.dark-theme .status-badge:hover {
+    background-color: rgba(30, 30, 30, 0.6) !important; /* Forçando a cor original no tema escuro */
+    border-color: rgba(255,255,255,0.15) !important; /* Forçando a cor original no tema escuro */
+}
+
+.status-badge .status-icon {
+    color: var(--primary-color);
+    margin-right: 0.5rem;
+    font-size: 0.85rem; /* Ligeiramente maior que o texto */
+}
+
+.status-badge.is-warning .status-icon {
+    color: var(--accent-color);
+}
+
+/* Animação mais sutil e com melhor contraste para o badge de warning */
+@keyframes pulse-warning {
+    0% { border-color: rgba(255, 107, 53, 0.4); }
+    50% { border-color: rgba(255, 107, 53, 0.7); }
+    100% { border-color: rgba(255, 107, 53, 0.4); }
+}
+
+.status-badge.is-warning {
+    animation: pulse-warning 2s infinite;
+}
+
+/* Responsividade do header */
+@media (max-width: 992px) {
+    .header-main {
+        padding: 1rem 0;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .header-brand {
+        margin-bottom: 0.5rem;
+    }
+    
+    .site-title {
+        font-size: 1.6rem;
+    }
+    
+    .site-tagline {
+        text-align: center;
+        max-width: 100%; /* Permitir que ocupe toda a largura quando centralizado */
+    }
+}
+
+@media (max-width: 576px) {
+    .header-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .status-text {
+        display: none;
+    }
+    
+    .logo-container {
+        width: 42px;
+        height: 42px;
+    }
+    
+    .site-title {
+        font-size: 1.4rem;
+    }
 }
 
 /* ...existing code... */

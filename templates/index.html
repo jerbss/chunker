@@ -20,40 +20,27 @@
     <link rel="stylesheet" href="{% static 'css/theme-toggle.css' %}">
 </head>
 <body class="d-flex flex-column h-100">
-    <!-- Header redesenhado -->
+    <!-- Header redesenhado 2.0 -->
     <header class="site-header">
         <div class="header-main">
             <div class="container">
-                <div class="row align-items-center py-3">
-                    <div class="col-lg-6">
-                        <div class="logo-container">
-                            <div class="logo-wrapper">
-                                <i class="fas fa-cubes logo-icon"></i>
+                <div class="header-content d-flex justify-content-between align-items-center">
+                    <div class="header-brand">
+                        <a href="/" class="brand-link" aria-label="Chunkify Home">
+                            <div class="logo-container">
+                                <i class="fas fa-cubes logo-icon" aria-hidden="true"></i>
                             </div>
-                            <div class="brand-text">
+                            <div class="brand-titles">
                                 <h1 class="site-title animate__animated animate__fadeIn">
                                     Chunk<span class="text-accent">ify</span>
                                 </h1>
                                 <p class="site-tagline">Transforme temas complexos em blocos digestíveis</p>
                             </div>
-                        </div>
+                        </a>
                     </div>
-                    <div class="col-lg-6">
-                        <div class="header-actions">
-                            <div class="status-indicators">
-                                <div class="status-badge" title="Processado com Inteligência Artificial">
-                                    <i class="fas fa-brain status-icon"></i>
-                                    <span class="status-text">IA Avançada</span>
-                                </div>
-                                
-                                {% if used_fallback %}
-                                <div class="status-badge is-warning" title="Utilizando API de fallback">
-                                    <i class="fas fa-exchange-alt status-icon"></i>
-                                    <span class="status-text">Modo Fallback</span>
-                                </div>
-                                {% endif %}
-                            </div>
-                            
+                    
+                    <div class="header-controls">
+                        <div class="theme-mode-switch">
                             <button class="theme-toggle" type="button" title="Alternar tema claro/escuro" aria-label="Alternar tema">
                                 <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="1em" height="1em" class="theme-toggle__lightbulb" stroke-width="0.7" stroke="currentColor" fill="currentColor" stroke-linecap="round" viewBox="0 0 32 32">
                                     <!-- SVG paths unchanged -->
@@ -72,11 +59,26 @@
                                 </svg>
                             </button>
                         </div>
+                        
+                        <div class="status-indicators">
+                            <div class="status-badge" data-bs-toggle="tooltip" data-bs-placement="bottom" 
+                                 title="Este conteúdo é processado usando modelos avançados de IA">
+                                <i class="fas fa-brain status-icon" aria-hidden="true"></i>
+                                <span class="status-text">IA Avançada</span>
+                            </div>
+                            
+                            {% if used_fallback %}
+                            <div class="status-badge is-warning" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                 title="Sistema utilizando API alternativa devido a indisponibilidade da principal">
+                                <i class="fas fa-exchange-alt status-icon" aria-hidden="true"></i>
+                                <span class="status-text">Modo Fallback</span>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="header-accent"></div>
     </header>
 
     <main class="container flex-shrink-0 mt-5">
@@ -193,13 +195,14 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start">
-                    <p class="mb-0">&copy; 2025 Chunkify | Simplificando o aprendizado</p>
+                    <p class="mb-0">&copy; 2025 <a href="/">Chunkify</a> | Simplificando o aprendizado</p>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
-                    <a href="#" class="text-decoration-none text-muted me-3">
+                    <!-- Indicando que o link não está pronto com classe disabled -->
+                    <a href="#" class="disabled me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Em construção">
                         <i class="fas fa-question-circle"></i> Ajuda
                     </a>
-                    <a href="#" class="text-decoration-none text-muted">
+                    <a href="#" class="disabled" data-bs-toggle="tooltip" data-bs-placement="top" title="Em construção">
                         <i class="fas fa-info-circle"></i> Sobre
                     </a>
                 </div>
@@ -219,5 +222,16 @@
     <!-- Custom JS -->
     <script src="{% static 'js/index.js' %}"></script>
     {% endif %}
+    
+    <!-- Inicializar tooltips -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar tooltips do Bootstrap
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+        });
+    </script>
 </body>
 </html>
