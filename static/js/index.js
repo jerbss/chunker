@@ -1149,75 +1149,127 @@ function processFirstStepSection(heading) {
  * Processa a seção "O Que Você Vai Construir"
  */
 function processBuildSection(heading) {
-    // Processar parágrafos que contém fases numeradas
+    // Criar um objeto para rastrear as fases que já foram processadas
+    const processedPhases = {};
+    
+    // Manter referência aos elementos a serem removidos após o processamento
+    const elementsToRemove = [];
+    
+    // Primeiro passo: identificar todas as fases e seus elementos relacionados
     let nextElement = heading.nextElementSibling;
     
     while (nextElement && !nextElement.matches('h2')) {
         // Verificar se é um parágrafo que contém fases
         if (nextElement.tagName === 'P' && 
             (nextElement.textContent.includes('Fase 1') || 
-             nextElement.textContent.includes('1️⃣'))) {
+             nextElement.textContent.includes('1️⃣') ||
+             nextElement.textContent.includes('Fase 2') ||
+             nextElement.textContent.includes('2️⃣'))) {
             
-            // Extrair e formatar o conteúdo da fase
             const content = nextElement.innerHTML;
             
-            // Verificar se o parágrafo contém múltiplas fases (com quebras de linha)
-            if (content.includes('<br>')) {
-                // Dividir em múltiplas fases se houver quebras de linha
-                const phaseBlocks = content.split('<br><br>').filter(block => block.trim());
+            // Determinar qual fase está sendo processada
+            let phaseNumber = null;
+            if (content.includes('Fase 1') || content.includes('1️⃣')) phaseNumber = 1;
+            else if (content.includes('Fase 2') || content.includes('2️⃣')) phaseNumber = 2;
+            else if (content.includes('Fase 3') || content.includes('3️⃣')) phaseNumber = 3;
+            
+            if (phaseNumber) {
+                // Marcar esta fase como encontrada
+                if (!processedPhases[phaseNumber]) {
+                    processedPhases[phaseNumber] = {
+                        title: '',
+                        mainItems: [],
+                        additionalItems: [],
+                        elements: []
+                    };
+                }
                 
-                // Criar um container para todas as fases
-                const phasesContainer = document.createElement('div');
-                phasesContainer.className = 'phases-container';
+                // Adicionar este elemento à lista dessa fase
+                processedPhases[phaseNumber].elements.push(nextElement);
+                elementsToRemove.push(nextElement);
                 
-                // Processar cada bloco de fase
-                phaseBlocks.forEach(phaseBlock => {
-                    // Dividir a fase em título e itens
-                    const phaseLines = phaseBlock.split('<br>');
+                // Extrair o conteúdo desta fase
+                const lines = content.split('<br>');
+                
+                // Se for a primeira vez que encontramos esta fase, extrair o título
+                if (!processedPhases[phaseNumber].title && lines.length > 0) {
+                    processedPhases[phaseNumber].title = lines[0];
                     
-                    if (phaseLines.length > 0) {
-                        const phaseTitle = phaseLines[0];
-                        const phaseItems = phaseLines.slice(1).filter(line => line.trim());
-                        
-                        // Criar container para a fase
-                        const phaseContainer = document.createElement('div');
-                        phaseContainer.className = 'phase-block mb-3';
-                        
-                        // Adicionar título da fase
-                        const titleEl = document.createElement('p');
-                        titleEl.className = 'phase-title mb-2';
-                        titleEl.innerHTML = phaseTitle;
-                        phaseContainer.appendChild(titleEl);
-                        
-                        // Adicionar itens da fase como lista
-                        if (phaseItems.length > 0) {
-                            const ul = document.createElement('ul');
-                            
-                            phaseItems.forEach(item => {
-                                // Limpar itens e remover marcadores
-                                const cleanedItem = item.replace(/^-\s+/, '').trim();
-                                
-                                const li = document.createElement('li');
-                                li.innerHTML = cleanedItem;
-                                ul.appendChild(li);
-                            });
-                            
-                            phaseContainer.appendChild(ul);
-                        }
-                        
-                        phasesContainer.appendChild(phaseContainer);
-                    }
-                });
-                
-                // Substituir o parágrafo original
-                const oldElement = nextElement;
-                nextElement = nextElement.nextElementSibling;
-                oldElement.replaceWith(phasesContainer);
-                continue;
+                    // Extrair os itens principais desta fase (após o título)
+                    const mainItems = lines.slice(1).filter(line => line.trim());
+                    processedPhases[phaseNumber].mainItems.push(...mainItems);
+                } else {
+                    // Se já temos um título para esta fase, todos os itens são adicionais
+                    processedPhases[phaseNumber].additionalItems.push(...lines.filter(line => line.trim()));
+                }
             }
+        }
+        // Verificar se este elemento é uma lista solta que pertence a uma fase anterior
+        else if (nextElement.tagName === 'UL' && Object.keys(processedPhases).length > 0) {
+            // Assumir que esta lista pertence à última fase encontrada
+            const lastPhaseNumber = Math.max(...Object.keys(processedPhases).map(Number));
+            
+            // Adicionar itens desta lista à fase
+            const listItems = Array.from(nextElement.querySelectorAll('li'))
+                .map(li => li.innerHTML);
+            
+            processedPhases[lastPhaseNumber].additionalItems.push(...listItems);
+            elementsToRemove.push(nextElement);
         }
         
         nextElement = nextElement.nextElementSibling;
+    }
+    
+    // Segundo passo: criar os novos elementos estruturados para cada fase
+    const phasesContainer = document.createElement('div');
+    phasesContainer.className = 'phases-container';
+    
+    // Processar cada fase na ordem numérica
+    Object.keys(processedPhases)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .forEach(phaseNumber => {
+            const phase = processedPhases[phaseNumber];
+            
+            // Criar container para a fase
+            const phaseContainer = document.createElement('div');
+            phaseContainer.className = 'phase-block mb-4';
+            
+            // Adicionar título da fase
+            const titleEl = document.createElement('p');
+            titleEl.className = 'phase-title mb-2';
+            titleEl.innerHTML = phase.title;
+            phaseContainer.appendChild(titleEl);
+            
+            // Juntar todos os itens da fase (principais e adicionais)
+            const allItems = [...phase.mainItems, ...phase.additionalItems]
+                .filter(item => item.trim())
+                .map(item => item.replace(/^-\s+/, '').trim());
+            
+            // Adicionar itens da fase como lista única
+            if (allItems.length > 0) {
+                const ul = document.createElement('ul');
+                ul.className = 'phase-items';
+                
+                allItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = item;
+                    ul.appendChild(li);
+                });
+                
+                phaseContainer.appendChild(ul);
+            }
+            
+            phasesContainer.appendChild(phaseContainer);
+        });
+    
+    // Inserir o container de fases após o heading
+    if (Object.keys(processedPhases).length > 0) {
+        heading.after(phasesContainer);
+        
+        // Remover os elementos originais que foram processados
+        elementsToRemove.forEach(el => el.remove());
     }
 }
 
