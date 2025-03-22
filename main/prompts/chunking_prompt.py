@@ -18,16 +18,16 @@ INTRO_SYSTEM_PROMPT = '''
 ## O Que Você Vai Construir:
 [Divisão em blocos progressivos com números concretos e ARTEFATOS VERIFICÁVEIS] Modelo:
 1️⃣ **Fase 1: [Título Temático Concreto] (Parte 1)**: 
-   - Deconstrução de [X] conceitos usando o método "[Nome do Método]"
    - [Artefato específico] com [X] elementos (ex: "Linha do tempo com 5 viradas de estilo")
-   - Desafio: [Ação criativa específica] usando [X] técnicas específicas
-   - [Métrica de domínio] (ex: "Capacidade de classificar 8 exemplos com 80% de precisão")
+   - [Habilidade mensurável específica] com resultado tangível
+   - [Métrica concreta] (ex: "Identificação de 3 músicas-chave do início da carreira")
+   - Mini-desafio: [Ação específica] em [tempo definido] (ex: "Identifique 2 influências musicais em 15 minutos")
 
 2️⃣ **Fase 2: [Título Temático Concreto] (Partes 2-3)**: 
-   - Análise de [X] exemplos com foco em [X] padrões específicos
-   - [Template ou ferramenta] para [ação específica] com [X] variáveis mensuráveis
-   - Projeto: [Criação específica] usando [método ou ferramenta]
-   - [Aumento percentual em competência] (ex: "redução de 40% no tempo de execução")
+   - [Artefato específico] com [X] elementos
+   - [Habilidade mensurável específica] com resultado tangível
+   - [Métrica concreta] (ex: "Classificação das 10 músicas mais populares")
+   - Mini-desafio: [Ação específica] em [tempo definido]
 ...
 
 ## Seu Plano de Ataque Personalizado:
@@ -214,10 +214,13 @@ def generate_prompt(tema, num_partes):
     
     - Para "O Que Você Vai Construir", SEMPRE:
       * Use TÍTULOS TEMÁTICOS CONCRETOS para cada fase (ex: "Anatomia do Sucesso", "DNA Musical")
-      * Para cada fase, liste 3-4 CONQUISTAS MENSURÁVEIS com números específicos
-      * Cada conquista deve ter ARTEFATOS VERIFICÁVEIS (ex: "Linha do tempo com 7 marcos históricos")
-      * Inclua um MINI-DESAFIO PRÁTICO por fase (ex: "Identifique 3 instrumentos em 30s de áudio")
-      * Use MÉTRICAS VERIFICÁVEIS para validação (ex: "Compare com o gabarito da Parte 1")
+      * Para cada fase, liste 3-4 CONQUISTAS MENSURÁVEIS usando traços simples (-)
+      * Cada item deve começar com um traço (-) e NÃO com enumeração ou bullet points
+      * CORRIJA O USO DE SINGULAR/PLURAL:
+        - Para UMA ÚNICA parte, use "**Fase X: [Título] (Parte N)**:" (SINGULAR)
+        - Para MÚLTIPLAS partes, use "**Fase X: [Título] (Partes N-M)**:" (PLURAL)
+        - NUNCA use "Partes X-X" (ex: "Partes 1-1") - isso é incorreto semanticamente
+      * Cada fase deve ter um mini-desafio concreto com tempo específico
     
     - No "Plano de Ataque Personalizado":
       * ESPECIFIQUE EXATAMENTE o conteúdo de cada modo (ex: "Turbo: 15 conceitos + 3 análises")
