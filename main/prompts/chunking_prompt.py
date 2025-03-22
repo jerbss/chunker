@@ -104,7 +104,12 @@ Use a seguinte hierarquia de formatação:
 # PARTES DO GUIA
 Para cada parte, use este formato obrigatório:
 
-# Parte X: [Título Descritivo] → **Título Dinâmico com Verbo**] ([Duração])
+# Parte X: [Verbo + Substantivo] → [Emoji] ([Duração])
+
+Exemplo:
+# Parte 1: Desvendando as Origens → 👶 (1.5h)
+# Parte 2: Analisando a Evolução → 📈 (2h)
+# Parte 3: Explorando o Legado → ⭐ (1.8h)
 
 <!-- METADADOS INSTRUCIONAIS -->
 Dificuldade: [X]/5  
@@ -222,6 +227,13 @@ def generate_prompt(tema, num_partes):
       * Exemplo para música: "Um exercício prático: Liste as 5 músicas iniciais e identifique o tema principal de cada uma"
       * Exemplo para tecnologia: "Um exercício prático: Crie um diagrama simples mostrando os 3 componentes principais e suas conexões"
       * Seja específico sobre o que o usuário deve produzir/criar e como verificar o resultado
+    - Use SEMPRE EXATAMENTE o formato "Parte X: [Verbo + Substantivo] → [Emoji] ([Duração])" para os títulos de cada parte:
+      * O formato deve ser seguido literalmente, incluindo os símbolos "→" e os parênteses na duração
+      * Exemplos corretos: "Parte 1: Desvendando as Origens → 👶 (1.5h)", "Parte 2: Analisando a Evolução → 📈 (3h)"
+      * Escolha emojis relevantes para o conteúdo: 👶 para origens, 📈 para evolução, ⭐ para impacto, etc.
+      * Inclua a duração estimada em horas entre parênteses: (1.5h), (2h), (3h)
+      * Os títulos devem começar com um VERBO no gerúndio seguido de um substantivo (ex: Desvendando Origens, Explorando Conceitos)
+    - ESTE FORMATO É OBRIGATÓRIO e deve ser seguido em todas as partes sem exceção
     """
     
     return f"{CHUNKING_SYSTEM_PROMPT}\n{instrucoes_adicionais}\n\nCrie um guia de estudos completo para o tema \"{tema}\" dividido em {num_partes} partes."

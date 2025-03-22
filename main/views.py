@@ -290,7 +290,8 @@ Use esta formatação:
                         for i in range(1, num_partes + 1):
                             parte_prompt = f"""Crie APENAS a parte {i} de um guia de estudos sobre "{tema}".
 Use esta formatação:
-- Título da parte como Heading 1 (#): "# Parte {i}: [Título Descritivo]"
+- Título da parte como Heading 1 (#): "# Parte {i}: [Verbo + Substantivo] → [Emoji] ([Duração])"
+  Exemplos: "# Parte 1: Desvendando as Origens → 👶 (1.5h)" ou "# Parte 2: Analisando a Evolução → 📈 (2h)"
 - **Objetivo de Aprendizagem:** (1 parágrafo)
 - **Tópicos Principais:** (lista de 3-5 itens com descrições)
 - **Conceitos-chave:** (lista de termos)
