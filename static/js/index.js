@@ -827,40 +827,151 @@ function transformParagraphsToLists() {
     document.querySelectorAll('.card-body p').forEach(paragraph => {
         const text = paragraph.innerHTML;
         
-        // Verificar se o parágrafo contém linhas começando com - ou números seguidos de emoji
-        if ((text.includes('<br>- ') || 
+        // Verificar se o parágrafo contém linhas começando com marcadores de lista
+        if ((text.includes('<br>- ') || text.includes('<br>• ') || 
              text.match(/<br>\d+[\.\):]?\s/) || 
-             text.match(/<br>[\d\u{1F300}-\u{1F6FF}][\.\):]?\s/u))) {
+             text.match(/<br>[\d\u{1F300}-\u{1F6FF}][\.\):]?\s/u) ||
+             text.startsWith('- ') || text.startsWith('• ') ||
+             text.match(/^\d+[\.\):]?\s/))) {
             
             // Dividir o parágrafo por quebras de linha
-            const lines = text.split('<br>');
+            let lines = text.split('<br>');
             
-            // Se há um título ou introdução, mantê-lo separado
-            let title = '';
-            let listItems = lines;
-            
-            // Se a primeira linha não começa com - ou número, é um título
-            if (!lines[0].trim().startsWith('-') && !lines[0].trim().match(/^\d+[\.\):]/)) {
-                title = lines[0];
-                listItems = lines.slice(1);
+            // Se a primeira linha não contém quebra de linha, verificar se já é um item de lista
+            if (!text.startsWith('<br>') && (lines[0].startsWith('- ') || 
+                lines[0].startsWith('• ') || 
+                lines[0].match(/^\d+[\.\):]?\s/))) {
+                // Este parágrafo começa diretamente com um item de lista
+                let title = '';
+                let listItems = lines;
+                
+                // Criar lista HTML
+                processListItems(paragraph, title, listItems);
+                return;
             }
             
-            // Criar o HTML para a lista
-            const listHTML = listItems
-                .filter(line => line.trim())
-                .map(line => {
-                    // Remover o traço inicial e espaços
-                    return `<li>${line.trim().replace(/^-\s+/, '')}</li>`;
-                })
-                .join('');
+            // Verificar se há um título ou introdução
+            let title = '';
+            let listItems = [];
             
-            // Substituir o parágrafo por título + lista
-            if (listHTML) {
-                const newHTML = (title ? `<p>${title}</p>` : '') + `<ul>${listHTML}</ul>`;
-                paragraph.outerHTML = newHTML;
+            // Se a primeira linha não começa com marcador de lista, é um título/introdução
+            if (!lines[0].trim().startsWith('-') && 
+                !lines[0].trim().startsWith('•') && 
+                !lines[0].trim().match(/^\d+[\.\):]/)) {
+                title = lines[0];
+                listItems = lines.slice(1);
+            } else {
+                // Todo o conteúdo é uma lista
+                listItems = lines;
+            }
+            
+            // Processar e substituir o parágrafo
+            processListItems(paragraph, title, listItems);
+        }
+    });
+    
+    // Transformar parágrafos com emojis como marcadores em listas
+    document.querySelectorAll('.card-body p').forEach(paragraph => {
+        const text = paragraph.innerHTML;
+        
+        // Detectar padrões onde emojis são usados como marcadores de lista
+        const emojiListPattern = /^([\u{1F300}-\u{1F6FF}]|[0-9][\.\)]|📊|🔍|⚠️|✅|⏱|🛠|🚀|🔵|🟣|🐢)\s+(.*?)(?:<br>|$)/gmu;
+        
+        if (text.match(emojiListPattern)) {
+            const lines = text.split('<br>');
+            const listItems = [];
+            
+            lines.forEach(line => {
+                if (line.match(emojiListPattern)) {
+                    const matches = line.match(/^([\u{1F300}-\u{1F6FF}]|[0-9][\.\)]|📊|🔍|⚠️|✅|⏱|🛠|🚀|🔵|🟣|🐢)\s+(.*?)$/u);
+                    if (matches && matches.length > 2) {
+                        // Preservar o emoji como parte do item da lista
+                        listItems.push(`<strong>${matches[1]}</strong> ${matches[2]}`);
+                    } else {
+                        listItems.push(line);
+                    }
+                } else if (line.trim()) {
+                    listItems.push(line);
+                }
+            });
+            
+            if (listItems.length > 1) {
+                // Criar uma lista com os itens
+                const ul = document.createElement('ul');
+                ul.className = 'emoji-list'; // Classe especial para estilizar listas com emojis
+                
+                listItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = item;
+                    ul.appendChild(li);
+                });
+                
+                paragraph.replaceWith(ul);
             }
         }
     });
+}
+
+/**
+ * Processa itens de lista e substitui o parágrafo original
+ * @param {HTMLElement} paragraph - O parágrafo a ser substituído
+ * @param {string} title - O título ou introdução (se houver)
+ * @param {Array<string>} listItems - Os itens da lista
+ */
+function processListItems(paragraph, title, listItems) {
+    // Filtrar itens vazios e processá-los
+    const processedItems = listItems
+        .filter(line => line.trim())
+        .map(line => {
+            // Remover o marcador inicial (hífen, ponto, etc) e espaços
+            let processedLine = line.trim();
+            
+            // Padrões de marcadores comuns
+            const markerPatterns = [
+                /^-\s+/, // Hífen
+                /^•\s+/, // Bullet
+                /^\d+[\.\):]?\s+/, // Números com ponto, parêntese ou dois pontos
+                /^[\u{1F300}-\u{1F6FF}]\s+/u // Emojis
+            ];
+            
+            // Remover o marcador mantendo o restante do conteúdo
+            markerPatterns.forEach(pattern => {
+                processedLine = processedLine.replace(pattern, '');
+            });
+            
+            return processedLine;
+        });
+    
+    // Se temos itens para processar
+    if (processedItems.length > 0) {
+        // Criar elementos HTML
+        const container = document.createElement('div');
+        
+        // Adicionar título se existir
+        if (title && title.trim()) {
+            const titlePara = document.createElement('p');
+            titlePara.innerHTML = title.trim();
+            container.appendChild(titlePara);
+        }
+        
+        // Criar a lista
+        const ul = document.createElement('ul');
+        ul.className = 'formatted-list'; // Classe para estilização
+        
+        // Adicionar cada item como um <li>
+        processedItems.forEach(item => {
+            if (item.trim()) {
+                const li = document.createElement('li');
+                li.innerHTML = item;
+                ul.appendChild(li);
+            }
+        });
+        
+        container.appendChild(ul);
+        
+        // Substituir o parágrafo original
+        paragraph.replaceWith(container);
+    }
 }
 
 /**
