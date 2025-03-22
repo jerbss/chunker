@@ -109,6 +109,9 @@ Para cada parte, use este formato obrigatório:
 
 **Mapa da Parte:** (Ícone) [Duração Estimada] | Pré-requisitos: [Lista Curta]
 
+**Progresso Acumulado:** ▰▰▰▰▱ [X]% do core mastery  
+**Conexões com Partes:** → Parte [Y] ([Tema]) ← | → Parte [Z] ([Tema]) →
+
 **Objetivo Transformador:**
 - [1 frase impactante] Ex: "Vai sair desta parte capaz de [ação concreta] mesmo que nunca tenha [contexto] antes"
 
@@ -120,12 +123,19 @@ Para cada parte, use este formato obrigatório:
 🟣 **Núcleo 2:** [Nome + ícone]  
    - [Subtópico aplicado] → Ex: "Criar 5 variações de botão com states combinados"
 
+**Rotas Alternativas:**
+- 🐢 Caminho Seguro: [Versão simplificada para iniciantes]  
+- 🚀 Atalho do Expert: [Otimização para quem já tem experiência]
+
 **Armadilhas Comuns (⚠️ Cuidado!):**
 - [Erro típico] + Solução: Ex: "Evite sobreposição de classes !important → Use cascade layers"
 
 **Checklist de Domínio:**
 - [ ] [Habilidade verificável 1] → Ex: "Criar 2 temas alternativos"  
 - [ ] [Artefato concreto 2] → Ex: "Template de configuração exportado"
+
+**Caso Real #[Número]:**  
+"Como o dev@[Nome] resolveu [problema específico] usando [técnica desta parte] economizando [benefício tangível]"
 
 **Prompt de IA Acionável:**
 ```prompt
@@ -134,8 +144,6 @@ Para cada parte, use este formato obrigatório:
 
 **Desafio Relâmpago:**
 ▶️ Em 15 minutos: [Mini-tarefa com resultado tangível] → Ex: "Modifique o theme 'corporate' para usar espaçamento base de 1.25rem"
-
-IMPORTANTE: TODAS AS PARTES DEVEM SER DETALHADAS COMPLETAMENTE, SEM EXCEÇÃO.
 
 # CONCLUSÃO
 - Heading 1 para a conclusão: "# Conclusão"
