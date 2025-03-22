@@ -103,16 +103,37 @@ Use a seguinte hierarquia de formatação:
 - [Ação verificável] (ex: "um exercício para testar na prática")
 
 # PARTES DO GUIA
-Para cada parte, inclua:
-- Use Heading 1 para o título de cada parte: "# Parte X: [Título Descritivo]"
-- **Objetivo de Aprendizagem:** (1 parágrafo)
-- **Tópicos Principais:**
-  - Tópico 1 com breve descrição
-  - Tópico 2 com breve descrição
-  - Tópico 3 com breve descrição
-- **Conceitos-chave:** Lista de conceitos
-- **Pergunta de Reflexão:** Uma pergunta instigante
-- **Prompt de Instrução:** Um prompt bem estruturado relacionado especificamente a essa parte, que o usuário pode copiar e colar em uma ferramenta de IA para explorar o tema em maior profundidade (2-4 linhas)
+Para cada parte, use este formato obrigatório:
+
+# Parte X: [Título Descritivo] → **Título Dinâmico com Verbo**
+
+**Mapa da Parte:** (Ícone) [Duração Estimada] | Pré-requisitos: [Lista Curta]
+
+**Objetivo Transformador:**
+- [1 frase impactante] Ex: "Vai sair desta parte capaz de [ação concreta] mesmo que nunca tenha [contexto] antes"
+
+**Tópicos Nucleares:**
+🔵 **Núcleo 1:** [Nome + ícone]  
+   - [Subtópico 1 com verbo] → Ex: "Configurar 3 tipos de temas usando preset groups"  
+   - [Subtópico 2] → Ex: "Modificar variáveis CSS com fallback seguro"
+
+🟣 **Núcleo 2:** [Nome + ícone]  
+   - [Subtópico aplicado] → Ex: "Criar 5 variações de botão com states combinados"
+
+**Armadilhas Comuns (⚠️ Cuidado!):**
+- [Erro típico] + Solução: Ex: "Evite sobreposição de classes !important → Use cascade layers"
+
+**Checklist de Domínio:**
+- [ ] [Habilidade verificável 1] → Ex: "Criar 2 temas alternativos"  
+- [ ] [Artefato concreto 2] → Ex: "Template de configuração exportado"
+
+**Prompt de IA Acionável:**
+```prompt
+[Comando específico para ChatGPT/Gemini] Ex: Gere 3 variações de tema para daisyUI usando cores primárias #3B82F6 e #10B981. Formato: JSON com variáveis CSS
+```
+
+**Desafio Relâmpago:**
+▶️ Em 15 minutos: [Mini-tarefa com resultado tangível] → Ex: "Modifique o theme 'corporate' para usar espaçamento base de 1.25rem"
 
 IMPORTANTE: TODAS AS PARTES DEVEM SER DETALHADAS COMPLETAMENTE, SEM EXCEÇÃO.
 
@@ -145,11 +166,14 @@ def generate_prompt(tema, num_partes):
     - Ofereça ferramentas realmente acionáveis no Kit, como templates e checklists específicos
     - No "Primeiro Passo Imediato", foque em conquistas concretas, não apenas aprendizado conceitual
     - Certifique-se de seguir a ESTRUTURA OBRIGATÓRIA para a introdução, adaptando para o tema
+    - Use SEMPRE verbos de ação nos títulos das partes (ex: "Construindo", "Dominando", "Explorando")
+    - Inclua duração estimada realista para cada parte e use ícones relevantes ao tema
+    - As armadilhas comuns devem apresentar problema E solução em formato conciso
+    - O checklist de domínio deve ter itens verificáveis e mensuráveis
+    - Os prompts de IA devem ser específicos para gerar resultados úteis e aplicáveis
     - Você DEVE detalhar TODAS as partes completamente (de 1 até {num_partes})
-    - Cada parte deve seguir exatamente a mesma estrutura com o mesmo nível de detalhamento
-    - Para cada parte, CERTIFIQUE-SE de incluir um "Prompt de Instrução:" bem elaborado
+    - Certifique-se de usar cores diferentes para cada núcleo (🔵 🟣 🟢 🟠)
     - NÃO use placeholders ou texto indicando "continuar estrutura para as partes X a Y"
-    - É ESSENCIAL que você forneça TODAS as partes completas e a conclusão sem truncar conteúdo
     - SEMPRE use a formatação Markdown exatamente como especificada para garantir processamento correto
     """
     
