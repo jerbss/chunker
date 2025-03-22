@@ -815,163 +815,450 @@ function initializeCardBehaviors() {
         });
     });
 
-    // Converter parágrafos com listas em elementos <ul>
-    transformParagraphsToLists();
+    // Converter parágrafos com listas em elementos <ul> e processar seções especiais
+    processAllContentSections();
 }
 
 /**
- * Transforma parágrafos que contêm listas em elementos <ul>
+ * Processa todas as seções de conteúdo nos cards
+ * Abordagem completamente nova para tratar listas e seções especiais
  */
-function transformParagraphsToLists() {
-    // Selecionar todos os parágrafos no conteúdo processado
-    document.querySelectorAll('.card-body p').forEach(paragraph => {
-        const text = paragraph.innerHTML;
+function processAllContentSections() {
+    // Pré-processar conteúdo para garantir consistência
+    cleanupHtmlContent();
+    
+    // Processar todas as seções em ordem específica
+    processMarkdownLists();
+    processSpecialHeadings();
+    processEmojiBullets();
+    processSpecialSections();
+    
+    // Realizar ajustes finais na estrutura HTML
+    finalizeContentStructure();
+}
+
+/**
+ * Limpa o HTML para garantir consistência antes do processamento
+ */
+function cleanupHtmlContent() {
+    // Remover espaços extras e padronizar quebras de linha
+    document.querySelectorAll('.card-body').forEach(cardBody => {
+        // Substituir múltiplas quebras de linha por uma única
+        cardBody.innerHTML = cardBody.innerHTML
+            .replace(/(<br\s*\/?>\s*){2,}/gi, '<br>')
+            .replace(/\s*<br\s*\/?>\s*/gi, '<br>');
         
-        // Verificar se o parágrafo contém linhas começando com marcadores de lista
-        if ((text.includes('<br>- ') || text.includes('<br>• ') || 
-             text.match(/<br>\d+[\.\):]?\s/) || 
-             text.match(/<br>[\d\u{1F300}-\u{1F6FF}][\.\):]?\s/u) ||
-             text.startsWith('- ') || text.startsWith('• ') ||
-             text.match(/^\d+[\.\):]?\s/))) {
+        // Remover quebras de linha no início e fim de parágrafos
+        cardBody.querySelectorAll('p').forEach(p => {
+            p.innerHTML = p.innerHTML
+                .replace(/^(<br\s*\/?>)+|(<br\s*\/?>)+$/g, '')
+                .trim();
             
-            // Dividir o parágrafo por quebras de linha
-            let lines = text.split('<br>');
-            
-            // Se a primeira linha não contém quebra de linha, verificar se já é um item de lista
-            if (!text.startsWith('<br>') && (lines[0].startsWith('- ') || 
-                lines[0].startsWith('• ') || 
-                lines[0].match(/^\d+[\.\):]?\s/))) {
-                // Este parágrafo começa diretamente com um item de lista
-                let title = '';
-                let listItems = lines;
-                
-                // Criar lista HTML
-                processListItems(paragraph, title, listItems);
-                return;
+            // Se o parágrafo estiver vazio após a limpeza, removê-lo
+            if (!p.textContent.trim() && !p.querySelector('img')) {
+                p.remove();
             }
+        });
+    });
+}
+
+/**
+ * Processa listas em formato Markdown (- item ou * item) em todos os parágrafos
+ */
+function processMarkdownLists() {
+    document.querySelectorAll('.card-body p').forEach(paragraph => {
+        const html = paragraph.innerHTML;
+        
+        // Verificar se o parágrafo contém marcadores de lista
+        if (html.includes('<br>- ') || 
+            html.includes('<br>• ') || 
+            html.includes('<br>* ') ||
+            html.match(/<br>\d+[\.\):]/) || 
+            html.startsWith('- ') || 
+            html.startsWith('• ') || 
+            html.startsWith('* ') ||
+            html.match(/^\d+[\.\):]/)) {
             
-            // Verificar se há um título ou introdução
+            // Dividir o conteúdo do parágrafo por quebras de linha
+            const lines = html.split('<br>');
+            
+            // Verificar se a primeira linha é um título
             let title = '';
-            let listItems = [];
+            let items = [];
             
-            // Se a primeira linha não começa com marcador de lista, é um título/introdução
-            if (!lines[0].trim().startsWith('-') && 
+            // Se a primeira linha não começa com marcador, é provavelmente um título
+            if (lines.length > 0 && 
+                !lines[0].trim().startsWith('-') && 
                 !lines[0].trim().startsWith('•') && 
+                !lines[0].trim().startsWith('*') &&
                 !lines[0].trim().match(/^\d+[\.\):]/)) {
                 title = lines[0];
-                listItems = lines.slice(1);
+                items = lines.slice(1);
             } else {
-                // Todo o conteúdo é uma lista
-                listItems = lines;
+                items = lines;
             }
             
-            // Processar e substituir o parágrafo
-            processListItems(paragraph, title, listItems);
-        }
-    });
-    
-    // Transformar parágrafos com emojis como marcadores em listas
-    document.querySelectorAll('.card-body p').forEach(paragraph => {
-        const text = paragraph.innerHTML;
-        
-        // Detectar padrões onde emojis são usados como marcadores de lista
-        const emojiListPattern = /^([\u{1F300}-\u{1F6FF}]|[0-9][\.\)]|📊|🔍|⚠️|✅|⏱|🛠|🚀|🔵|🟣|🐢)\s+(.*?)(?:<br>|$)/gmu;
-        
-        if (text.match(emojiListPattern)) {
-            const lines = text.split('<br>');
-            const listItems = [];
+            // Criar o novo elemento para substituir o parágrafo
+            const container = document.createElement('div');
             
-            lines.forEach(line => {
-                if (line.match(emojiListPattern)) {
-                    const matches = line.match(/^([\u{1F300}-\u{1F6FF}]|[0-9][\.\)]|📊|🔍|⚠️|✅|⏱|🛠|🚀|🔵|🟣|🐢)\s+(.*?)$/u);
-                    if (matches && matches.length > 2) {
-                        // Preservar o emoji como parte do item da lista
-                        listItems.push(`<strong>${matches[1]}</strong> ${matches[2]}`);
-                    } else {
-                        listItems.push(line);
-                    }
-                } else if (line.trim()) {
-                    listItems.push(line);
-                }
-            });
+            // Adicionar o título se existir
+            if (title.trim()) {
+                const titleEl = document.createElement('p');
+                titleEl.innerHTML = title.trim();
+                container.appendChild(titleEl);
+            }
             
-            if (listItems.length > 1) {
-                // Criar uma lista com os itens
-                const ul = document.createElement('ul');
-                ul.className = 'emoji-list'; // Classe especial para estilizar listas com emojis
+            // Filtrar itens vazios
+            items = items.filter(item => item.trim());
+            
+            if (items.length > 0) {
+                // Determinar o tipo de lista (ordenada ou não ordenada)
+                const isOrderedList = items[0].trim().match(/^\d+[\.\):]/);
+                const list = document.createElement(isOrderedList ? 'ol' : 'ul');
                 
-                listItems.forEach(item => {
+                // Adicionar cada item à lista
+                items.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = item;
-                    ul.appendChild(li);
+                    // Remover o marcador do início
+                    li.innerHTML = item.trim()
+                        .replace(/^-\s+/, '')
+                        .replace(/^•\s+/, '')
+                        .replace(/^\*\s+/, '')
+                        .replace(/^\d+[\.\):]\s*/, '');
+                    list.appendChild(li);
                 });
                 
-                paragraph.replaceWith(ul);
+                container.appendChild(list);
             }
+            
+            // Substituir o parágrafo original pelo novo container
+            paragraph.replaceWith(container);
         }
     });
 }
 
 /**
- * Processa itens de lista e substitui o parágrafo original
- * @param {HTMLElement} paragraph - O parágrafo a ser substituído
- * @param {string} title - O título ou introdução (se houver)
- * @param {Array<string>} listItems - Os itens da lista
+ * Processa cabeçalhos especiais - ajustando hierarquia e formatação
  */
-function processListItems(paragraph, title, listItems) {
-    // Filtrar itens vazios e processá-los
-    const processedItems = listItems
-        .filter(line => line.trim())
-        .map(line => {
-            // Remover o marcador inicial (hífen, ponto, etc) e espaços
-            let processedLine = line.trim();
-            
-            // Padrões de marcadores comuns
-            const markerPatterns = [
-                /^-\s+/, // Hífen
-                /^•\s+/, // Bullet
-                /^\d+[\.\):]?\s+/, // Números com ponto, parêntese ou dois pontos
-                /^[\u{1F300}-\u{1F6FF}]\s+/u // Emojis
-            ];
-            
-            // Remover o marcador mantendo o restante do conteúdo
-            markerPatterns.forEach(pattern => {
-                processedLine = processedLine.replace(pattern, '');
-            });
-            
-            return processedLine;
-        });
-    
-    // Se temos itens para processar
-    if (processedItems.length > 0) {
-        // Criar elementos HTML
-        const container = document.createElement('div');
+function processSpecialHeadings() {
+    // Ajustar altura de cabeçalhos h2 em seções específicas
+    document.querySelectorAll('.card-body h2').forEach(heading => {
+        const text = heading.textContent.toLowerCase();
         
-        // Adicionar título se existir
-        if (title && title.trim()) {
-            const titlePara = document.createElement('p');
-            titlePara.innerHTML = title.trim();
-            container.appendChild(titlePara);
+        // Cabeçalhos específicos que devem ter formatação especial
+        if (text.includes('plano de ataque') || 
+            text.includes('por onde começar') || 
+            text.includes('primeiro passo') ||
+            text.includes('o que você vai construir')) {
+            
+            // Destacar visualmente esses cabeçalhos
+            heading.classList.add('section-heading');
+            heading.style.borderBottom = '2px solid var(--primary-color)';
+            heading.style.paddingBottom = '0.5rem';
+            heading.style.marginBottom = '1rem';
+        }
+    });
+}
+
+/**
+ * Processa itens de lista que começam com emojis
+ */
+function processEmojiBullets() {
+    // Regular expression para detectar emojis comuns usados nos roteiros
+    const emojiRegex = /([\u{1F300}-\u{1F6FF}]|[0-9][\.\)]|⏱|🛠|✅|🎯|🤖|🔄|📈|🚀|🐢|1️⃣|2️⃣|3️⃣|4️⃣|5️⃣)/u;
+    
+    document.querySelectorAll('.card-body ul li, .card-body ol li').forEach(item => {
+        const html = item.innerHTML;
+        
+        // Verificar se o item começa com emoji
+        const match = html.match(new RegExp(`^${emojiRegex.source}\\s+`, 'u'));
+        
+        if (match) {
+            // Destacar o emoji e manter o restante do conteúdo
+            const emoji = match[0].trim();
+            const restOfContent = html.slice(match[0].length);
+            
+            // Substituir com o emoji destacado seguido pelo conteúdo
+            item.innerHTML = `<strong style="margin-right: 0.25rem;">${emoji}</strong>${restOfContent}`;
+        }
+    });
+}
+
+/**
+ * Processa seções especiais como "Plano de Ataque Personalizado" e "Primeiro Passo Imediato"
+ */
+function processSpecialSections() {
+    // Identificar seções especiais pelos cabeçalhos
+    document.querySelectorAll('.card-body h2').forEach(heading => {
+        const headingText = heading.textContent.toLowerCase();
+        
+        // Seção "Plano de Ataque Personalizado"
+        if (headingText.includes('plano de ataque')) {
+            processPlanSection(heading);
         }
         
-        // Criar a lista
-        const ul = document.createElement('ul');
-        ul.className = 'formatted-list'; // Classe para estilização
+        // Seção "Primeiro Passo Imediato"
+        if (headingText.includes('primeiro passo')) {
+            processFirstStepSection(heading);
+        }
         
-        // Adicionar cada item como um <li>
-        processedItems.forEach(item => {
-            if (item.trim()) {
-                const li = document.createElement('li');
-                li.innerHTML = item;
-                ul.appendChild(li);
+        // Seção "O Que Você Vai Construir"
+        if (headingText.includes('o que você vai construir')) {
+            processBuildSection(heading);
+        }
+    });
+}
+
+/**
+ * Processa a seção "Plano de Ataque Personalizado"
+ */
+function processPlanSection(heading) {
+    // Encontrar e processar subsections como "Escolha Seu Ritmo" e "Kit Ferramentas"
+    let nextElement = heading.nextElementSibling;
+    
+    while (nextElement && !nextElement.matches('h2')) {
+        const content = nextElement.textContent || '';
+        
+        // Verificar se o elemento contém algum dos subtítulos conhecidos
+        if ((content.includes('Escolha Seu Ritmo') || 
+             content.includes('Kit Ferramentas') || 
+             content.includes('Kit Sob Medida')) && 
+            nextElement.tagName === 'P') {
+            
+            // Converter este parágrafo em um bloco estruturado
+            const paragraphContent = nextElement.innerHTML;
+            
+            // Dividir o conteúdo por quebra de linha para separar título e itens
+            const lines = paragraphContent.split('<br>');
+            
+            if (lines.length > 1) {
+                // Extrair o título (primeira linha)
+                const titleLine = lines[0];
+                const items = lines.slice(1).filter(line => line.trim());
+                
+                // Criar container para a nova estrutura
+                const container = document.createElement('div');
+                container.className = 'special-section mb-3';
+                
+                // Analisar e adicionar o título formatado
+                const titleMatch = titleLine.match(/([\u{1F300}-\u{1F6FF}]|⏱|🛠)\s+\*\*([^*]+)\*\*/u);
+                if (titleMatch) {
+                    const emoji = titleMatch[1];
+                    const titleText = titleMatch[2];
+                    
+                    const titleEl = document.createElement('h3');
+                    titleEl.className = 'h5 d-flex align-items-center';
+                    titleEl.innerHTML = `<span class="me-2">${emoji}</span> ${titleText}`;
+                    container.appendChild(titleEl);
+                } else {
+                    // Caso não consiga extrair emoji e título formatado
+                    const titleEl = document.createElement('h3');
+                    titleEl.className = 'h5';
+                    titleEl.innerHTML = titleLine;
+                    container.appendChild(titleEl);
+                }
+                
+                // Criar a lista de itens
+                if (items.length > 0) {
+                    const ul = document.createElement('ul');
+                    ul.className = 'formatted-list';
+                    
+                    items.forEach(item => {
+                        // Limpar o item, removendo traços iniciais
+                        const cleanedItem = item.replace(/^-\s+/, '').trim();
+                        
+                        const li = document.createElement('li');
+                        li.innerHTML = cleanedItem;
+                        ul.appendChild(li);
+                    });
+                    
+                    container.appendChild(ul);
+                }
+                
+                // Substituir o parágrafo original
+                const oldElement = nextElement;
+                nextElement = nextElement.nextElementSibling;
+                oldElement.replaceWith(container);
+                continue;
             }
-        });
+        }
         
-        container.appendChild(ul);
-        
-        // Substituir o parágrafo original
-        paragraph.replaceWith(container);
+        nextElement = nextElement.nextElementSibling;
     }
+}
+
+/**
+ * Processa a seção "Primeiro Passo Imediato"
+ */
+function processFirstStepSection(heading) {
+    // Procura o parágrafo que contém os itens de primeiro passo
+    let nextElement = heading.nextElementSibling;
+    
+    while (nextElement && !nextElement.matches('h2')) {
+        // Verificar se é um parágrafo que contém item
+        if (nextElement.tagName === 'P' && 
+            (nextElement.innerHTML.includes('- ') || 
+             nextElement.innerHTML.includes('<br>-'))) {
+            
+            // Extrair conteúdo e identificar introdução e itens
+            const content = nextElement.innerHTML;
+            const parts = content.split('<br>-');
+            
+            if (parts.length > 1) {
+                // A primeira parte é a introdução
+                const intro = parts[0].replace(/▶️\s+/, '').trim();
+                const items = parts.slice(1).map(item => item.trim());
+                
+                // Criar container para a nova estrutura
+                const container = document.createElement('div');
+                
+                // Adicionar a introdução se houver
+                if (intro) {
+                    const introEl = document.createElement('p');
+                    introEl.innerHTML = `<strong>▶️</strong> ${intro}`;
+                    container.appendChild(introEl);
+                }
+                
+                // Criar a lista de itens
+                if (items.length > 0) {
+                    const ul = document.createElement('ul');
+                    ul.className = 'formatted-list';
+                    
+                    items.forEach(item => {
+                        const li = document.createElement('li');
+                        li.innerHTML = item;
+                        ul.appendChild(li);
+                    });
+                    
+                    container.appendChild(ul);
+                }
+                
+                // Substituir o parágrafo original
+                const oldElement = nextElement;
+                nextElement = nextElement.nextElementSibling;
+                oldElement.replaceWith(container);
+                continue;
+            }
+        }
+        
+        nextElement = nextElement.nextElementSibling;
+    }
+}
+
+/**
+ * Processa a seção "O Que Você Vai Construir"
+ */
+function processBuildSection(heading) {
+    // Processar parágrafos que contém fases numeradas
+    let nextElement = heading.nextElementSibling;
+    
+    while (nextElement && !nextElement.matches('h2')) {
+        // Verificar se é um parágrafo que contém fases
+        if (nextElement.tagName === 'P' && 
+            (nextElement.textContent.includes('Fase 1') || 
+             nextElement.textContent.includes('1️⃣'))) {
+            
+            // Extrair e formatar o conteúdo da fase
+            const content = nextElement.innerHTML;
+            
+            // Verificar se o parágrafo contém múltiplas fases (com quebras de linha)
+            if (content.includes('<br>')) {
+                // Dividir em múltiplas fases se houver quebras de linha
+                const phaseBlocks = content.split('<br><br>').filter(block => block.trim());
+                
+                // Criar um container para todas as fases
+                const phasesContainer = document.createElement('div');
+                phasesContainer.className = 'phases-container';
+                
+                // Processar cada bloco de fase
+                phaseBlocks.forEach(phaseBlock => {
+                    // Dividir a fase em título e itens
+                    const phaseLines = phaseBlock.split('<br>');
+                    
+                    if (phaseLines.length > 0) {
+                        const phaseTitle = phaseLines[0];
+                        const phaseItems = phaseLines.slice(1).filter(line => line.trim());
+                        
+                        // Criar container para a fase
+                        const phaseContainer = document.createElement('div');
+                        phaseContainer.className = 'phase-block mb-3';
+                        
+                        // Adicionar título da fase
+                        const titleEl = document.createElement('p');
+                        titleEl.className = 'phase-title mb-2';
+                        titleEl.innerHTML = phaseTitle;
+                        phaseContainer.appendChild(titleEl);
+                        
+                        // Adicionar itens da fase como lista
+                        if (phaseItems.length > 0) {
+                            const ul = document.createElement('ul');
+                            
+                            phaseItems.forEach(item => {
+                                // Limpar itens e remover marcadores
+                                const cleanedItem = item.replace(/^-\s+/, '').trim();
+                                
+                                const li = document.createElement('li');
+                                li.innerHTML = cleanedItem;
+                                ul.appendChild(li);
+                            });
+                            
+                            phaseContainer.appendChild(ul);
+                        }
+                        
+                        phasesContainer.appendChild(phaseContainer);
+                    }
+                });
+                
+                // Substituir o parágrafo original
+                const oldElement = nextElement;
+                nextElement = nextElement.nextElementSibling;
+                oldElement.replaceWith(phasesContainer);
+                continue;
+            }
+        }
+        
+        nextElement = nextElement.nextElementSibling;
+    }
+}
+
+/**
+ * Realiza ajustes finais na estrutura HTML
+ */
+function finalizeContentStructure() {
+    // Aplicar classes de estilo específicas para melhorar a aparência
+    
+    // Estilizar listas formatadas
+    document.querySelectorAll('.formatted-list').forEach(list => {
+        list.classList.add('mb-3');
+    });
+    
+    // Estilizar títulos de fase
+    document.querySelectorAll('.phase-title').forEach(title => {
+        title.style.fontWeight = '600';
+        title.style.color = 'var(--secondary-color)';
+    });
+    
+    // Garantir que todos os emojis tenham destaque visual consistente
+    document.querySelectorAll('.card-body li').forEach(item => {
+        // Se o item tem conteúdo começando com emoji mas não foi processado
+        const content = item.innerHTML;
+        const emojiMatch = content.match(/^([\u{1F300}-\u{1F6FF}]|[0-9][\.\)]|⏱|🛠|✅|🎯|🤖|🔄|📈|🚀|🐢|1️⃣|2️⃣|3️⃣|4️⃣|5️⃣)\s+/u);
+        
+        if (emojiMatch && !content.includes('<strong>')) {
+            const emoji = emojiMatch[1];
+            const restContent = content.slice(emojiMatch[0].length);
+            item.innerHTML = `<strong style="margin-right: 0.25rem;">${emoji}</strong> ${restContent}`;
+        }
+    });
+    
+    // Aplicar estilos para tornar os emojis mais visíveis
+    document.querySelectorAll('.card-body strong').forEach(strong => {
+        if (strong.textContent.match(/^[\u{1F300}-\u{1F6FF}]|⏱|🛠|✅|🎯|🤖|🔄|📈|🚀|🐢|1️⃣|2️⃣|3️⃣|4️⃣|5️⃣$/u)) {
+            strong.style.fontSize = '1.1em';
+            strong.style.display = 'inline-block';
+            strong.style.minWidth = '1.5em';
+        }
+    });
 }
 
 /**
