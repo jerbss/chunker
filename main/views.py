@@ -112,6 +112,7 @@ def test_gemini(request):
             def process_with_gemini():
                 nonlocal result
                 nonlocal use_gemini_fallback  # Importante: acessar a variável do escopo externo
+                nonlocal html_result  # Precisamos acessar html_result também
                 logger.info("Usando API Gemini como fallback")
                 use_gemini_fallback = True  # Atualizar a flag
                 
@@ -125,11 +126,35 @@ def test_gemini(request):
                 gemini_response = gemini_model.generate_content(prompt)
                 
                 # Verificar se a resposta foi gerada com sucesso
-                if gemini_response and hasattr(gemini_response, 'text'):
+                if (gemini_response and hasattr(gemini_response, 'text')):
                     result = gemini_response.text
                     logger.info(f"Resposta recebida do Gemini com {len(result) if result else 0} caracteres")
+                    
+                    # Converter markdown para HTML logo após obter o resultado
+                    try:
+                        html_result = mark_safe(markdown.markdown(
+                            result, 
+                            extensions=['extra', 'fenced_code', 'tables', 'nl2br', 'sane_lists']
+                        ))
+                    except Exception as md_error:
+                        logger.error(f"Erro na conversão Markdown: {str(md_error)}")
+                        raise Exception("Erro ao processar resposta do Gemini")
                 else:
                     raise Exception("Resposta inválida do Gemini.")
+                
+                # Retornar para a view principal com o resultado processado
+                context = {
+                    'result': result,
+                    'html_result': html_result,
+                    'error': None,
+                    'tema': tema,
+                    'num_partes': num_partes,
+                    'has_content': bool(html_result),
+                    'app_title': 'Chunkify',
+                    'used_fallback': use_gemini_fallback
+                }
+                
+                return render(request, 'index.html', context)
             
             # Prepara o prompt baseado no número de partes
             if num_partes > 10:
@@ -166,7 +191,7 @@ Use esta formatação:
                 
                 try:
                     if use_gemini_fallback or not zuki_client:
-                        process_with_gemini()
+                        return process_with_gemini()  # Importante: retornar a resposta diretamente
                     else:
                         # Gerar as três partes usando Zuki
                         response1 = zuki_client.chat.completions.create(
@@ -202,20 +227,15 @@ Use esta formatação:
                     
                     # Determinar o tipo de erro para uma mensagem mais informativa
                     error_msg = str(api_error).lower()
-                    if "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
+                    if "502: bad gateway" in error_msg:
+                        logger.warning("Zuki API retornou 'Bad Gateway'. Tentando fallback para Gemini.")
+                        use_gemini_fallback = True
+                        return process_with_gemini()  # Importante: retornar a resposta diretamente
+                    elif "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
                         # Tentar fallback para Gemini
                         logger.info("Detectado erro de créditos insuficientes, tentando fallback para Gemini")
-                        try:
-                            use_gemini_fallback = True
-                            process_with_gemini()
-                        except Exception as gemini_error:
-                            logger.error(f"Gemini API Error: {str(gemini_error)}")
-                            error = "Créditos insuficientes e o fallback também falhou. Por favor, tente novamente mais tarde."
-                            return render(request, 'index.html', {
-                                'error': error,
-                                'tema': tema,
-                                'num_partes': num_partes
-                            })
+                        use_gemini_fallback = True
+                        return process_with_gemini()  # Importante: retornar a resposta diretamente
                     elif "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
                         error = "O tema foi bloqueado pelo filtro de conteúdo da API. Por favor, tente outro tema."
                     elif "rate limit" in error_msg or "quota" in error_msg:
@@ -247,7 +267,7 @@ Use esta formatação:
                 # Para temas complexos, vamos gerar cada parte separadamente para garantir completude
                 try:
                     if use_gemini_fallback or not zuki_client:
-                        process_with_gemini()
+                        return process_with_gemini()  # Importante: retornar a resposta diretamente
                     else:
                         # Gerar introdução usando Zuki
                         intro_prompt = f"""Crie apenas a introdução para um guia de estudos sobre "{tema}" em {num_partes} partes.
@@ -309,20 +329,15 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                     
                     # Determinar o tipo de erro para uma mensagem mais informativa
                     error_msg = str(api_error).lower()
-                    if "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
+                    if "502: bad gateway" in error_msg:
+                        logger.warning("Zuki API retornou 'Bad Gateway'. Tentando fallback para Gemini.")
+                        use_gemini_fallback = True
+                        return process_with_gemini()  # Importante: retornar a resposta diretamente
+                    elif "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
                         # Tentar fallback para Gemini
                         logger.info("Detectado erro de créditos insuficientes, tentando fallback para Gemini")
-                        try:
-                            use_gemini_fallback = True
-                            process_with_gemini()
-                        except Exception as gemini_error:
-                            logger.error(f"Gemini API Error: {str(gemini_error)}")
-                            error = "Créditos insuficientes e o fallback também falhou. Por favor, tente novamente mais tarde."
-                            return render(request, 'index.html', {
-                                'error': error,
-                                'tema': tema,
-                                'num_partes': num_partes
-                            })
+                        use_gemini_fallback = True
+                        return process_with_gemini()  # Importante: retornar a resposta diretamente
                     elif "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
                         error = "O tema foi bloqueado pelo filtro de conteúdo da API. Por favor, tente outro tema."
                     elif "rate limit" in error_msg or "quota" in error_msg:
@@ -355,7 +370,7 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                     logger.info(f"Enviando prompt para a API: tema='{tema}', num_partes={num_partes}")
                     
                     if use_gemini_fallback or not zuki_client:
-                        process_with_gemini()
+                        return process_with_gemini()  # Importante: retornar a resposta diretamente
                     else:
                         # Usar Zuki
                         response = zuki_client.chat.completions.create(
@@ -375,20 +390,15 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                     
                     # Determinar o tipo de erro para uma mensagem mais informativa
                     error_msg = str(api_error).lower()
-                    if "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
+                    if "502: bad gateway" in error_msg:
+                        logger.warning("Zuki API retornou 'Bad Gateway'. Tentando fallback para Gemini.")
+                        use_gemini_fallback = True
+                        return process_with_gemini()  # Importante: retornar a resposta diretamente
+                    elif "insufficient credits" in error_msg or ("credits" in error_msg and "available" in error_msg):
                         # Tentar fallback para Gemini
                         logger.info("Detectado erro de créditos insuficientes, tentando fallback para Gemini")
-                        try:
-                            use_gemini_fallback = True
-                            process_with_gemini()
-                        except Exception as gemini_error:
-                            logger.error(f"Gemini API Error: {str(gemini_error)}")
-                            error = "Créditos insuficientes e o fallback também falhou. Por favor, tente novamente mais tarde."
-                            return render(request, 'index.html', {
-                                'error': error,
-                                'tema': tema,
-                                'num_partes': num_partes
-                            })
+                        use_gemini_fallback = True
+                        return process_with_gemini()  # Importante: retornar a resposta diretamente
                     elif "content filter" in error_msg or "blocked" in error_msg or "safety" in error_msg:
                         error = "O tema foi bloqueado pelo filtro de conteúdo da API. Por favor, tente outro tema."
                     elif "rate limit" in error_msg or "quota" in error_msg:
@@ -411,7 +421,10 @@ Sintetize a progressão do conhecimento através das partes e explique como elas
                         return render(request, 'index.html', {
                             'error': error,
                             'tema': tema,
-                            'num_partes': num_partes
+                            'num_partes': num_partes,
+                            'has_content': False,
+                            'app_title': 'Chunkify',
+                            'used_fallback': use_gemini_fallback
                         })
             
             # Converter markdown para HTML
