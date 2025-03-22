@@ -214,8 +214,11 @@ def generate_prompt(tema, num_partes):
     
     - Para "O Que Você Vai Construir", SEMPRE:
       * Use TÍTULOS TEMÁTICOS CONCRETOS para cada fase (ex: "Anatomia do Sucesso", "DNA Musical")
-      * Para cada fase, liste 3-4 CONQUISTAS MENSURÁVEIS usando traços simples (-)
-      * Cada item deve começar com um traço (-) e NÃO com enumeração ou bullet points
+      * Para cada fase, liste 3-4 CONQUISTAS MENSURÁVEIS com FORMATAÇÃO MARKDOWN CORRETA:
+        - Certifique-se de incluir uma QUEBRA DE LINHA após os dois pontos que finalizam o título da fase
+        - Use HÍFEN com ESPAÇO antes de cada item (ex: "- Identificar as 3 principais...", NÃO "-Identificar...")
+        - Deixe UMA LINHA EM BRANCO entre a descrição da fase e a primeira linha de itens
+        - Cada item deve ocupar uma ÚNICA LINHA, não quebre o texto de um item em múltiplas linhas
       * CORRIJA O USO DE SINGULAR/PLURAL:
         - Para UMA ÚNICA parte, use "**Fase X: [Título] (Parte N)**:" (SINGULAR)
         - Para MÚLTIPLAS partes, use "**Fase X: [Título] (Partes N-M)**:" (PLURAL)
@@ -223,21 +226,27 @@ def generate_prompt(tema, num_partes):
       * Cada fase deve ter um mini-desafio concreto com tempo específico
     
     - No "Plano de Ataque Personalizado":
-      * ESPECIFIQUE EXATAMENTE o conteúdo de cada modo (ex: "Turbo: 15 conceitos + 3 análises")
-      * Liste recursos do kit com NÚMEROS PRECISOS (ex: "Teste com 12 perguntas", "Checklist com 5 armadilhas")
-      * Forneça EXEMPLOS COMPLETOS E ESPECÍFICOS de prompts de IA (ex: "Compare 2 músicas usando a) Estrutura b) Instrumentação c) Receptividade")
+      * Formatação CORRETA para o "Escolha Seu Ritmo":
+        - Use HÍFEN com ESPAÇO para cada modo (ex: "- 🚀 Modo Turbo: 3h total...")
+        - QUEBRA DE LINHA entre cada modo de ritmo
+      * Formatação CORRETA para o "Kit Sob Medida":
+        - Use HÍFEN com ESPAÇO para cada item (ex: "- 🔍 Teste: "Quiz de Nivelamento"...")
+        - QUEBRA DE LINHA entre cada item do kit
+        - NÃO use parágrafos dentro dos itens de lista
     
     - Em "Primeiro Passo Imediato":
-      * Especifique TEMPO EXATO (ex: "Nos primeiros 40 minutos")
-      * Liste 3 AÇÕES CONCRETAS com VERBO + OBJETO DIRETO (ex: "Identifique 2 padrões melódicos")
-      * Inclua CRITÉRIO DE SUCESSO CLARO para cada ação (ex: "Compare com o gabarito da Parte 1")
-      * Adicione uma forma de AUTOAVALIAÇÃO QUANTIFICADA (ex: "Use o Termômetro do Iniciante (1-5)")
+      * Formatação CORRETA para as ações:
+        - Use HÍFEN com ESPAÇO para cada ação (ex: "- Identificar os 3 membros originais...")
+        - QUEBRA DE LINHA entre cada ação
+        - NÃO use parágrafos dentro dos itens de lista
     
-    - Para todo o conteúdo da introdução:
-      * PROGRESSÃO CLARA: Mostre aumento gradual em complexidade (Identificar → Analisar → Criar)
-      * VALIDAÇÃO INTEGRADA: Inclua mecanismos de autoavaliação em cada etapa
-      * ESPECIFICIDADE NUMÉRICA: Todo dado citado deve ter número/percentual
-      * AÇÃO IMEDIATA: Cada seção deve terminar com tarefa executável em menos de 1 hora
+    - IMPORTANTE para TODAS as LISTAS:
+      * SEMPRE use o formato Markdown correto: HÍFEN seguido de ESPAÇO e depois o conteúdo
+      * Exemplo correto: "- Este é um item de lista"
+      * Exemplo INCORRETO: "-Este é um item de lista" (sem espaço após o hífen)
+      * NUNCA use números como marcadores de lista no lugar de hífens
+      * NUNCA use asteriscos (*) no lugar de hífens (-)
+      * NUNCA use parágrafos de múltiplas linhas dentro de itens de lista
     """
     
     return f"{CHUNKING_SYSTEM_PROMPT}\n{instrucoes_adicionais}\n\nCrie um guia de estudos completo para o tema \"{tema}\" dividido em {num_partes} partes."
