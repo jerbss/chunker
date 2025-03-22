@@ -107,10 +107,20 @@ Para cada parte, use este formato obrigatório:
 
 # Parte X: [Título Descritivo] → **Título Dinâmico com Verbo**
 
+<!-- METADADOS INSTRUCIONAIS -->
+Dificuldade: [X]/5  
+Taxonomia de Bloom: [Nível - Lembrar/Entender/Aplicar/Analisar/Avaliar/Criar]  
+Estilo de Aprendizado: [Perfil - Visual/Auditivo/Leitura/Cinestésico]  
+Pré-requisitos Técnicos: [Lista de habilidades/ferramentas necessárias]
+
 **Mapa da Parte:** (Ícone) [Duração Estimada] | Pré-requisitos: [Lista Curta]
 
 **Progresso Acumulado:** ▰▰▰▰▱ [X]% do core mastery  
 **Conexões com Partes:** → Parte [Y] ([Tema]) ← | → Parte [Z] ([Tema]) →
+
+**Árvore de Conhecimento:**  
+├── ◉ [Porcentagem]% conteúdo novo  
+└── ◼ [Porcentagem]% reforço partes [X-Y]
 
 **Objetivo Transformador:**
 - [1 frase impactante] Ex: "Vai sair desta parte capaz de [ação concreta] mesmo que nunca tenha [contexto] antes"
