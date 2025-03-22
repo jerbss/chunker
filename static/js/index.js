@@ -861,6 +861,37 @@ function transformParagraphsToLists() {
             }
         }
     });
+    
+    // Remover parágrafos vazios entre listas e fases
+    cleanEmptyParagraphs();
+}
+
+/**
+ * Remove parágrafos vazios que aparecem após listas e antes de fases
+ */
+function cleanEmptyParagraphs() {
+    // Selecionar todos os elementos ul
+    document.querySelectorAll('.card-body ul').forEach(ul => {
+        // Verificar o próximo elemento após a lista
+        let nextElement = ul.nextElementSibling;
+        
+        // Se for um parágrafo vazio ou que só contém <br>
+        if (nextElement && nextElement.tagName === 'P' && 
+            (nextElement.innerHTML.trim() === '' || 
+             nextElement.innerHTML.trim() === '<br>' || 
+             nextElement.innerHTML.trim() === '&nbsp;')) {
+            
+            // Verificar se o próximo elemento após o parágrafo contém uma fase
+            const nextAfterEmpty = nextElement.nextElementSibling;
+            if (nextAfterEmpty && nextAfterEmpty.tagName === 'P' && 
+                (nextAfterEmpty.innerHTML.includes('Fase') || 
+                 nextAfterEmpty.innerHTML.match(/\d+[️⃣]?\s*<strong>/))) {
+                
+                // Remover o parágrafo vazio
+                nextElement.remove();
+            }
+        }
+    });
 }
 
 /**
