@@ -233,7 +233,18 @@ def generate_prompt(tema, num_partes):
       * Escolha emojis relevantes para o conteúdo: 👶 para origens, 📈 para evolução, ⭐ para impacto, etc.
       * Inclua a duração estimada em horas entre parênteses: (1.5h), (2h), (3h)
       * Os títulos devem começar com um VERBO no gerúndio seguido de um substantivo (ex: Desvendando Origens, Explorando Conceitos)
-    - ESTE FORMATO É OBRIGATÓRIO e deve ser seguido em todas as partes sem exceção
+    - Para "O Que Você Vai Construir", SEMPRE use títulos temáticos e descritivos para cada fase:
+      * Exemplos de bons títulos: "Raízes e Ascensão", "Consolidação e Evolução", "Legado e Impacto", "Fundamentos Estruturais"
+      * Evite títulos genéricos como "Fase Inicial", "Fase Intermediária", "Fase Avançada"
+      * Cada título deve capturar a essência temática do conteúdo daquela fase
+      * SEMPRE use o formato CORRETO para numeração de partes:
+        - Para UMA ÚNICA parte, use: "1️⃣ **Fase 1: [Título Descritivo] (Parte 1)**:" (SINGULAR)
+        - Para MÚLTIPLAS partes, use: "2️⃣ **Fase 2: [Título Descritivo] (Partes 2-3)**:" (PLURAL)
+      * NUNCA use "Partes X-X" quando se refere a uma única parte (ex: "Partes 1-1") - isso é incorreto
+      * Exemplo correto para 3 partes: 
+        "1️⃣ **Fase 1: Raízes e Ascensão (Parte 1)**: Domínio das 8 músicas fundamentais..."
+        "2️⃣ **Fase 2: Consolidação e Evolução (Parte 2)**: Análise de 5 álbuns-chave..."
+        "3️⃣ **Fase 3: Legado e Impacto (Parte 3)**: Compreensão das 6 principais influências..."
     """
     
     return f"{CHUNKING_SYSTEM_PROMPT}\n{instrucoes_adicionais}\n\nCrie um guia de estudos completo para o tema \"{tema}\" dividido em {num_partes} partes."
