@@ -6,7 +6,7 @@ INTRO_SYSTEM_PROMPT = '''
 ## ESTRUTURA OBRIGATÓRIA:
 
 ```markdown
-# [TEMA] em [NÚMERO] Partes: [Subtítulo Específico - evite repetir "do zero"]
+# [TEMA] em [NÚMERO] Partes: Seu Mapa para Dominar [TEMA] do Zero
 
 ## Por Onde Começar?
 [3 bullets pessoais usando "você" com problemas específicos] Exemplo:
@@ -105,7 +105,7 @@ Use a seguinte hierarquia de formatação:
 # PARTES DO GUIA
 Para cada parte, use este formato obrigatório:
 
-# Parte X: [Título Descritivo] → **Título Dinâmico com Verbo**
+# Parte X: [Título Descritivo] → **Título Dinâmico com Verbo**] ([Duração])
 
 <!-- METADADOS INSTRUCIONAIS -->
 Dificuldade: [X]/5  
@@ -184,8 +184,9 @@ def generate_prompt(tema, num_partes):
     - Ofereça ferramentas realmente acionáveis no Kit, como templates e checklists específicos
     - No "Primeiro Passo Imediato", foque em conquistas concretas, não apenas aprendizado conceitual
     - Certifique-se de seguir a ESTRUTURA OBRIGATÓRIA para a introdução, adaptando para o tema
-    - Use SEMPRE verbos de ação nos títulos das partes (ex: "Construindo", "Dominando", "Explorando")
-    - Inclua duração estimada realista para cada parte e use ícones relevantes ao tema
+    - Use SEMPRE o formato "Parte X: [Verbo + Substantivo] → [Emoji] ([Duração])" para os títulos (ex: "Parte 1: Configurando Ambiente → ⚙️ (1.5h)")
+    - Escolha emojis que se adequem ao conteúdo de cada parte (⚙️ para configuração, 🧱 para componentes, etc.)
+    - Inclua duração estimada realista para cada parte (geralmente 1.5h a 2h por parte)
     - As armadilhas comuns devem apresentar problema E solução em formato conciso
     - O checklist de domínio deve ter itens verificáveis e mensuráveis
     - Os prompts de IA devem ser específicos para gerar resultados úteis e aplicáveis
