@@ -814,6 +814,53 @@ function initializeCardBehaviors() {
                 });
         });
     });
+
+    // Converter parágrafos com listas em elementos <ul>
+    transformParagraphsToLists();
+}
+
+/**
+ * Transforma parágrafos que contêm listas em elementos <ul>
+ */
+function transformParagraphsToLists() {
+    // Selecionar todos os parágrafos no conteúdo processado
+    document.querySelectorAll('.card-body p').forEach(paragraph => {
+        const text = paragraph.innerHTML;
+        
+        // Verificar se o parágrafo contém linhas começando com - ou números seguidos de emoji
+        if ((text.includes('<br>- ') || 
+             text.match(/<br>\d+[\.\):]?\s/) || 
+             text.match(/<br>[\d\u{1F300}-\u{1F6FF}][\.\):]?\s/u))) {
+            
+            // Dividir o parágrafo por quebras de linha
+            const lines = text.split('<br>');
+            
+            // Se há um título ou introdução, mantê-lo separado
+            let title = '';
+            let listItems = lines;
+            
+            // Se a primeira linha não começa com - ou número, é um título
+            if (!lines[0].trim().startsWith('-') && !lines[0].trim().match(/^\d+[\.\):]/)) {
+                title = lines[0];
+                listItems = lines.slice(1);
+            }
+            
+            // Criar o HTML para a lista
+            const listHTML = listItems
+                .filter(line => line.trim())
+                .map(line => {
+                    // Remover o traço inicial e espaços
+                    return `<li>${line.trim().replace(/^-\s+/, '')}</li>`;
+                })
+                .join('');
+            
+            // Substituir o parágrafo por título + lista
+            if (listHTML) {
+                const newHTML = (title ? `<p>${title}</p>` : '') + `<ul>${listHTML}</ul>`;
+                paragraph.outerHTML = newHTML;
+            }
+        }
+    });
 }
 
 /**
