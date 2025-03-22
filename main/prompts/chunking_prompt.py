@@ -15,14 +15,16 @@ INTRO_SYSTEM_PROMPT = '''
 - Precisa [objetivo aspiracional específico], mesmo começando do zero?
 
 ## O Que Você Vai Construir:
-[Divisão em blocos progressivos com números concretos] Modelo:
-1️⃣ **[Nome Concreto da Fase]** (Partes 1-X):  
+[Divisão em blocos progressivos com números concretos e métricas mensuráveis] Modelo:
+1️⃣ **Fase 1: [Nome Concreto da Fase] (Parte 1)**: 
    - [Número específico] de conceitos que explicam [porcentagem/maioria] do tema
-   - [Habilidade mensurável específica]
+   - [Habilidade mensurável específica] com [X%] de domínio após conclusão
+   - [Métrica concreta] (ex: "75% da história da banda coberta", "8 dos 10 padrões fundamentais")
 
-2️⃣ **[Nome Concreto da Fase]** (Partes X-Y):  
+2️⃣ **Fase 2: [Nome Concreto da Fase] (Partes 2-3)**: 
    - [Habilidade técnica específica com resultado tangível]
-   - [Ferramenta ou método prático]
+   - [Ferramenta ou método prático] com [nível ou valor mensurável]
+   - [Aumento percentual em competência/eficiência] (ex: "redução de 40% no tempo de execução")
 ...
 
 ## Seu Plano de Ataque Personalizado:
@@ -33,22 +35,15 @@ INTRO_SYSTEM_PROMPT = '''
 🛠 **Kit Sob Medida:**
 - 🔍 Teste: "[Nome específico do teste]" (com resultados acionáveis)
 - 📋 Checklist de [número específico] pontos essenciais
-- 🤖 Guia para [tarefa prática] passo a passo
+- 🤖 Prompts de IA: "[Exemplo concreto específico do tema]" (ex: "Gere uma análise das 5 músicas mais românticas do Sorriso Maroto")
 - 📊 Template de [ferramenta prática] personalizável
+- 📈 Placar de Progresso: Rastreie seu avanço com [X] métricas concretas por parte
 
 ## Primeiro Passo Imediato:
 ▶️ Na **Parte 1**, em [tempo específico] você vai:
 - [Realização concreta #1] usando [método específico]
 - [Realização concreta #2] com [resultado demonstrável]
 - [Ação prática] em uma situação real de [contexto aplicado]
-```
-
-## REGRAS DE CONTEÚDO:
-1. SEMPRE use números específicos (7 regras, 15 passos, 90% dos casos) para aumentar credibilidade
-2. Cada tópico deve conter verbos de ação e resultados demonstráveis
-3. Descreva benefícios tangíveis que o leitor sentirá ou produzirá
-4. Relate a problemas reais e frustrações autênticas dos iniciantes
-5. Use linguagem concreta e evite termos vagos como "entender", "aprender" ou "dominar"
 '''
 
 CHUNKING_SYSTEM_PROMPT = """
@@ -81,8 +76,8 @@ Use a seguinte hierarquia de formatação:
 
 ## O Que Você Vai Construir:
 [Divisão em blocos progressivos] Modelo:
-1️⃣ [Fase 1] (Partes 1-X): [Competência concreta]
-2️⃣ [Fase 2] (Partes X-Y): [Habilidade prática]
+1️⃣ **Fase 1: [Nome da Fase] (Partes 1-X)**: [Competência concreta]
+2️⃣ **Fase 2: [Nome da Fase] (Partes X-Y)**: [Habilidade prática]
 ...
 
 ## Seu Plano de Ataque Personalizado:
@@ -93,8 +88,9 @@ Use a seguinte hierarquia de formatação:
 🛠 **Kit Ferramentas Incluso:**
 - ✅ Teste de nível inicial
 - 🎯 Objetivos SMART por parte
-- 🤖 Prompts de IA prontos para usar
+- 🤖 Prompts de IA específicos (ex: "Analise as influências musicais de [artista específico]")
 - 🔄 Checkpoints de revisão
+- 📈 Rastreador de progresso
 
 ## Primeiro Passo Imediato:
 ▶️ Na **Parte 1**, você vai dominar em [tempo]:
@@ -174,25 +170,71 @@ def generate_prompt(tema, num_partes):
     Returns:
         str: O prompt completo para envio ao modelo Gemini.
     """
+    # Cálculo de tempos flexíveis baseados no número de partes
+    # Tempo base que aumenta ligeiramente com mais partes
+    tempo_base_por_parte = min(1.5 + (num_partes - 3) * 0.1, 2.5) if num_partes > 3 else 1.5
+    tempo_total_turbo = round(tempo_base_por_parte * num_partes, 1)
+    tempo_total_profundo = round(tempo_total_turbo * 1.8, 1)  # Modo profundo é 80% mais longo
+    
+    # Fórmula para complexidade do tema
+    complexidade_temas = {
+        'inteligência artificial': 0.3, 'machine learning': 0.3, 'deep learning': 0.4,
+        'física quântica': 0.4, 'cálculo': 0.3, 'estatística': 0.25,
+        'filosofia': 0.2, 'programação': 0.2, 'algoritmos': 0.25
+    }
+    
+    # Verificar se o tema contém palavras-chave de complexidade
+    ajuste_complexidade = 0
+    for palavra_chave, valor in complexidade_temas.items():
+        if palavra_chave.lower() in tema.lower():
+            ajuste_complexidade = max(ajuste_complexidade, valor)
+    
+    # Aplicar ajuste de complexidade
+    if ajuste_complexidade > 0:
+        tempo_total_turbo = round(tempo_total_turbo * (1 + ajuste_complexidade), 1)
+        tempo_total_profundo = round(tempo_total_profundo * (1 + ajuste_complexidade), 1)
+    
     # Instruções mais explícitas para garantir detalhamento completo
-    instrucoes_adicionais = """
+    instrucoes_adicionais = f"""
     ATENÇÃO ESPECIAL:
     - Use números específicos para criar credibilidade (ex: "7 regras principais", "domine 90% do vocabulário")
     - Na parte "Por Onde Começar?", mencione frustrações reais e específicas dos iniciantes no tema
-    - Para "O Que Você Vai Construir", divida em fases com nomes criativos e concretos
-    - Calcule tempos mais realistas no "Plano de Ataque" (cerca de 1.5h por parte no modo expresso)
+    - Para "O Que Você Vai Construir", SEMPRE use títulos temáticos e descritivos para cada fase:
+      * Exemplos de bons títulos: "Raízes e Ascensão", "Consolidação e Evolução", "Legado e Impacto", "Fundamentos Estruturais"
+      * Evite títulos genéricos como "Fase Inicial", "Fase Intermediária", "Fase Avançada"
+      * Cada título deve capturar a essência temática do conteúdo daquela fase
+      * SEMPRE use o formato "1️⃣ **Fase 1: [Título Descritivo] (Parte X)**: " ou "2️⃣ **Fase 2: [Título Descritivo] (Partes X-Y)**: "
+      * Note que o texto "Fase X: [Título] (Parte Y)" está em negrito, seguido de dois pontos fora do negrito
+      * Exemplo: "1️⃣ **Fase 1: Raízes e Ascensão (Parte 1)**: Domínio de 75% dos sucessos iniciais..."
+    - No "Kit Sob Medida", SEMPRE inclua exemplos concretos específicos ao tema:
+      * Para "Prompts de IA" forneça um exemplo real como: "Gere uma análise das 5 músicas mais românticas do Sorriso Maroto"
+      * Para testes, use exemplos como: "Teste: 'Quiz Cronológico dos Álbuns do Sorriso Maroto'"
+      * Os exemplos DEVEM ser adaptados ao tema específico do guia, não genéricos
+    - Certifique-se que as fases correspondam EXATAMENTE ao número de partes:
+      * Se forem {num_partes} partes no total, crie entre 1 e {num_partes} fases
+      * Cada fase deve ter uma ou mais partes, sempre seguindo uma numeração sequencial
+      * Use "Parte X" (singular) quando a fase tiver apenas uma parte
+      * Use "Partes X-Y" (plural) apenas quando a fase tiver múltiplas partes
+      * NUNCA use numeração do tipo "Partes X-X" (ex: "Partes 1-1"), pois isso é redundante
+    - Para "O Que Você Vai Construir", SEMPRE inclua métricas mensuráveis em cada fase:
+      * Porcentagem de cobertura do conhecimento (ex: "75% dos conceitos essenciais", "90% das aplicações práticas")
+      * Métricas numéricas de desempenho (ex: "redução de 40% no tempo de desenvolvimento", "aumento de 60% na eficiência")
+      * Resultados quantificados (ex: "domínio de 8 dos 10 padrões fundamentais", "criação de 5 implementações funcionais")
+    - No "Kit Sob Medida", SEMPRE inclua um "Placar de Progresso" com métricas específicas por parte (ex: "5 habilidades para marcar como concluídas")
+    - Calcule tempos realistas para cada parte seguindo esta estrutura:
+      * Modo Turbo: Total de {tempo_total_turbo}h ({tempo_base_por_parte}h por parte em média)
+      * Modo Profundo: Total de {tempo_total_profundo}h (inclui projetos práticos e aprofundamento)
+    - Ajuste os tempos individuais por parte com base na complexidade de cada uma (partes iniciais geralmente são mais rápidas)
     - Ofereça ferramentas realmente acionáveis no Kit, como templates e checklists específicos
     - No "Primeiro Passo Imediato", foque em conquistas concretas, não apenas aprendizado conceitual
     - Certifique-se de seguir a ESTRUTURA OBRIGATÓRIA para a introdução, adaptando para o tema
     - Use SEMPRE o formato "Parte X: [Verbo + Substantivo] → [Emoji] ([Duração])" para os títulos (ex: "Parte 1: Configurando Ambiente → ⚙️ (1.5h)")
     - Escolha emojis que se adequem ao conteúdo de cada parte (⚙️ para configuração, 🧱 para componentes, etc.)
-    - Inclua duração estimada realista para cada parte (geralmente 1.5h a 2h por parte)
     - As armadilhas comuns devem apresentar problema E solução em formato conciso
     - O checklist de domínio deve ter itens verificáveis e mensuráveis
     - Os prompts de IA devem ser específicos para gerar resultados úteis e aplicáveis
-    - Você DEVE detalhar TODAS as partes completamente (de 1 até {num_partes})
-    - Certifique-se de usar cores diferentes para cada núcleo (🔵 🟣 🟢 🟠)
-    - NÃO use placeholders ou texto indicando "continuar estrutura para as partes X a Y"
+    - Para cada parte, inclua um "Indicador de Progresso" com porcentagem clara (ex: "Ao concluir esta parte: 35% do domínio total do tema")
+    - Cada checklist de domínio deve ter exatamente os itens com métricas verificáveis (ex: "Criar 3 variações de X", "Implementar 5 funções que...")
     - SEMPRE use a formatação Markdown exatamente como especificada para garantir processamento correto
     """
     
