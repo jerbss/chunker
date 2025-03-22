@@ -9,44 +9,44 @@ INTRO_SYSTEM_PROMPT = '''
 # [TEMA] em [NÚMERO] Partes: Seu Mapa para Dominar [TEMA] do Zero
 
 ## Por Onde Começar?
-[3-4 bullets pessoais usando "você" com problemas específicos] Exemplo:
-- Já ficou sem entender POR QUE [problema específico do tema]?
-- Quer [benefício concreto] sem precisar [obstáculo comum]?
-- Precisa [objetivo aspiracional específico], mesmo começando do zero?
-- [OPCIONAL] Quer desvendar [algo único/emocionante sobre o tema]? (ex: "o segredo por trás dos refrões contagiantes que fizeram o Brasil se apaixonar pelo Sorriso Maroto?")
+[3-4 bullets pessoais usando "você" com problemas ESPECÍFICOS e QUANTIFICÁVEIS] Exemplos:
+- Já confundiu as três formações principais da banda entre 1998-2010?
+- Quer extrair os cinco elementos-chave de um refrão sem teoria musical?
+- Precisa relacionar oito sucessos às suas influências regionais em 1h?
+- Sabia que 73% dos fãs não identificam a técnica vocal que definiu o som da banda?
 
 ## O Que Você Vai Construir:
-[Divisão em blocos progressivos com números concretos e métricas mensuráveis] Modelo:
-1️⃣ **Fase 1: [Nome Concreto da Fase] (Parte 1)**: 
-   - [Número específico] de conceitos que explicam [porcentagem/maioria] do tema
-   - [Habilidade mensurável específica] com [X%] de domínio após conclusão
-   - [Métrica concreta] (ex: "75% da história da banda coberta", "8 dos 10 padrões fundamentais")
-   - [Mini-desafio] (ex: "Teste seu domínio com um quiz de 5 perguntas ao final desta parte")
+[Divisão em blocos progressivos com números concretos e ARTEFATOS VERIFICÁVEIS] Modelo:
+1️⃣ **Fase 1: [Título Temático Concreto] (Parte 1)**: 
+   - Deconstrução de [X] conceitos usando o método "[Nome do Método]"
+   - [Artefato específico] com [X] elementos (ex: "Linha do tempo com 5 viradas de estilo")
+   - Desafio: [Ação criativa específica] usando [X] técnicas específicas
+   - [Métrica de domínio] (ex: "Capacidade de classificar 8 exemplos com 80% de precisão")
 
-2️⃣ **Fase 2: [Nome Concreto da Fase] (Partes 2-3)**: 
-   - [Habilidade técnica específica com resultado tangível]
-   - [Ferramenta ou método prático] com [nível ou valor mensurável]
-   - [Aumento percentual em competência/eficiência] (ex: "redução de 40% no tempo de execução")
-   - [Mini-desafio] (ex: "Crie sua própria análise de uma música usando o método aprendido")
+2️⃣ **Fase 2: [Título Temático Concreto] (Partes 2-3)**: 
+   - Análise de [X] exemplos com foco em [X] padrões específicos
+   - [Template ou ferramenta] para [ação específica] com [X] variáveis mensuráveis
+   - Projeto: [Criação específica] usando [método ou ferramenta]
+   - [Aumento percentual em competência] (ex: "redução de 40% no tempo de execução")
 ...
 
 ## Seu Plano de Ataque Personalizado:
 ⏱ **Escolha Seu Ritmo:**
-- 🚀 Modo Expresso: [X]h total ([Y]h/parte, ajustável por complexidade) → Conceitos-chave + exemplos
-- 🧠 Modo Imersivo: [X*2]h total → Com prática e aplicações reais
+- 🚀 Modo Turbo: [X]h total ([Y]h/parte) → [Z] conceitos-chave + [N] exemplos práticos
+- 🧠 Modo Imersivo: [X*2]h total → Inclui [N] exercícios práticos + projeto integrador
 
 🛠 **Kit Sob Medida:**
-- 🔍 Teste: "[Nome específico do teste]" (com resultados acionáveis)
-- 📋 Checklist de [número específico] pontos essenciais
-- 🤖 Prompts de IA: "[Exemplo concreto e detalhado específico do tema]" (ex: "Gere uma análise das 5 músicas mais românticas do Sorriso Maroto e identifique as influências musicais em cada uma")
-- 📊 Template de [ferramenta prática] personalizável
+- 🔍 Teste: "[Nome específico do teste]" com [X] perguntas e resultados acionáveis
+- 📋 Checklist: "[Nome do checklist]" com [X] pontos essenciais/armadilhas a evitar
+- 🤖 Prompts de IA: "[Comando preciso e específico ao tema]" (ex: "Analise a estrutura da música [TÍTULO] usando: 1) Padrão rítmico 2) Temática lírica 3) Influências detectadas")
+- 📊 Template: "[Nome da ferramenta]" para [ação específica] com [X] componentes
 - 📈 Placar de Progresso: Rastreie seu avanço com [X] métricas concretas por parte
 
 ## Primeiro Passo Imediato:
-▶️ Na **Parte 1**, em [tempo específico] você vai:
-- [Realização concreta #1] usando [método específico]
-- [Realização concreta #2] com [resultado demonstrável]
-- [Ação prática] em uma situação real de [contexto aplicado]
+▶️ Nos primeiros [tempo específico] você vai:
+- [Ação concreta #1] usando [método específico] (critério de sucesso: [métrica clara])
+- [Ação concreta #2] com [resultado demonstrável] (validação: [método de checagem])
+- [Autoavaliação] usando "[Nome da ferramenta/escala]" (medindo: [variável específica])
 '''
 
 CHUNKING_SYSTEM_PROMPT = """
@@ -205,46 +205,36 @@ def generate_prompt(tema, num_partes):
     # Instruções mais explícitas para garantir detalhamento completo
     instrucoes_adicionais = f"""
     ATENÇÃO ESPECIAL:
-    - Use números específicos para criar credibilidade (ex: "7 regras principais", "domine 90% do vocabulário")
     - Na parte "Por Onde Começar?", SEMPRE:
-      * Mencione frustrações reais e específicas dos iniciantes no tema
-      * Adicione uma quarta pergunta emocional que destaque algo único, fascinante ou inspirador sobre o tema
-      * Exemplo para música: "Quer desvendar o segredo por trás dos refrões contagiantes que fizeram o Brasil se apaixonar?"
-      * Exemplo para tecnologia: "Curioso para descobrir como os algoritmos que você usa diariamente transformam o mundo?"
-    - Para "O Que Você Vai Construir", SEMPRE use métricas concretas em vez de porcentagens:
-      * Use contagens específicas: "Conhecimento das 10 músicas mais importantes" em vez de "75% dos sucessos"
-      * Use números precisos: "Análise de 5 álbuns-chave" em vez de "90% da discografia"
-      * Use resultados quantificáveis: "Criação de 3 playlists temáticas" em vez de "Capacidade de organizar músicas"
-      * Exemplo: "1️⃣ **Fase 1: Raízes e Ascensão (Parte 1)**: Domínio das 8 músicas fundamentais e compreensão dos 3 momentos decisivos na formação da banda"
-    - No "Kit Sob Medida", SEMPRE inclua:
-      * Um exemplo concreto de objetivo SMART: "🎯 Objetivos SMART: Ex: 'Identificar as 5 principais influências musicais do Sorriso Maroto até o final da Parte 2'"
-      * Para "Prompts de IA" forneça um exemplo detalhado específico ao tema
-      * Os exemplos DEVEM ser adaptados ao tema específico do guia, não genéricos
-    - Na seção "Escolha Seu Ritmo", use tempos arredondados e intuitivos:
-      * Modo Turbo: {tempo_total_turbo}h total ({tempo_base_por_parte}h por parte, ajustável)
-      * Modo Profundo: {tempo_total_profundo}h total ({round(tempo_total_profundo/num_partes)}h por parte)
-    - Em "Primeiro Passo Imediato", SEMPRE inclua um exercício prático detalhado:
-      * Exemplo para música: "Um exercício prático: Liste as 5 músicas iniciais e identifique o tema principal de cada uma"
-      * Exemplo para tecnologia: "Um exercício prático: Crie um diagrama simples mostrando os 3 componentes principais e suas conexões"
-      * Seja específico sobre o que o usuário deve produzir/criar e como verificar o resultado
-    - Use SEMPRE EXATAMENTE o formato "Parte X: [Verbo + Substantivo] → [Emoji] ([Duração])" para os títulos de cada parte:
-      * O formato deve ser seguido literalmente, incluindo os símbolos "→" e os parênteses na duração
-      * Exemplos corretos: "Parte 1: Desvendando as Origens → 👶 (1.5h)", "Parte 2: Analisando a Evolução → 📈 (3h)"
-      * Escolha emojis relevantes para o conteúdo: 👶 para origens, 📈 para evolução, ⭐ para impacto, etc.
-      * Inclua a duração estimada em horas entre parênteses: (1.5h), (2h), (3h)
-      * Os títulos devem começar com um VERBO no gerúndio seguido de um substantivo (ex: Desvendando Origens, Explorando Conceitos)
-    - Para "O Que Você Vai Construir", SEMPRE use títulos temáticos e descritivos para cada fase:
-      * Exemplos de bons títulos: "Raízes e Ascensão", "Consolidação e Evolução", "Legado e Impacto", "Fundamentos Estruturais"
-      * Evite títulos genéricos como "Fase Inicial", "Fase Intermediária", "Fase Avançada"
-      * Cada título deve capturar a essência temática do conteúdo daquela fase
-      * SEMPRE use o formato CORRETO para numeração de partes:
-        - Para UMA ÚNICA parte, use: "1️⃣ **Fase 1: [Título Descritivo] (Parte 1)**:" (SINGULAR)
-        - Para MÚLTIPLAS partes, use: "2️⃣ **Fase 2: [Título Descritivo] (Partes 2-3)**:" (PLURAL)
-      * NUNCA use "Partes X-X" quando se refere a uma única parte (ex: "Partes 1-1") - isso é incorreto
-      * Exemplo correto para 3 partes: 
-        "1️⃣ **Fase 1: Raízes e Ascensão (Parte 1)**: Domínio das 8 músicas fundamentais..."
-        "2️⃣ **Fase 2: Consolidação e Evolução (Parte 2)**: Análise de 5 álbuns-chave..."
-        "3️⃣ **Fase 3: Legado e Impacto (Parte 3)**: Compreensão das 6 principais influências..."
+      * Use perguntas com NÚMEROS ESPECÍFICOS e PERÍODOS DE TEMPO CONCRETOS
+      * Inclua 3-4 bullets usando "você" com problemas específicos do iniciante absoluto
+      * Cite dados concretos (números, períodos, termos técnicos simplificados)
+      * Adicione uma pergunta emocional destacando um aspecto único/fascinante do tema
+      * Exemplos: "Já confundiu as três formações da banda?", "Quer extrair os cinco elementos-chave?"
+    
+    - Para "O Que Você Vai Construir", SEMPRE:
+      * Use TÍTULOS TEMÁTICOS CONCRETOS para cada fase (ex: "Anatomia do Sucesso", "DNA Musical")
+      * Para cada fase, liste 3-4 CONQUISTAS MENSURÁVEIS com números específicos
+      * Cada conquista deve ter ARTEFATOS VERIFICÁVEIS (ex: "Linha do tempo com 7 marcos históricos")
+      * Inclua um MINI-DESAFIO PRÁTICO por fase (ex: "Identifique 3 instrumentos em 30s de áudio")
+      * Use MÉTRICAS VERIFICÁVEIS para validação (ex: "Compare com o gabarito da Parte 1")
+    
+    - No "Plano de Ataque Personalizado":
+      * ESPECIFIQUE EXATAMENTE o conteúdo de cada modo (ex: "Turbo: 15 conceitos + 3 análises")
+      * Liste recursos do kit com NÚMEROS PRECISOS (ex: "Teste com 12 perguntas", "Checklist com 5 armadilhas")
+      * Forneça EXEMPLOS COMPLETOS E ESPECÍFICOS de prompts de IA (ex: "Compare 2 músicas usando a) Estrutura b) Instrumentação c) Receptividade")
+    
+    - Em "Primeiro Passo Imediato":
+      * Especifique TEMPO EXATO (ex: "Nos primeiros 40 minutos")
+      * Liste 3 AÇÕES CONCRETAS com VERBO + OBJETO DIRETO (ex: "Identifique 2 padrões melódicos")
+      * Inclua CRITÉRIO DE SUCESSO CLARO para cada ação (ex: "Compare com o gabarito da Parte 1")
+      * Adicione uma forma de AUTOAVALIAÇÃO QUANTIFICADA (ex: "Use o Termômetro do Iniciante (1-5)")
+    
+    - Para todo o conteúdo da introdução:
+      * PROGRESSÃO CLARA: Mostre aumento gradual em complexidade (Identificar → Analisar → Criar)
+      * VALIDAÇÃO INTEGRADA: Inclua mecanismos de autoavaliação em cada etapa
+      * ESPECIFICIDADE NUMÉRICA: Todo dado citado deve ter número/percentual
+      * AÇÃO IMEDIATA: Cada seção deve terminar com tarefa executável em menos de 1 hora
     """
     
     return f"{CHUNKING_SYSTEM_PROMPT}\n{instrucoes_adicionais}\n\nCrie um guia de estudos completo para o tema \"{tema}\" dividido em {num_partes} partes."
