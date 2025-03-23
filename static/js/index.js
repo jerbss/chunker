@@ -1367,12 +1367,16 @@ function processBuildSection(heading) {
     let nextElement = heading.nextElementSibling;
     
     while (nextElement && !nextElement.matches('h2')) {
-        // Verificar se é um parágrafo que contém fases
+        // Verificar se é um parágrafo que contém fases - estendendo para incluir Fase 3 e Fase 4
         if (nextElement.tagName === 'P' && 
             (nextElement.textContent.includes('Fase 1') || 
              nextElement.textContent.includes('1️⃣') ||
-             nextElement.textContent.includes('Fase 2') ||
-             nextElement.textContent.includes('2️⃣'))) {
+             nextElement.textContent.includes('Fase 2') || 
+             nextElement.textContent.includes('2️⃣') ||
+             nextElement.textContent.includes('Fase 3') || 
+             nextElement.textContent.includes('3️⃣') ||
+             nextElement.textContent.includes('Fase 4') || 
+             nextElement.textContent.includes('4️⃣'))) {
             
             const content = nextElement.innerHTML;
             
@@ -1381,6 +1385,8 @@ function processBuildSection(heading) {
             if (content.includes('Fase 1') || content.includes('1️⃣')) phaseNumber = 1;
             else if (content.includes('Fase 2') || content.includes('2️⃣')) phaseNumber = 2;
             else if (content.includes('Fase 3') || content.includes('3️⃣')) phaseNumber = 3;
+            else if (content.includes('Fase 4') || content.includes('4️⃣')) phaseNumber = 4;
+            else if (content.includes('Fase 5') || content.includes('5️⃣')) phaseNumber = 5;
             
             if (phaseNumber) {
                 // Marcar esta fase como encontrada
@@ -1400,30 +1406,48 @@ function processBuildSection(heading) {
                 // Extrair o conteúdo desta fase
                 const lines = content.split('<br>');
                 
-                // Se for a primeira vez que encontramos esta fase, extrair o título
-                if (!processedPhases[phaseNumber].title && lines.length > 0) {
-                    processedPhases[phaseNumber].title = lines[0];
-                    
-                    // Extrair os itens principais desta fase (após o título)
-                    const mainItems = lines.slice(1).filter(line => line.trim());
-                    processedPhases[phaseNumber].mainItems.push(...mainItems);
+                // Tratamento especial para parágrafos (Fase 3 e 4 geralmente aparecem como parágrafos únicos)
+                if (lines.length <= 1) {
+                    // É um parágrafo único sem quebras de linha
+                    processedPhases[phaseNumber].title = content;
                 } else {
-                    // Se já temos um título para esta fase, todos os itens são adicionais
-                    processedPhases[phaseNumber].additionalItems.push(...lines.filter(line => line.trim()));
+                    // Se for a primeira vez que encontramos esta fase, extrair o título
+                    if (!processedPhases[phaseNumber].title && lines.length > 0) {
+                        processedPhases[phaseNumber].title = lines[0];
+                        
+                        // Extrair os itens principais desta fase (após o título)
+                        const mainItems = lines.slice(1).filter(line => line.trim());
+                        processedPhases[phaseNumber].mainItems.push(...mainItems);
+                    } else {
+                        // Se já temos um título para esta fase, todos os itens são adicionais
+                        processedPhases[phaseNumber].additionalItems.push(...lines.filter(line => line.trim()));
+                    }
                 }
             }
         }
         // Verificar se este elemento é uma lista solta que pertence a uma fase anterior
-        else if (nextElement.tagName === 'UL' && Object.keys(processedPhases).length > 0) {
-            // Assumir que esta lista pertence à última fase encontrada
-            const lastPhaseNumber = Math.max(...Object.keys(processedPhases).map(Number));
+        else if ((nextElement.tagName === 'UL' || nextElement.tagName === 'OL') && Object.keys(processedPhases).length > 0) {
+            // Determinar a qual fase essa lista pertence
+            // Por padrão, assume a última fase encontrada
+            let targetPhaseNumber = Math.max(...Object.keys(processedPhases).map(Number));
+            
+            // Verificar se há uma fase na sequência correta
+            const previousElement = nextElement.previousElementSibling;
+            if (previousElement && previousElement.tagName === 'P') {
+                // Verificar se o parágrafo anterior define uma fase específica
+                const prevContent = previousElement.textContent;
+                if (prevContent.includes('Fase 3') || prevContent.includes('3️⃣')) targetPhaseNumber = 3;
+                else if (prevContent.includes('Fase 4') || prevContent.includes('4️⃣')) targetPhaseNumber = 4;
+            }
             
             // Adicionar itens desta lista à fase
             const listItems = Array.from(nextElement.querySelectorAll('li'))
                 .map(li => li.innerHTML);
             
-            processedPhases[lastPhaseNumber].additionalItems.push(...listItems);
-            elementsToRemove.push(nextElement);
+            if (processedPhases[targetPhaseNumber]) {
+                processedPhases[targetPhaseNumber].additionalItems.push(...listItems);
+                elementsToRemove.push(nextElement);
+            }
         }
         
         nextElement = nextElement.nextElementSibling;
@@ -1447,6 +1471,8 @@ function processBuildSection(heading) {
             // Adicionar título da fase
             const titleEl = document.createElement('p');
             titleEl.className = 'phase-title mb-2';
+            titleEl.style.fontWeight = '600';
+            titleEl.style.color = 'var(--secondary-color)';
             titleEl.innerHTML = phase.title;
             phaseContainer.appendChild(titleEl);
             
