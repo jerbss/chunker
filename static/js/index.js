@@ -585,6 +585,116 @@ function createPartCard(part, index) {
            </div>`
         : '';
     
+    // Mini-desafio prático com tempo específico (NOVO)
+    const miniChallengeBlock = `
+        <div class="mt-3 p-3 border-start border-success bg-light">
+            <div class="d-flex justify-content-between align-items-start">
+                <strong class="text-success" style="font-family: 'Exo 2', sans-serif; font-weight: 600;">
+                    <i class="fas fa-stopwatch me-1"></i>Mini-Desafio (15min)
+                </strong>
+            </div>
+            <p class="mb-2 mt-2">Crie um exemplo prático aplicando ${part.concepts.length > 0 ? part.concepts[0] : 'o conceito principal'} em um projeto simples.</p>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-sm btn-outline-success me-2 toggle-challenge-details">
+                    <i class="fas fa-chevron-down"></i> Dicas
+                </button>
+                <span class="small text-muted">Tente resolver antes de ver as dicas</span>
+            </div>
+            <div class="challenge-details mt-2" style="display: none;">
+                <ul class="mb-0">
+                    <li>Comece definindo o escopo mínimo viável</li>
+                    <li>Aplique pelo menos 2 conceitos desta parte</li>
+                    <li>Critique seu próprio resultado ao finalizar</li>
+                </ul>
+            </div>
+        </div>
+    `;
+    
+    // Artefatos esperados (NOVO)
+    const expectedArtifactsBlock = `
+        <div class="mt-3 p-3 border-start border-primary bg-light">
+            <strong class="text-primary" style="font-family: 'Exo 2', sans-serif; font-weight: 600;">
+                <i class="fas fa-clipboard-check me-1"></i>Artefatos Esperados
+            </strong>
+            <ul class="mb-0 mt-2">
+                <li>Documento com exemplo prático de ${part.concepts.length > 0 ? part.concepts[0] : 'aplicação do conceito'}</li>
+                <li>Exercício resolvido demonstrando entendimento do tópico</li>
+                <li>Resumo dos pontos principais (máx. 1 página)</li>
+            </ul>
+        </div>
+    `;
+    
+    // Checklist de domínio (NOVO)
+    const checklistItems = part.concepts.length > 0 
+        ? part.concepts.slice(0, 3).map(concept => `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="check-${cardId}-${concept.replace(/\W+/g, '')}">
+                <label class="form-check-label" for="check-${cardId}-${concept.replace(/\W+/g, '')}">
+                    Compreendo ${concept} e posso explicar para outra pessoa
+                </label>
+            </div>
+          `).join('')
+        : `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="check-${cardId}-generic">
+                <label class="form-check-label" for="check-${cardId}-generic">
+                    Compreendo os conceitos principais desta parte
+                </label>
+            </div>
+          `;
+    
+    const domainChecklistBlock = `
+        <div class="mt-3 p-3 border border-secondary rounded bg-light">
+            <strong style="font-family: 'Exo 2', sans-serif; font-weight: 600;">
+                <i class="fas fa-tasks me-1"></i>Checklist de Domínio
+            </strong>
+            <div class="mt-2">
+                ${checklistItems}
+            </div>
+        </div>
+    `;
+    
+    // Toggle de modo de estudo (NOVO)
+    const studyModeToggle = `
+        <div class="study-mode-toggle card-header d-flex justify-content-between align-items-center py-2 px-3 bg-light border-bottom">
+            <span class="text-muted small">Modo de estudo:</span>
+            <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="mode-${cardId}" id="turbo-${cardId}" autocomplete="off" checked>
+                <label class="btn btn-sm btn-outline-secondary" for="turbo-${cardId}">
+                    <i class="fas fa-rocket me-1"></i>Turbo
+                </label>
+                
+                <input type="radio" class="btn-check" name="mode-${cardId}" id="deep-${cardId}" autocomplete="off">
+                <label class="btn btn-sm btn-outline-secondary" for="deep-${cardId}">
+                    <i class="fas fa-brain me-1"></i>Profundo
+                </label>
+            </div>
+        </div>
+    `;
+    
+    // Autoavaliação (NOVO)
+    const selfAssessmentBlock = `
+        <div class="mt-3 p-3 border-start border-secondary bg-light">
+            <strong class="text-secondary" style="font-family: 'Exo 2', sans-serif; font-weight: 600;">
+                <i class="fas fa-chart-line me-1"></i>Autoavaliação
+            </strong>
+            <p class="mb-2 mt-2">Em uma escala de 1-5, avalie seu entendimento dos conceitos desta parte:</p>
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="rating-labels d-flex justify-content-between w-100 px-2">
+                    <span class="small">Iniciante</span>
+                    <span class="small">Intermediário</span>
+                    <span class="small">Avançado</span>
+                </div>
+            </div>
+            <div class="rating-container d-flex align-items-center mt-1">
+                <input type="range" class="form-range" min="1" max="5" value="3" id="rating-${cardId}">
+            </div>
+            <div class="mt-2 p-2 border rounded d-none feedback-area" id="feedback-${cardId}">
+                <p class="feedback-text mb-0 small"></p>
+            </div>
+        </div>
+    `;
+    
     // Criar bloco de prompt de instrução se existir
     const instructionPromptBlock = part.instructionPrompt 
         ? `<div class="mt-3 p-3 border-start border-info bg-light">
@@ -605,11 +715,29 @@ function createPartCard(part, index) {
         ? part.content 
         : '<p class="text-muted">Este card contém os principais conceitos e tópicos relacionados a esta parte do conteúdo.</p>';
     
+    // Conteúdo específico do Modo Profundo (inicialmente oculto)
+    const deepModeContent = `
+        <div class="deep-mode-content mt-3 p-3 border rounded bg-light" style="display: none;">
+            <h5 class="text-primary"><i class="fas fa-brain me-2"></i>Conteúdo do Modo Profundo</h5>
+            <p>Neste modo, você terá acesso a:</p>
+            <ul>
+                <li><strong>Exercícios Práticos:</strong> Aplicações detalhadas dos conceitos</li>
+                <li><strong>Projeto Guiado:</strong> Implementação passo-a-passo</li>
+                <li><strong>Análise Aprofundada:</strong> Explicações conceituais detalhadas</li>
+            </ul>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>Este conteúdo requer aproximadamente 2-3 horas para ser completado.
+            </div>
+        </div>
+    `;
+    
     card.innerHTML = `
         <div class="card shadow h-100">
             <div class="card-header bg-success text-white">
                 <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">${part.title}</h3>
             </div>
+            
+            ${studyModeToggle}
             
             ${part.objective ? 
                 `<div class="card-img-top text-center py-3 bg-light">
@@ -620,12 +748,19 @@ function createPartCard(part, index) {
             
             <div class="card-body">
                 ${bodyContent}
+                ${deepModeContent}
             </div>
             
-            <div class="card-footer bg-light">
-                <div class="mb-2 concepts-container">${conceptBadges}</div>
-                ${part.reflection ? reflectionBlock : ''}
-                ${instructionPromptBlock}
+            <div class="card-footer bg-light p-0">
+                <div class="p-3">
+                    <div class="mb-2 concepts-container">${conceptBadges}</div>
+                    ${expectedArtifactsBlock}
+                    ${miniChallengeBlock}
+                    ${domainChecklistBlock}
+                    ${selfAssessmentBlock}
+                    ${part.reflection ? reflectionBlock : ''}
+                    ${instructionPromptBlock}
+                </div>
             </div>
         </div>
     `;
@@ -817,6 +952,79 @@ function initializeCardBehaviors() {
 
     // Converter parágrafos com listas em elementos <ul> e processar seções especiais
     processAllContentSections();
+
+    // Inicializar comportamentos para novos elementos
+    initializeNewCardFeatures();
+}
+
+/**
+ * Inicializa os comportamentos para os novos recursos dos cards
+ */
+function initializeNewCardFeatures() {
+    // Toggle dos detalhes do mini-desafio
+    document.querySelectorAll('.toggle-challenge-details').forEach(button => {
+        button.addEventListener('click', function() {
+            const detailsContainer = this.closest('.border-start').querySelector('.challenge-details');
+            const isHidden = detailsContainer.style.display === 'none';
+            
+            // Toggle da visibilidade
+            detailsContainer.style.display = isHidden ? 'block' : 'none';
+            
+            // Atualizar o ícone
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-chevron-down', !isHidden);
+            icon.classList.toggle('fa-chevron-up', isHidden);
+            
+            // Atualizar o texto do botão
+            this.innerHTML = isHidden 
+                ? '<i class="fas fa-chevron-up"></i> Ocultar Dicas'
+                : '<i class="fas fa-chevron-down"></i> Dicas';
+        });
+    });
+    
+    // Toggle entre modos de estudo
+    document.querySelectorAll('.btn-check[name^="mode-"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const cardId = this.name.split('-')[1];
+            const card = document.getElementById(cardId);
+            const deepModeContent = card.querySelector('.deep-mode-content');
+            
+            if (this.id.startsWith('deep')) {
+                deepModeContent.style.display = 'block';
+            } else {
+                deepModeContent.style.display = 'none';
+            }
+        });
+    });
+    
+    // Configurar controles de autoavaliação
+    document.querySelectorAll('input[type="range"][id^="rating-"]').forEach(slider => {
+        const updateFeedback = function() {
+            const cardId = slider.id.split('-')[1];
+            const value = parseInt(slider.value);
+            const feedbackArea = document.getElementById(`feedback-${cardId}`);
+            const feedbackText = feedbackArea.querySelector('.feedback-text');
+            
+            // Mostrar a área de feedback
+            feedbackArea.classList.remove('d-none');
+            
+            // Definir o texto de feedback baseado no valor
+            const feedbacks = [
+                "Você está começando! Continue estudando os conceitos básicos.",
+                "Você tem alguma familiaridade. Revise os conceitos-chave novamente.",
+                "Bom progresso! Tente aplicar estes conceitos em exemplos práticos.",
+                "Ótimo domínio! Experimente ensinar estes conceitos para solidificar o conhecimento.",
+                "Excelente! Você dominou este tópico. Avance para aplicações mais complexas."
+            ];
+            
+            feedbackText.textContent = feedbacks[value - 1];
+        };
+        
+        // Atualizar feedback ao mudar o valor
+        slider.addEventListener('input', updateFeedback);
+        // Inicializar com o valor atual
+        updateFeedback();
+    });
 }
 
 /**
