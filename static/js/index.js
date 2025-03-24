@@ -586,9 +586,7 @@ function createPartCard(part, index) {
             <!-- Header principal com título da parte -->
             <div class="card-header bg-success text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">
-                        <span class="me-2">${emoji}</span>${part.title}
-                    </h3>
+                    <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">${part.title}</h3>
                     <span class="badge bg-light text-success">Parte ${partNumber}</span>
                 </div>
             </div>
