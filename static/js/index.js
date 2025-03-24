@@ -665,7 +665,7 @@ function createPartCard(part, index) {
                                     <i class="fas fa-map-location-dot text-success me-2 fs-5"></i>
                                     <h5 class="mb-0 fw-medium">Mapa da Parte</h5>
                                 </div>
-                                <p class="mb-2">${metadata.mapInfo}</p>` : ''
+                                <p class="mb-2">${metadata.mapInfo.replace(/\(Ícone\)/g, emoji)}</p>` : ''
                             }
                             
                             ${metadata.connections ? 
