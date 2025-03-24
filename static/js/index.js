@@ -548,7 +548,7 @@ function createIntroCard() {
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">${state.mainTitle}</h3>
-                    <span class="badge bg-light text-primary">Introdução</span>
+                    <span class="badge bg-white text-primary">Introdução</span>
                 </div>
             </div>
             <div class="card-body">
@@ -1141,7 +1141,7 @@ function createConclusionCard() {
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">Integração dos Conhecimentos</h3>
-                    <span class="badge bg-light text-primary">Síntese</span>
+                    <span class="badge bg-white text-primary">Síntese</span>
                 </div>
             </div>
             <div class="card-body">
