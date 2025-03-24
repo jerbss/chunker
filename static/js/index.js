@@ -625,22 +625,6 @@ function createPartCard(part, index) {
                 </div>
             </div>
             
-            <!-- Toggle de modo de estudo -->
-            <div class="study-mode-toggle card-header d-flex justify-content-between align-items-center py-2 px-3 bg-light border-bottom">
-                <span class="text-muted small">Modo de estudo:</span>
-                <div class="btn-group" role="group">
-                    <input type="radio" class="btn-check" name="mode-${cardId}" id="turbo-${cardId}" autocomplete="off" checked>
-                    <label class="btn btn-sm btn-outline-secondary" for="turbo-${cardId}">
-                        <i class="fas fa-rocket me-1"></i>Turbo
-                    </label>
-                    
-                    <input type="radio" class="btn-check" name="mode-${cardId}" id="deep-${cardId}" autocomplete="off">
-                    <label class="btn btn-sm btn-outline-secondary" for="deep-${cardId}">
-                        <i class="fas fa-brain me-1"></i>Profundo
-                    </label>
-                </div>
-            </div>
-            
             <!-- Objetivo de aprendizagem (se existir) -->
             ${part.objective ? 
                 `<div class="card-img-top bg-light border-bottom">
