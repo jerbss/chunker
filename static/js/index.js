@@ -561,211 +561,573 @@ function createIntroCard() {
 }
 
 /**
- * Cria um card para uma parte
+ * Cria um card para uma parte - versão reestruturada
  */
 function createPartCard(part, index) {
     const partNumber = index + 1;
     const cardId = `card-part-${partNumber}`;
-    const colClass = 'col-12'; // Usa largura total, igual à introdução e conclusão
+    const colClass = 'col-12'; // Usa largura total
     
     const card = document.createElement('div');
     card.className = `${colClass} mb-4`;
     card.id = cardId;
     
-    // Criar badges para TODOS os conceitos-chave sem limitar quantidade
-    const conceptBadges = Array.isArray(part.concepts) && part.concepts.length > 0 
-        ? part.concepts.map(concept => `<span class="badge bg-light text-success me-1 mb-1">${concept}</span>`).join('')
-        : '<span class="badge bg-light text-muted me-1 mb-1">Sem conceitos-chave definidos</span>';
+    // Extrair metadados do conteúdo da parte (como no exemplo fornecido)
+    const metadata = extractPartMetadata(part.content);
     
-    // Criar bloco de reflexão se existir (agora com melhor formatação e posição)
-    const reflectionBlock = part.reflection 
-        ? `<div class="mt-3 p-3 border-start border-warning bg-light">
-               <strong class="text-warning" style="font-family: 'Exo 2', sans-serif; font-weight: 600;"><i class="fas fa-lightbulb me-1"></i>Reflexão:</strong> 
-               <p class="mb-0 mt-1">${part.reflection}${!part.reflection.endsWith('?') ? '?' : ''}</p>
-           </div>`
-        : '';
+    // Extrair informações específicas do título
+    const titleInfo = extractTitleInfo(part.title);
+    const emoji = titleInfo.emoji || '📚';
+    const duration = titleInfo.duration || '1.5h';
     
-    // Mini-desafio prático com tempo específico (NOVO)
-    const miniChallengeBlock = `
-        <div class="mt-3 p-3 border-start border-success bg-light">
-            <div class="d-flex justify-content-between align-items-start">
-                <strong class="text-success" style="font-family: 'Exo 2', sans-serif; font-weight: 600;">
-                    <i class="fas fa-stopwatch me-1"></i>Mini-Desafio (15min)
-                </strong>
-            </div>
-            <p class="mb-2 mt-2">Crie um exemplo prático aplicando ${part.concepts.length > 0 ? part.concepts[0] : 'o conceito principal'} em um projeto simples.</p>
-            <div class="d-flex align-items-center">
-                <button class="btn btn-sm btn-outline-success me-2 toggle-challenge-details">
-                    <i class="fas fa-chevron-down"></i> Dicas
-                </button>
-                <span class="small text-muted">Tente resolver antes de ver as dicas</span>
-            </div>
-            <div class="challenge-details mt-2" style="display: none;">
-                <ul class="mb-0">
-                    <li>Comece definindo o escopo mínimo viável</li>
-                    <li>Aplique pelo menos 2 conceitos desta parte</li>
-                    <li>Critique seu próprio resultado ao finalizar</li>
-                </ul>
-            </div>
-        </div>
-    `;
-    
-    // Artefatos esperados (NOVO)
-    const expectedArtifactsBlock = `
-        <div class="mt-3 p-3 border-start border-primary bg-light">
-            <strong class="text-primary" style="font-family: 'Exo 2', sans-serif; font-weight: 600;">
-                <i class="fas fa-clipboard-check me-1"></i>Artefatos Esperados
-            </strong>
-            <ul class="mb-0 mt-2">
-                <li>Documento com exemplo prático de ${part.concepts.length > 0 ? part.concepts[0] : 'aplicação do conceito'}</li>
-                <li>Exercício resolvido demonstrando entendimento do tópico</li>
-                <li>Resumo dos pontos principais (máx. 1 página)</li>
-            </ul>
-        </div>
-    `;
-    
-    // Checklist de domínio (NOVO)
-    const checklistItems = part.concepts.length > 0 
-        ? part.concepts.slice(0, 3).map(concept => `
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="check-${cardId}-${concept.replace(/\W+/g, '')}">
-                <label class="form-check-label" for="check-${cardId}-${concept.replace(/\W+/g, '')}">
-                    Compreendo ${concept} e posso explicar para outra pessoa
-                </label>
-            </div>
-          `).join('')
-        : `
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="check-${cardId}-generic">
-                <label class="form-check-label" for="check-${cardId}-generic">
-                    Compreendo os conceitos principais desta parte
-                </label>
-            </div>
-          `;
-    
-    const domainChecklistBlock = `
-        <div class="mt-3 p-3 border border-secondary rounded bg-light">
-            <strong style="font-family: 'Exo 2', sans-serif; font-weight: 600;">
-                <i class="fas fa-tasks me-1"></i>Checklist de Domínio
-            </strong>
-            <div class="mt-2">
-                ${checklistItems}
-            </div>
-        </div>
-    `;
-    
-    // Toggle de modo de estudo (NOVO)
-    const studyModeToggle = `
-        <div class="study-mode-toggle card-header d-flex justify-content-between align-items-center py-2 px-3 bg-light border-bottom">
-            <span class="text-muted small">Modo de estudo:</span>
-            <div class="btn-group" role="group">
-                <input type="radio" class="btn-check" name="mode-${cardId}" id="turbo-${cardId}" autocomplete="off" checked>
-                <label class="btn btn-sm btn-outline-secondary" for="turbo-${cardId}">
-                    <i class="fas fa-rocket me-1"></i>Turbo
-                </label>
-                
-                <input type="radio" class="btn-check" name="mode-${cardId}" id="deep-${cardId}" autocomplete="off">
-                <label class="btn btn-sm btn-outline-secondary" for="deep-${cardId}">
-                    <i class="fas fa-brain me-1"></i>Profundo
-                </label>
-            </div>
-        </div>
-    `;
-    
-    // Autoavaliação (NOVO)
-    const selfAssessmentBlock = `
-        <div class="mt-3 p-3 border-start border-secondary bg-light">
-            <strong class="text-secondary" style="font-family: 'Exo 2', sans-serif; font-weight: 600;">
-                <i class="fas fa-chart-line me-1"></i>Autoavaliação
-            </strong>
-            <p class="mb-2 mt-2">Em uma escala de 1-5, avalie seu entendimento dos conceitos desta parte:</p>
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="rating-labels d-flex justify-content-between w-100 px-2">
-                    <span class="small">Iniciante</span>
-                    <span class="small">Intermediário</span>
-                    <span class="small">Avançado</span>
-                </div>
-            </div>
-            <div class="rating-container d-flex align-items-center mt-1">
-                <input type="range" class="form-range" min="1" max="5" value="3" id="rating-${cardId}">
-            </div>
-            <div class="mt-2 p-2 border rounded d-none feedback-area" id="feedback-${cardId}">
-                <p class="feedback-text mb-0 small"></p>
-            </div>
-        </div>
-    `;
-    
-    // Criar bloco de prompt de instrução se existir
-    const instructionPromptBlock = part.instructionPrompt 
-        ? `<div class="mt-3 p-3 border-start border-info bg-light">
-               <div class="d-flex justify-content-between align-items-start">
-                   <strong class="text-info" style="font-family: 'Exo 2', sans-serif; font-weight: 600;">
-                       <i class="fas fa-robot me-1"></i>Prompt de Instrução
-                   </strong>
-                   <button class="btn btn-sm btn-outline-info copy-prompt" data-prompt="${encodeURIComponent(part.instructionPrompt)}">
-                       <i class="fas fa-copy"></i> Copiar
-                   </button>
-               </div>
-               <pre class="mb-0 mt-2 p-2 theme-adaptive-pre" style="white-space: pre-wrap; border-radius: 4px;">${part.instructionPrompt}</pre>
-           </div>`
-        : '';
-    
-    // Verificar se há conteúdo real no corpo do card, caso contrário, adicionar um placeholder
-    const bodyContent = (part.content && part.content.trim()) 
-        ? part.content 
-        : '<p class="text-muted">Este card contém os principais conceitos e tópicos relacionados a esta parte do conteúdo.</p>';
-    
-    // Conteúdo específico do Modo Profundo (inicialmente oculto)
-    const deepModeContent = `
-        <div class="deep-mode-content mt-3 p-3 border rounded bg-light" style="display: none;">
-            <h5 class="text-primary"><i class="fas fa-brain me-2"></i>Conteúdo do Modo Profundo</h5>
-            <p>Neste modo, você terá acesso a:</p>
-            <ul>
-                <li><strong>Exercícios Práticos:</strong> Aplicações detalhadas dos conceitos</li>
-                <li><strong>Projeto Guiado:</strong> Implementação passo-a-passo</li>
-                <li><strong>Análise Aprofundada:</strong> Explicações conceituais detalhadas</li>
-            </ul>
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>Este conteúdo requer aproximadamente 2-3 horas para ser completado.
-            </div>
-        </div>
-    `;
-    
+    // Criar a estrutura do card com layout aprimorado
     card.innerHTML = `
         <div class="card shadow h-100">
+            <!-- Header principal com título da parte -->
             <div class="card-header bg-success text-white">
-                <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">${part.title}</h3>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">
+                        <span class="me-2">${emoji}</span>${part.title}
+                    </h3>
+                    <span class="badge bg-light text-success">Parte ${partNumber}</span>
+                </div>
             </div>
             
-            ${studyModeToggle}
+            <!-- Metadados superiores: dificuldade, taxonomia, etc. -->
+            <div class="card-header metadata-header py-2 px-3 bg-light border-bottom">
+                <div class="row g-2">
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-gauge-high text-secondary me-2"></i>
+                            <span class="text-muted small">Dificuldade: </span>
+                            <span class="ms-1 fw-medium">${metadata.difficulty || '1/5'}</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-brain text-secondary me-2"></i>
+                            <span class="text-muted small">Bloom: </span>
+                            <span class="ms-1 fw-medium">${metadata.bloomTaxonomy || 'Compreender'}</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-graduation-cap text-secondary me-2"></i>
+                            <span class="text-muted small">Estilo: </span>
+                            <span class="ms-1 fw-medium">${metadata.learningStyle || 'Visual'}</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-clock text-secondary me-2"></i>
+                            <span class="text-muted small">Duração: </span>
+                            <span class="ms-1 fw-medium">${duration}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
+            <!-- Toggle de modo de estudo -->
+            <div class="study-mode-toggle card-header d-flex justify-content-between align-items-center py-2 px-3 bg-light border-bottom">
+                <span class="text-muted small">Modo de estudo:</span>
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="mode-${cardId}" id="turbo-${cardId}" autocomplete="off" checked>
+                    <label class="btn btn-sm btn-outline-secondary" for="turbo-${cardId}">
+                        <i class="fas fa-rocket me-1"></i>Turbo
+                    </label>
+                    
+                    <input type="radio" class="btn-check" name="mode-${cardId}" id="deep-${cardId}" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-secondary" for="deep-${cardId}">
+                        <i class="fas fa-brain me-1"></i>Profundo
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Objetivo de aprendizagem (se existir) -->
             ${part.objective ? 
-                `<div class="card-img-top text-center py-3 bg-light">
-                    <span class="text-success" style="font-family: 'Exo 2', sans-serif; font-weight: 600;"><i class="fas fa-bullseye me-1"></i>Objetivo:</span>
-                    <p class="mb-0 px-3">${part.objective}</p>
+                `<div class="card-img-top bg-light border-bottom">
+                    <div class="d-flex align-items-start p-3">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="objective-icon bg-success-subtle rounded-circle p-2">
+                                <i class="fas fa-bullseye text-success fs-5"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-success fw-medium mb-1 d-block" style="font-family: 'Exo 2', sans-serif;">Objetivo Transformador:</span>
+                            <p class="mb-0">${part.objective}</p>
+                            
+                            ${metadata.progressPercent ? 
+                                `<div class="mt-3">
+                                    <div class="d-flex justify-content-between align-items-center small">
+                                        <span class="text-muted">Progresso Acumulado</span>
+                                        <span class="badge bg-success">${metadata.progressPercent}%</span>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 8px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: ${metadata.progressPercent}%"></div>
+                                    </div>
+                                </div>` : ''
+                            }
+                        </div>
+                    </div>
                 </div>` : ''
             }
             
+            <!-- Corpo principal do card -->
             <div class="card-body">
-                ${bodyContent}
-                ${deepModeContent}
+                <!-- Mapa e conexões -->
+                ${metadata.mapInfo || metadata.connections ? 
+                    `<div class="card border rounded-3 mb-3 part-map-card">
+                        <div class="card-body p-3">
+                            ${metadata.mapInfo ? 
+                                `<div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-map-location-dot text-success me-2 fs-5"></i>
+                                    <h5 class="mb-0 fw-medium">Mapa da Parte</h5>
+                                </div>
+                                <p class="mb-2">${metadata.mapInfo}</p>` : ''
+                            }
+                            
+                            ${metadata.connections ? 
+                                `<div class="connections-section mt-2">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-link text-primary me-2"></i>
+                                        <span class="text-muted">Conexões com outras partes:</span>
+                                    </div>
+                                    <div class="connections-map">
+                                        ${metadata.connections}
+                                    </div>
+                                </div>` : ''
+                            }
+                            
+                            ${metadata.knowledgeTree ? 
+                                `<div class="mt-2 pt-2 border-top">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-code-branch text-success me-2"></i>
+                                        <span class="text-muted">Árvore de Conhecimento:</span>
+                                    </div>
+                                    <pre class="mb-0 knowledge-tree-pre">${metadata.knowledgeTree}</pre>
+                                </div>` : ''
+                            }
+                        </div>
+                    </div>` : ''
+                }
+                
+                <!-- Conteúdo principal (tópicos nucleares) -->
+                ${part.content && part.content.trim() ? 
+                    `<div class="topics-container">
+                        ${cleanContentHTML(part.content)}
+                    </div>` : 
+                    '<p class="text-muted">Este card contém os principais conceitos e tópicos relacionados a esta parte do conteúdo.</p>'
+                }
+                
+                <!-- Conteúdo do modo profundo (inicialmente oculto) -->
+                <div class="deep-mode-content mt-3 p-3 border rounded bg-light" style="display: none;">
+                    <h5 class="text-primary"><i class="fas fa-brain me-2"></i>Conteúdo do Modo Profundo</h5>
+                    <p>Neste modo, você terá acesso a:</p>
+                    <ul>
+                        <li><strong>Exercícios Práticos:</strong> Aplicações detalhadas dos conceitos</li>
+                        <li><strong>Projeto Guiado:</strong> Implementação passo-a-passo</li>
+                        <li><strong>Análise Aprofundada:</strong> Explicações conceituais detalhadas</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>Este conteúdo requer aproximadamente 2-3 horas para ser completado.
+                    </div>
+                </div>
             </div>
             
+            <!-- Footer com recursos adicionais -->
             <div class="card-footer bg-light p-0">
                 <div class="p-3">
-                    <div class="mb-2 concepts-container">${conceptBadges}</div>
-                    ${expectedArtifactsBlock}
-                    ${miniChallengeBlock}
-                    ${domainChecklistBlock}
-                    ${selfAssessmentBlock}
-                    ${part.reflection ? reflectionBlock : ''}
-                    ${instructionPromptBlock}
+                    <!-- Conceitos-chave -->
+                    <div class="mb-3 concepts-container">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-tags text-success me-2"></i>
+                            <h5 class="mb-0 fw-medium">Conceitos-chave</h5>
+                        </div>
+                        <div class="mt-1">
+                            ${Array.isArray(part.concepts) && part.concepts.length > 0 
+                                ? part.concepts.map(concept => `<span class="badge bg-light text-success me-1 mb-1">${concept}</span>`).join('')
+                                : '<span class="badge bg-light text-muted me-1 mb-1">Sem conceitos-chave definidos</span>'
+                            }
+                        </div>
+                    </div>
+                    
+                    <!-- Checklist de domínio - aproveitando dados formatados ou padrão -->
+                    <div class="mt-4 mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-tasks text-primary me-2"></i>
+                            <h5 class="mb-0 fw-medium">Checklist de Domínio</h5>
+                        </div>
+                        <div class="checklist-container p-3 border rounded-3 bg-light mt-2">
+                            ${metadata.domainChecklist ? 
+                                createStructuredChecklist(metadata.domainChecklist, cardId) : 
+                                createDefaultChecklist(part, cardId)
+                            }
+                        </div>
+                    </div>
+                    
+                    <!-- Recursos adicionais organizados em accordions -->
+                    <div class="mt-4">
+                        <div class="accordion" id="resources-${cardId}">
+                            <!-- Artefatos esperados -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#artifacts-${cardId}">
+                                        <i class="fas fa-clipboard-check text-primary me-2"></i>Artefatos Esperados
+                                    </button>
+                                </h2>
+                                <div id="artifacts-${cardId}" class="accordion-collapse collapse show" data-bs-parent="#resources-${cardId}">
+                                    <div class="accordion-body">
+                                        <ul class="mb-0">
+                                            <li>Documento com exemplo prático de ${part.concepts.length > 0 ? part.concepts[0] : 'aplicação do conceito'}</li>
+                                            <li>Exercício resolvido demonstrando entendimento do tópico</li>
+                                            <li>Resumo dos pontos principais (máx. 1 página)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Desafio Relâmpago -->
+                            ${metadata.challenge ? 
+                                `<div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#challenge-${cardId}">
+                                            <i class="fas fa-bolt text-warning me-2"></i>Desafio Relâmpago
+                                        </button>
+                                    </h2>
+                                    <div id="challenge-${cardId}" class="accordion-collapse collapse show" data-bs-parent="#resources-${cardId}">
+                                        <div class="accordion-body">
+                                            <div class="d-flex">
+                                                <div class="challenge-timer-badge bg-warning-subtle rounded-circle p-2 me-3">
+                                                    <i class="fas fa-stopwatch text-warning fs-5"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="fw-medium mb-1">Em 15 minutos:</p>
+                                                    <p class="mb-0">${metadata.challenge}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>` : ''
+                            }
+                            
+                            <!-- Caso Real -->
+                            ${metadata.realCase ? 
+                                `<div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#case-${cardId}">
+                                            <i class="fas fa-user-check text-info me-2"></i>Caso Real
+                                        </button>
+                                    </h2>
+                                    <div id="case-${cardId}" class="accordion-collapse collapse show" data-bs-parent="#resources-${cardId}">
+                                        <div class="accordion-body">
+                                            <p class="mb-0 fst-italic">"${metadata.realCase}"</p>
+                                        </div>
+                                    </div>
+                                </div>` : ''
+                            }
+                            
+                            <!-- Prompt de IA -->
+                            ${metadata.aiPrompt || part.instructionPrompt ? 
+                                `<div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#prompt-${cardId}">
+                                            <i class="fas fa-robot text-info me-2"></i>Prompt de IA
+                                        </button>
+                                    </h2>
+                                    <div id="prompt-${cardId}" class="accordion-collapse collapse" data-bs-parent="#resources-${cardId}">
+                                        <div class="accordion-body">
+                                            <div class="d-flex justify-content-end mb-2">
+                                                <button class="btn btn-sm btn-outline-info copy-prompt" data-prompt="${encodeURIComponent(metadata.aiPrompt || part.instructionPrompt)}">
+                                                    <i class="fas fa-copy me-1"></i>Copiar
+                                                </button>
+                                            </div>
+                                            <pre class="m-0 p-2 bg-light border rounded">${metadata.aiPrompt || part.instructionPrompt}</pre>
+                                        </div>
+                                    </div>
+                                </div>` : ''
+                            }
+                            
+                            <!-- Autoavaliação -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#assessment-${cardId}">
+                                        <i class="fas fa-chart-line text-secondary me-2"></i>Autoavaliação
+                                    </button>
+                                </h2>
+                                <div id="assessment-${cardId}" class="accordion-collapse collapse" data-bs-parent="#resources-${cardId}">
+                                    <div class="accordion-body">
+                                        <p class="mb-2">Em uma escala de 1-5, avalie seu entendimento desta parte:</p>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="rating-labels d-flex justify-content-between w-100 px-2">
+                                                <span class="small">Iniciante</span>
+                                                <span class="small">Intermediário</span>
+                                                <span class="small">Avançado</span>
+                                            </div>
+                                        </div>
+                                        <div class="rating-container d-flex align-items-center mt-1">
+                                            <input type="range" class="form-range" min="1" max="5" value="3" id="rating-${cardId}">
+                                        </div>
+                                        <div class="mt-2 p-2 border rounded d-none feedback-area" id="feedback-${cardId}">
+                                            <p class="feedback-text mb-0 small"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Reflexão (se existir) -->
+                            ${part.reflection ? 
+                                `<div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#reflection-${cardId}">
+                                            <i class="fas fa-lightbulb text-warning me-2"></i>Reflexão
+                                        </button>
+                                    </h2>
+                                    <div id="reflection-${cardId}" class="accordion-collapse collapse" data-bs-parent="#resources-${cardId}">
+                                        <div class="accordion-body">
+                                            <p class="mb-0">${part.reflection}${!part.reflection.endsWith('?') ? '?' : ''}</p>
+                                        </div>
+                                    </div>
+                                </div>` : ''
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     `;
     
     return card;
+}
+
+/**
+ * Extrai informações de emoji e duração do título da parte
+ * @param {string} title - Título da parte
+ * @returns {Object} - Objeto com emoji e duração extraídos
+ */
+function extractTitleInfo(title) {
+    const result = {
+        emoji: null,
+        duration: null
+    };
+    
+    // Extrair emoji usando regex
+    const emojiMatch = title.match(/→\s*([^\s(]+)/);
+    if (emojiMatch && emojiMatch[1]) {
+        result.emoji = emojiMatch[1].trim();
+    }
+    
+    // Extrair duração usando regex para encontrar texto entre parênteses
+    const durationMatch = title.match(/\(([^)]+)\)/);
+    if (durationMatch && durationMatch[1]) {
+        result.duration = durationMatch[1].trim();
+    }
+    
+    return result;
+}
+
+/**
+ * Extrai metadados estruturados da parte do conteúdo HTML
+ * @param {string} contentHTML - HTML do conteúdo da parte
+ * @returns {Object} - Objeto com metadados extraídos
+ */
+function extractPartMetadata(contentHTML) {
+    // Criar um elemento temporário para analisar o HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = contentHTML;
+    
+    const metadata = {
+        difficulty: null,
+        bloomTaxonomy: null,
+        learningStyle: null,
+        prerequisites: null,
+        mapInfo: null,
+        progressPercent: null,
+        connections: null,
+        knowledgeTree: null,
+        domainChecklist: null,
+        challenge: null,
+        realCase: null,
+        aiPrompt: null
+    };
+    
+    // Extrair informações básicas do primeiro parágrafo
+    const firstParagraph = tempDiv.querySelector('p');
+    if (firstParagraph) {
+        const text = firstParagraph.textContent;
+        
+        // Extrair dificuldade
+        const difficultyMatch = text.match(/Dificuldade:\s*([^,\n]+)/);
+        if (difficultyMatch) metadata.difficulty = difficultyMatch[1].trim();
+        
+        // Extrair taxonomia de Bloom
+        const bloomMatch = text.match(/Taxonomia de Bloom:\s*([^,\n]+)/);
+        if (bloomMatch) metadata.bloomTaxonomy = bloomMatch[1].trim();
+        
+        // Extrair estilo de aprendizado
+        const styleMatch = text.match(/Estilo de Aprendizado:\s*([^,\n]+)/);
+        if (styleMatch) metadata.learningStyle = styleMatch[1].trim();
+        
+        // Extrair pré-requisitos
+        const prereqMatch = text.match(/Pré-requisitos Técnicos:\s*([^,\n]+)/);
+        if (prereqMatch) metadata.prerequisites = prereqMatch[1].trim();
+    }
+    
+    // Extrair mapa da parte
+    const mapElement = Array.from(tempDiv.querySelectorAll('p')).find(p => 
+        p.textContent.includes('Mapa da Parte:'));
+    if (mapElement) {
+        metadata.mapInfo = mapElement.textContent.replace('Mapa da Parte:', '').trim();
+    }
+    
+    // Extrair progresso acumulado
+    const progressElement = Array.from(tempDiv.querySelectorAll('p')).find(p => 
+        p.textContent.includes('Progresso Acumulado:'));
+    if (progressElement) {
+        const progressText = progressElement.textContent;
+        const percentMatch = progressText.match(/(\d+)%/);
+        if (percentMatch) {
+            metadata.progressPercent = percentMatch[1];
+        }
+        
+        // Extrair conexões da mesma linha
+        const connectionsMatch = progressText.match(/Conexões com Partes:(.*?)(?:$|Árvore)/);
+        if (connectionsMatch) {
+            metadata.connections = connectionsMatch[1].trim();
+        }
+    }
+    
+    // Extrair árvore de conhecimento
+    const treeElement = Array.from(tempDiv.querySelectorAll('p')).find(p => 
+        p.textContent.includes('Árvore de Conhecimento:'));
+    if (treeElement) {
+        metadata.knowledgeTree = treeElement.textContent.replace('Árvore de Conhecimento:', '').trim();
+    }
+    
+    // Extrair checklist de domínio
+    const checklistElement = Array.from(tempDiv.querySelectorAll('div')).find(div => {
+        const p = div.querySelector('p');
+        return p && p.textContent.includes('Checklist de Domínio:');
+    });
+    if (checklistElement) {
+        const items = checklistElement.querySelectorAll('li');
+        if (items.length > 0) {
+            metadata.domainChecklist = Array.from(items).map(li => li.textContent.trim());
+        }
+    }
+    
+    // Extrair desafio relâmpago
+    const challengeElement = Array.from(tempDiv.querySelectorAll('p')).find(p => 
+        p.textContent.includes('Desafio Relâmpago:'));
+    if (challengeElement) {
+        const challengeText = challengeElement.textContent;
+        const challengeMatch = challengeText.match(/Em 15 minutos:(.*?)(?:$)/);
+        if (challengeMatch) {
+            metadata.challenge = challengeMatch[1].trim();
+        } else {
+            metadata.challenge = challengeText.replace('Desafio Relâmpago:', '').trim();
+        }
+    }
+    
+    // Extrair caso real
+    const caseElement = Array.from(tempDiv.querySelectorAll('p')).find(p => 
+        p.textContent.includes('Caso Real #'));
+    if (caseElement) {
+        metadata.realCase = caseElement.textContent.replace(/Caso Real #\d+:/, '').trim();
+    }
+    
+    // Extrair prompt de IA acionável
+    const promptElement = tempDiv.querySelector('pre code.language-prompt');
+    if (promptElement) {
+        metadata.aiPrompt = promptElement.textContent.trim();
+    }
+    
+    return metadata;
+}
+
+/**
+ * Limpa o HTML do conteúdo para melhor apresentação
+ * @param {string} contentHTML - HTML original do conteúdo
+ * @returns {string} - HTML limpo para apresentação
+ */
+function cleanContentHTML(contentHTML) {
+    // Criar um elemento temporário para limpar o HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = contentHTML;
+    
+    // Remover parágrafos de metadados que já foram extraídos
+    const paragraphs = tempDiv.querySelectorAll('p');
+    paragraphs.forEach(p => {
+        const text = p.textContent;
+        if (text.includes('Dificuldade:') || 
+            text.includes('Taxonomia de Bloom:') || 
+            text.includes('Estilo de Aprendizado:') || 
+            text.includes('Mapa da Parte:') || 
+            text.includes('Progresso Acumulado:') || 
+            text.includes('Árvore de Conhecimento:') ||
+            text.includes('Desafio Relâmpago:') ||
+            text.includes('Prompt de IA Acionável:') ||
+            text.includes('Caso Real #')) {
+            p.remove();
+        }
+    });
+    
+    // Agora o conteúdo deve conter principalmente os tópicos nucleares e rotas alternativas
+    return tempDiv.innerHTML;
+}
+
+/**
+ * Cria um checklist estruturado a partir dos itens extraídos
+ * @param {Array} items - Array de itens para o checklist
+ * @param {string} cardId - ID do card atual
+ * @returns {string} - HTML do checklist estruturado
+ */
+function createStructuredChecklist(items, cardId) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
+        return createDefaultChecklist(null, cardId);
+    }
+    
+    return items.map((item, index) => {
+        const itemId = `check-${cardId}-item-${index}`;
+        const isChecked = item.startsWith('[x]') ? 'checked' : '';
+        const cleanItem = item.replace(/\[[x\s]?\]/i, '').trim();
+        
+        return `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="${itemId}" ${isChecked}>
+                <label class="form-check-label" for="${itemId}">
+                    ${cleanItem}
+                </label>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Cria um checklist padrão baseado nos conceitos da parte
+ * @param {Object} part - Objeto com dados da parte
+ * @param {string} cardId - ID do card atual
+ * @returns {string} - HTML do checklist padrão
+ */
+function createDefaultChecklist(part, cardId) {
+    if (part && Array.isArray(part.concepts) && part.concepts.length > 0) {
+        return part.concepts.slice(0, 3).map(concept => `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="check-${cardId}-${concept.replace(/\W+/g, '')}">
+                <label class="form-check-label" for="check-${cardId}-${concept.replace(/\W+/g, '')}">
+                    Compreendo ${concept} e posso explicar para outra pessoa
+                </label>
+            </div>
+        `).join('');
+    } else {
+        return `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="check-${cardId}-generic">
+                <label class="form-check-label" for="check-${cardId}-generic">
+                    Compreendo os conceitos principais desta parte
+                </label>
+            </div>
+        `;
+    }
 }
 
 /**
@@ -1528,7 +1890,7 @@ function finalizeContentStructure() {
     document.querySelectorAll('.card-body li').forEach(item => {
         // Se o item tem conteúdo começando com emoji mas não foi processado
         const content = item.innerHTML;
-        const emojiMatch = content.match(/^([\u{1F300}-\u{1F6FF}]|[0-9][\.\)]|⏱|🛠|✅|🎯|🤖|🔄|📈|🚀|🐢|1️⃣|2️⃣|3️⃣|4️⃣|5️⃣)\s+/u);
+        const emojiMatch = content.match(/^([\u{1F300}-\u{1F6FF}]|⏱|🛠|✅|🎯|🤖|🔄|📈|🚀|🐢|1️⃣|2️⃣|3️⃣|4️⃣|5️⃣)\s+/u);
         
         if (emojiMatch && !content.includes('<strong>')) {
             const emoji = emojiMatch[1];
