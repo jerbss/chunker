@@ -395,6 +395,18 @@ code, pre {
 
 /* ========== Responsividade ========== */
 @media (min-width: 992px) {
+    /* Força cada coluna a ocupar 50% da largura da linha */
+    .card-header.metadata-header .row > [class*="col-lg-"] {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+        text-align: center;
+    }
+    
+    /* Opcional: centraliza também os conteúdos internos */
+    .card-header.metadata-header .d-flex {
+        justify-content: center;
+    }
+    
     .context-card {
         grid-column: span 2;
     }
@@ -1377,6 +1389,7 @@ html.light-theme .brand-link:hover .text-accent {
     border-bottom: 1px solid rgba(0,0,0,0.08);
     padding: 0.75rem 1rem;
 }
+
 
 html.dark-theme .card-header.metadata-header {
     border-bottom: 1px solid rgba(255,255,255,0.1);
