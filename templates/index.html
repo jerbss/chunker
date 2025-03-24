@@ -62,18 +62,10 @@
                         
                         <div class="status-indicators">
                             <div class="status-badge" data-bs-toggle="tooltip" data-bs-placement="bottom" 
-                                 title="Este conteúdo é processado usando modelos avançados de IA">
+                                 title="Este conteúdo é processado usando a API Google Gemini">
                                 <i class="fas fa-brain status-icon" aria-hidden="true"></i>
-                                <span class="status-text">IA Avançada</span>
+                                <span class="status-text">Gemini API</span>
                             </div>
-                            
-                            {% if used_fallback %}
-                            <div class="status-badge is-warning" data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                 title="Sistema utilizando API alternativa devido a indisponibilidade da principal">
-                                <i class="fas fa-exchange-alt status-icon" aria-hidden="true"></i>
-                                <span class="status-text">Modo Fallback</span>
-                            </div>
-                            {% endif %}
                         </div>
                     </div>
                 </div>

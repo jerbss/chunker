@@ -259,4 +259,13 @@ def generate_prompt(tema, num_partes):
       * NUNCA use parágrafos de múltiplas linhas dentro de itens de lista
     """
     
+    # Adicionar informação sobre a nova abordagem
+    instrucoes_adicionais += f"""
+    NOTA SOBRE ESTRUTURA:
+    Este prompt é usado apenas para a abordagem de geração completa em uma única solicitação.
+    Na abordagem preferida, o sistema utiliza requisições independentes para cada parte.
+    Se você está vendo este prompt, o sistema está utilizando o modo de fallback.
+    Isso garante que a geração mantenha qualidade e detalhamento consistente.
+    """
+    
     return f"{CHUNKING_SYSTEM_PROMPT}\n{instrucoes_adicionais}\n\nCrie um guia de estudos completo para o tema \"{tema}\" dividido em {num_partes} partes."
