@@ -1371,4 +1371,209 @@ html.light-theme .brand-link:hover .text-accent {
     text-decoration: underline;  /* feedback visual claro */
 }
 
+/* ========== Cards de Parte Redesenhados ========== */
+.card-header.metadata-header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 0.75rem 1rem;
+}
+
+html.dark-theme .card-header.metadata-header {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.03);
+}
+
+.part-map-card {
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    background-color: var(--card-bg);
+}
+
+html.dark-theme .part-map-card {
+    border-color: rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.03);
+}
+
+.knowledge-tree-pre {
+    font-family: monospace;
+    white-space: pre-wrap;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    background-color: rgba(0,0,0,0.03);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+html.dark-theme .knowledge-tree-pre {
+    background-color: rgba(255,255,255,0.05);
+}
+
+.connections-map {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    background-color: rgba(0,0,0,0.03);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+html.dark-theme .connections-map {
+    background-color: rgba(255,255,255,0.05);
+}
+
+.objective-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(var(--secondary-rgb), 0.1);
+    border-radius: 50%;
+    color: var(--secondary-color);
+}
+
+html.dark-theme .objective-icon {
+    background-color: rgba(var(--secondary-rgb), 0.2);
+}
+
+.challenge-timer-badge {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(var(--warning-rgb), 0.1);
+    border-radius: 50%;
+    color: var(--warning-color);
+}
+
+html.dark-theme .challenge-timer-badge {
+    background-color: rgba(var(--warning-rgb), 0.2);
+}
+
+.checklist-container {
+    background-color: rgba(0,0,0,0.02);
+}
+
+html.dark-theme .checklist-container {
+    background-color: rgba(255,255,255,0.03);
+}
+
+/* Estilos para o accordion personalizado */
+.accordion-button {
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    font-family: 'Exo 2', sans-serif;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.accordion-button:not(.collapsed) {
+    color: var(--primary-color);
+    background-color: rgba(var(--primary-rgb), 0.05);
+    box-shadow: none;
+}
+
+html.dark-theme .accordion-button:not(.collapsed) {
+    background-color: rgba(var(--primary-rgb), 0.15);
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(var(--primary-rgb), 0.25);
+}
+
+.accordion-item {
+    background-color: var(--card-bg);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+html.dark-theme .accordion-item {
+    border-color: rgba(255,255,255,0.1);
+}
+
+.accordion-body {
+    padding: 1rem;
+    background-color: var(--card-bg);
+}
+
+/* Estilos para os metadados de parte */
+.fw-medium {
+    font-weight: 500;
+}
+
+.bg-success-subtle {
+    background-color: rgba(var(--secondary-rgb), 0.1);
+}
+
+.bg-warning-subtle {
+    background-color: rgba(var(--warning-rgb), 0.1);
+}
+
+html.dark-theme .bg-success-subtle {
+    background-color: rgba(var(--secondary-rgb), 0.2);
+}
+
+html.dark-theme .bg-warning-subtle {
+    background-color: rgba(var(--warning-rgb), 0.2);
+}
+
+/* Progress bar enhancement */
+.progress {
+    background-color: rgba(0,0,0,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+html.dark-theme .progress {
+    background-color: rgba(255,255,255,0.1);
+}
+
+/* Custom badge styles */
+.badge.bg-light {
+    background-color: rgba(0,0,0,0.07) !important;
+    font-weight: normal;
+}
+
+html.dark-theme .badge.bg-light {
+    background-color: rgba(255,255,255,0.07) !important;
+}
+
+.badge.text-success {
+    color: var(--secondary-color) !important;
+}
+
+html.dark-theme .badge.text-success {
+    color: #4ADE80 !important;
+}
+
+.badge.text-primary {
+    color: var(--primary-color) !important;
+}
+
+html.dark-theme .badge.text-primary {
+    color: #60A5FA !important;
+}
+
+.badge.text-muted {
+    color: #6c757d !important;
+}
+
+html.dark-theme .badge.text-muted {
+    color: #adb5bd !important;
+}
+
+/* Header styles for part sections */
+.topics-container h3, 
+.topics-container h4 {
+    font-family: 'Exo 2', sans-serif;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.topics-container ul,
+.topics-container ol {
+    margin-bottom: 1.5rem;
+}
+
 /* ...existing code... */

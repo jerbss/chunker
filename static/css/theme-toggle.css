@@ -1,30 +1,68 @@
-/* Definição de temas (claro e escuro) */
-:root, html.light-theme {
-    --primary-color: #2962FF;       /* Azul Primário - 60% */
-    --primary-dark: #1E4FCC;        /* Versão mais escura do azul primário */
-    --secondary-color: #00CC99;     /* Verde Secundário - 30% */
-    --accent-color: #FF6B35;        /* Laranja de Ação - 10% */
-    --text-color: #2A2A2A;          /* Cinza Escuro para textos */
-    --light-bg: #F5F7FA;            /* Cinza Claro para fundos */
-    --card-bg: #FFFFFF;             /* Branco para cards */
-    --warning: #FF6B35;             /* Usando o laranja de acento para avisos */
-    --danger: #FF3A30;              /* Vermelho para erros */
-    --shadow: 0 4px 15px rgba(0,0,0,0.1);
-    --hover-shadow: 0 8px 25px rgba(0,0,0,0.15);
+/* Variáveis para temas - com suporte para novos elementos de UI */
+:root {
+    /* Tema claro (padrão) */
+    --light-bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-color: #212529;
+    --primary-color: #2962ff;
+    --primary-dark: #0039cb;
+    --primary-light: #768fff;
+    --primary-rgb: 41, 98, 255;
+    --secondary-color: #28a745;
+    --secondary-dark: #1e7e34;
+    --secondary-light: #48c164;
+    --secondary-rgb: 40, 167, 69;
+    --accent-color: #ff6b35;
+    --accent-dark: #e54b17;
+    --accent-light: #ff8a5f;
+    --accent-rgb: 255, 107, 53;
+    --warning-color: #ffc107;
+    --warning-dark: #d39e00;
+    --warning-light: #ffcd39;
+    --warning-rgb: 255, 193, 7;
+    --purple-color: #6f42c1;
+    --purple-dark: #4e2c94;
+    --purple-light: #855bd5;
+    --purple-rgb: 111, 66, 193;
+    --info-color: #17a2b8;
+    --info-dark: #117a8b;
+    --info-light: #4fbdcf;
+    --info-rgb: 23, 162, 184;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 }
 
+/* Tema escuro - ativado via classe na tag html */
 html.dark-theme {
-    --primary-color: #2962FF;       /* Azul Primário mantido - 60% */
-    --primary-dark: #1E4FCC;        /* Versão mais escura do azul */
-    --secondary-color: #00B386;     /* Verde Escuro - 30% */
-    --accent-color: #FF5A1F;        /* Laranja Escuro - 10% */
-    --text-color: #F5F7FA;          /* Cinza Claro para textos no tema escuro */
-    --light-bg: #1E1E1E;            /* Preto Suave para fundo */
-    --card-bg: #2A2A2A;             /* Cinza Escuro para cards */
-    --warning: #FF5A1F;             /* Usando o laranja escuro para avisos */
-    --danger: #FF3A30;              /* Vermelho para erros */
-    --shadow: 0 4px 15px rgba(0,0,0,0.25);
-    --hover-shadow: 0 8px 25px rgba(0,0,0,0.35);
+    --light-bg: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e4e6eb;
+    --primary-color: #4f83ff;
+    --primary-dark: #2962ff;
+    --primary-light: #768fff;
+    --primary-rgb: 79, 131, 255;
+    --secondary-color: #40c463;
+    --secondary-dark: #28a745;
+    --secondary-light: #5fd27f;
+    --secondary-rgb: 64, 196, 99;
+    --accent-color: #ff7d4d;
+    --accent-dark: #ff6b35;
+    --accent-light: #ff9872;
+    --accent-rgb: 255, 125, 77;
+    --warning-color: #ffcf33;
+    --warning-dark: #ffc107;
+    --warning-light: #ffde66;
+    --warning-rgb: 255, 207, 51;
+    --purple-color: #9168d9;
+    --purple-dark: #6f42c1;
+    --purple-light: #ab87e5;
+    --purple-rgb: 145, 104, 217;
+    --info-color: #3fc8dd;
+    --info-dark: #17a2b8;
+    --info-light: #62d5e6;
+    --info-rgb: 63, 200, 221;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --hover-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
 }
 
 /* Estilos adicionais para tema escuro */

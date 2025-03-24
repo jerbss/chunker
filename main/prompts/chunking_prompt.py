@@ -111,7 +111,6 @@ Exemplo:
 # Parte 2: Analisando a Evolução → 📈 (2h)
 # Parte 3: Explorando o Legado → ⭐ (1.8h)
 
-<!-- METADADOS INSTRUCIONAIS -->
 Dificuldade: [X]/5  
 Taxonomia de Bloom: [Nível - Lembrar/Entender/Aplicar/Analisar/Avaliar/Criar]  
 Estilo de Aprendizado: [Perfil - Visual/Auditivo/Leitura/Cinestésico]  
@@ -239,7 +238,18 @@ def generate_prompt(tema, num_partes):
         - Use HÍFEN com ESPAÇO para cada ação (ex: "- Identificar os 3 membros originais...")
         - QUEBRA DE LINHA entre cada ação
         - NÃO use parágrafos dentro dos itens de lista
-    
+        
+    - Para CADA PARTE, SEMPRE inclua:
+      * Dificuldade de 1-5 claramente especificada (ex: "Dificuldade: 2/5")
+      * Taxonomia de Bloom correspondente ao nível da parte
+      * Estilo de Aprendizado mais adequado ao conteúdo
+      * Progresso Acumulado com valor percentual entre 0-100% (aumentando a cada parte)
+      * Objetivo Transformador expressando uma mudança concreta de capacidade
+      * Checklist de Domínio com 3-4 itens marcáveis (formato "- [ ] Item verificável")
+      * Caso Real com exemplo prático de aplicação
+      * Desafio Relâmpago com tempo definido (15 minutos)
+      * Um Prompt de IA específico e acionável para aquela parte
+
     - IMPORTANTE para TODAS as LISTAS:
       * SEMPRE use o formato Markdown correto: HÍFEN seguido de ESPAÇO e depois o conteúdo
       * Exemplo correto: "- Este é um item de lista"
