@@ -279,9 +279,12 @@ function extractContent(element) {
     
     // Verificação adicional para evitar partes com título duplicado ou sem título correto
     if (state.parts.length > 0) {
-        // Remover partes que têm o mesmo título que o título principal
+        // Remover partes que têm o mesmo título que o título principal, vazias ou iguais a "PARTES"
         state.parts = state.parts.filter(part => 
-            part.title !== state.mainTitle && part.title.trim() !== "");
+            part.title !== state.mainTitle && 
+            part.title.trim() !== "" &&
+            part.title.trim().toLowerCase() !== "partes"
+        );
         
         // Se ainda não temos partes após a filtragem, criar pelo menos uma parte genérica
         if (state.parts.length === 0) {
@@ -484,22 +487,24 @@ function createCards() {
         }
     }
     
-    // Divisor de partes
+    // Remover o divisor de partes que gera o card "PARTES" vazio
+    /*
     if (state.parts.length > 0) {
         const partsDivider = createSectionDivider('PARTES', 'success');
         cardsContainer.appendChild(partsDivider);
-        
-        // Criar wrapper row para os cards de partes
+    }
+    */
+    
+    // Criar wrapper row para os cards de partes
+    if (state.parts.length > 0) {
         const partsRow = document.createElement('div');
-        partsRow.className = 'row g-4'; // g-4 para manter o mesmo espaçamento
+        partsRow.className = 'row g-4';
         
-        // Cards de Partes
         state.parts.forEach((part, index) => {
             const partCard = createPartCard(part, index);
-            partsRow.appendChild(partCard); // Adicionar ao wrapper row em vez do container
+            partsRow.appendChild(partCard);
         });
         
-        // Adicionar a row completa ao container
         cardsContainer.appendChild(partsRow);
     }
     
