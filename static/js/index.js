@@ -1358,17 +1358,16 @@ function initializeLayout() {
  * Esconde loading e limpa conteúdo desnecessário
  */
 function hideLoadingAndCleanup() {
-    // Remover loading spinner
+    // Remover loading spinner completamente
     const loadingContainer = document.getElementById('loading-container');
     if (loadingContainer) {
-        loadingContainer.classList.add('d-none');
+        loadingContainer.remove();
     }
     
-    // Garantir que o fallback esteja escondido
+    // Garantir que o fallback esteja escondido e removido para evitar duplicatas
     const fallbackContent = document.getElementById('fallback-content');
     if (fallbackContent) {
         fallbackContent.classList.add('d-none');
-        // Para garantir, podemos até remover completamente em vez de apenas esconder
         fallbackContent.remove();
     }
     
