@@ -164,16 +164,16 @@
                         <p class="text-muted">Aguarde enquanto criamos os chunks para você...</p>
                     </div>
                     
-                    <!-- Container para os cards (inicialmente vazio) -->
-                    <div id="cards-container" class="row g-4"></div>
-                    
-                    <!-- Fallback content (apenas visível se JS falhar) -->
-                    <div id="fallback-content" class="card shadow d-none">
-                        <div class="card-header bg-primary text-white">
-                            <h3 class="card-title">Seu conteúdo</h3>
-                        </div>
-                        <div class="card-body overflow-auto" style="max-height: 600px">
-                            {{ html_result|safe }}
+                    <!-- Container para os cards e fallback -->
+                    <div id="cards-container" class="row g-4">
+                        <!-- Fallback content (apenas visível se JS falhar) -->
+                        <div id="fallback-content" class="card shadow d-none">
+                            <div class="card-header bg-primary text-white">
+                                <h3 class="card-title">Seu conteúdo</h3>
+                            </div>
+                            <div class="card-body overflow-auto" style="max-height: 600px">
+                                {{ html_result|safe }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -202,6 +202,8 @@
     <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
     <!-- Custom JS -->
     <script src="{% static 'js/index.js' %}"></script>
+    <!-- Script de inicialização adicional -->
+    <script src="{% static 'js/init-cards.js' %}"></script>
     {% endif %}
     
     <!-- Inicializar tooltips -->

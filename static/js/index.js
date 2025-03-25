@@ -192,6 +192,18 @@ function processContent() {
         // Extrair o conteúdo e organizar em chunks
         extractContent(tempElement);
         
+        // Debugging para verificar extração de partes
+        if (DEBUG.enabled) {
+            console.log("Partes extraídas:", state.parts.length);
+            console.log("Partes:", state.parts.map(p => p.title));
+        }
+        
+        // Remover o fallback content imediatamente para evitar que ele seja mostrado
+        const fallbackContent = document.getElementById('fallback-content');
+        if (fallbackContent) {
+            fallbackContent.classList.add('d-none');
+        }
+        
         // Criar os cards baseados no conteúdo extraído
         createCards();
         
@@ -487,25 +499,12 @@ function createCards() {
         }
     }
     
-    // Remover o divisor de partes que gera o card "PARTES" vazio
-    /*
+    // Criar cards de partes INDIVIDUALMENTE, sem wrapper row
     if (state.parts.length > 0) {
-        const partsDivider = createSectionDivider('PARTES', 'success');
-        cardsContainer.appendChild(partsDivider);
-    }
-    */
-    
-    // Criar wrapper row para os cards de partes
-    if (state.parts.length > 0) {
-        const partsRow = document.createElement('div');
-        partsRow.className = 'row g-4';
-        
         state.parts.forEach((part, index) => {
             const partCard = createPartCard(part, index);
-            partsRow.appendChild(partCard);
+            cardsContainer.appendChild(partCard);
         });
-        
-        cardsContainer.appendChild(partsRow);
     }
     
     // Divisor de conclusão - mudando para "CONSIDERAÇÕES FINAIS"
@@ -566,7 +565,7 @@ function createIntroCard() {
 }
 
 /**
- * Cria um card para uma parte - versão reestruturada
+ * Cria um card para uma parte com estrutura melhorada para autodidatas
  */
 function createPartCard(part, index) {
     const partNumber = index + 1;
@@ -577,7 +576,7 @@ function createPartCard(part, index) {
     card.className = `${colClass} mb-4`;
     card.id = cardId;
     
-    // Extrair metadados do conteúdo da parte (como no exemplo fornecido)
+    // Extrair metadados do conteúdo da parte
     const metadata = extractPartMetadata(part.content);
     
     // Extrair informações específicas do título
@@ -585,10 +584,13 @@ function createPartCard(part, index) {
     const emoji = titleInfo.emoji || '📚';
     const duration = titleInfo.duration || '1.5h';
     
-    // Criar a estrutura do card com layout aprimorado
+    // Construir o conteúdo estruturado
+    const structuredContent = organizeStructuredContent(part.content, metadata);
+    
+    // Criar a estrutura do card com layout melhorado para autodidatas
     card.innerHTML = `
         <div class="card shadow h-100">
-            <!-- Header principal com título da parte -->
+            <!-- 1. HEADER DO CARD -->
             <div class="card-header bg-success text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h3 class="mb-0" style="font-family: 'Exo 2', sans-serif; font-weight: 700; letter-spacing: -0.03em;">${part.title}</h3>
@@ -630,252 +632,277 @@ function createPartCard(part, index) {
                 </div>
             </div>
             
-            <!-- Objetivo de aprendizagem (se existir) -->
+            <!-- 2. CONTEXTO DA APRENDIZAGEM -->
             ${part.objective ? 
-                `<div class="card-img-top bg-light border-bottom">
-                    <div class="d-flex align-items-start p-3">
-                        <div class="flex-shrink-0 me-3">
-                            <div class="objective-icon bg-success-subtle rounded-circle p-2">
-                                <i class="fas fa-bullseye text-success fs-5"></i>
+                `<div class="card-img-top context-block bg-light border-bottom">
+                    <div class="p-3">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="objective-icon bg-success-subtle rounded-circle p-2">
+                                    <i class="fas fa-bullseye text-success fs-5"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="fw-bold mb-2 text-success" style="font-family: 'Exo 2', sans-serif;">
+                                    O que você vai dominar nesta parte:
+                                </h4>
+                                <p class="lead mb-0">${part.objective}</p>
                             </div>
                         </div>
-                        <div>
-                            <span class="text-success fw-medium mb-1 d-block" style="font-family: 'Exo 2', sans-serif;">Objetivo Transformador:</span>
-                            <p class="mb-0">${part.objective}</p>
-                            
-                            ${metadata.progressPercent ? 
-                                `<div class="mt-3">
-                                    <div class="d-flex justify-content-between align-items-center small">
-                                        <span class="text-muted">Progresso Acumulado</span>
-                                        <span class="badge bg-success">${metadata.progressPercent}%</span>
-                                    </div>
-                                    <div class="progress mt-1" style="height: 8px;">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: ${metadata.progressPercent}%"></div>
-                                    </div>
-                                </div>` : ''
-                            }
-                        </div>
+                        
+                        ${metadata.progressPercent ? 
+                            `<div class="mt-3 context-progress p-2 bg-white rounded shadow-sm border">
+                                <div class="d-flex justify-content-between align-items-center small mb-1">
+                                    <span class="fw-medium">Progresso acumulado no domínio completo</span>
+                                    <span class="badge bg-success">${metadata.progressPercent}%</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: ${metadata.progressPercent}%" 
+                                         aria-valuenow="${metadata.progressPercent}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>` : ''
+                        }
+                        
+                        ${metadata.connections ? 
+                            `<div class="mt-3 context-connections p-2 bg-white rounded shadow-sm border">
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="fas fa-link text-primary me-2"></i>
+                                    <span class="fw-medium">Conexões com outras partes:</span>
+                                </div>
+                                <div class="connections-map">
+                                    ${metadata.connections}
+                                </div>
+                            </div>` : ''
+                        }
                     </div>
                 </div>` : ''
             }
             
             <!-- Corpo principal do card -->
             <div class="card-body">
-                <!-- Mapa e conexões -->
-                ${metadata.mapInfo || metadata.connections ? 
-                    `<div class="card border rounded-3 mb-3 part-map-card">
-                        <div class="card-body p-3">
-                            ${metadata.mapInfo ? 
-                                `<div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-map-location-dot text-success me-2 fs-5"></i>
-                                    <h5 class="mb-0 fw-medium">Mapa da Parte</h5>
+                <!-- 3. ROTEIRO DE APRENDIZADO -->
+                <div class="learning-journey mb-4">
+                    <div class="journey-header mb-3 pb-2 border-bottom border-success">
+                        <h4 class="d-flex align-items-center text-success" style="font-family: 'Exo 2', sans-serif; font-weight: 700;">
+                            <i class="fas fa-map-signs me-2"></i>
+                            Sua Jornada de Aprendizado
+                        </h4>
+                        <p class="text-muted mb-0">Siga esta sequência para dominar todos os conceitos desta parte:</p>
+                    </div>
+                    
+                    <!-- Tópicos nucleares reorganizados como jornada -->
+                    ${structuredContent.nucleosHTML}
+                </div>
+                
+                <!-- 4. GUIA PRÁTICO -->
+                <div class="practical-guide mb-4">
+                    <div class="row">
+                        <!-- Desafio Relâmpago -->
+                        ${metadata.challenge ? 
+                            `<div class="col-md-6 mb-3">
+                                <div class="card h-100 border-warning">
+                                    <div class="card-header bg-warning bg-opacity-10 border-warning">
+                                        <h5 class="d-flex align-items-center mb-0">
+                                            <i class="fas fa-bolt text-warning me-2"></i>
+                                            Pratique Agora
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="challenge-timer bg-warning bg-opacity-10 rounded p-1 px-2 me-2">
+                                                <i class="fas fa-stopwatch text-warning me-1"></i>
+                                                <span class="fw-medium">15 min</span>
+                                            </div>
+                                            <span class="text-muted small">Desafio rápido</span>
+                                        </div>
+                                        <p class="mb-0">${metadata.challenge}</p>
+                                    </div>
                                 </div>
-                                <p class="mb-2">${metadata.mapInfo.replace(/\(Ícone\)/g, emoji)}</p>` : ''
-                            }
-                            
-                            ${metadata.connections ? 
-                                `<div class="connections-section mt-2">
-                                    <div class="d-flex align-items-center mb-1">
-                                        <i class="fas fa-link text-primary me-2"></i>
-                                        <span class="text-muted">Conexões com outras partes:</span>
+                            </div>` : ''
+                        }
+                        
+                        <!-- Caso Real -->
+                        ${metadata.realCase ? 
+                            `<div class="col-md-6 mb-3">
+                                <div class="card h-100 border-info">
+                                    <div class="card-header bg-info bg-opacity-10 border-info">
+                                        <h5 class="d-flex align-items-center mb-0">
+                                            <i class="fas fa-briefcase text-info me-2"></i>
+                                            Aplicação no Mundo Real
+                                        </h5>
                                     </div>
-                                    <div class="connections-map">
-                                        ${metadata.connections}
+                                    <div class="card-body">
+                                        <p class="fst-italic mb-0">"${metadata.realCase}"</p>
                                     </div>
-                                </div>` : ''
-                            }
-                            
-                            ${metadata.knowledgeTree ? 
-                                `<div class="mt-2 pt-2 border-top">
-                                    <div class="d-flex align-items-center mb-1">
-                                        <i class="fas fa-code-branch text-success me-2"></i>
-                                        <span class="text-muted">Árvore de Conhecimento:</span>
+                                </div>
+                            </div>` : ''
+                        }
+                    </div>
+                    
+                    <!-- Armadilhas Comuns -->
+                    ${structuredContent.armadilhasHTML ? 
+                        `<div class="mt-2">
+                            <div class="card border-danger">
+                                <div class="card-header bg-danger bg-opacity-10 border-danger">
+                                    <h5 class="d-flex align-items-center mb-0">
+                                        <i class="fas fa-triangle-exclamation text-danger me-2"></i>
+                                        Evite Estes Erros
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    ${structuredContent.armadilhasHTML}
+                                </div>
+                            </div>
+                        </div>` : ''
+                    }
+                </div>
+                
+                <!-- 5. RECURSOS DE SUPORTE -->
+                <div class="support-resources mb-4">
+                    <div class="resources-header mb-3 pb-2 border-bottom">
+                        <h4 class="d-flex align-items-center" style="font-family: 'Exo 2', sans-serif; font-weight: 700;">
+                            <i class="fas fa-toolbox text-primary me-2"></i>
+                            Recursos de Apoio
+                        </h4>
+                    </div>
+                    
+                    <!-- Rotas Alternativas -->
+                    ${structuredContent.rotasHTML ? 
+                        `<div class="mb-3">
+                            <div class="card border-primary border-opacity-25">
+                                <div class="card-header bg-primary bg-opacity-10">
+                                    <h5 class="mb-0 d-flex align-items-center">
+                                        <i class="fas fa-route text-primary me-2"></i>
+                                        Caminhos Personalizados
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    ${structuredContent.rotasHTML}
+                                </div>
+                            </div>
+                        </div>` : ''
+                    }
+                    
+                    <!-- AI Prompt Card -->
+                    ${metadata.aiPrompt || part.instructionPrompt ? 
+                        `<div class="mb-3">
+                            <div class="card border-primary border-opacity-25">
+                                <div class="card-header bg-primary bg-opacity-10">
+                                    <h5 class="mb-0 d-flex align-items-center">
+                                        <i class="fas fa-robot text-primary me-2"></i>
+                                        Assistente de Aprendizado
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-2">Use este prompt para obter ajuda personalizada com IA:</p>
+                                    <div class="d-flex justify-content-end mb-2">
+                                        <button class="btn btn-sm btn-outline-primary copy-prompt" 
+                                                data-prompt="${encodeURIComponent(metadata.aiPrompt || part.instructionPrompt)}">
+                                            <i class="fas fa-copy me-1"></i>Copiar Prompt
+                                        </button>
                                     </div>
-                                    <pre class="mb-0 knowledge-tree-pre">${metadata.knowledgeTree}</pre>
-                                </div>` : ''
-                            }
+                                    <pre class="bg-light border rounded p-2 mb-0">${metadata.aiPrompt || part.instructionPrompt}</pre>
+                                </div>
+                            </div>
+                        </div>` : ''
+                    }
+                    
+                    <!-- Conceitos-chave Card -->
+                    <div class="mb-3">
+                        <div class="card border-success border-opacity-25">
+                            <div class="card-header bg-success bg-opacity-10">
+                                <h5 class="mb-0 d-flex align-items-center">
+                                    <i class="fas fa-tags text-success me-2"></i>
+                                    Conceitos-chave
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="concepts-container">
+                                    ${Array.isArray(part.concepts) && part.concepts.length > 0 
+                                        ? part.concepts.map(concept => 
+                                            `<span class="badge bg-success bg-opacity-10 text-success me-2 mb-2 p-2">${concept}</span>`
+                                          ).join('')
+                                        : '<span class="text-muted">Sem conceitos-chave definidos</span>'
+                                    }
+                                </div>
+                            </div>
                         </div>
-                    </div>` : ''
-                }
-                
-                <!-- Conteúdo principal (tópicos nucleares) -->
-                ${part.content && part.content.trim() ? 
-                    `<div class="topics-container">
-                        ${cleanContentHTML(part.content)}
-                    </div>` : 
-                    '<p class="text-muted">Este card contém os principais conceitos e tópicos relacionados a esta parte do conteúdo.</p>'
-                }
-                
-                <!-- Conteúdo do modo profundo (inicialmente oculto) -->
-                <div class="deep-mode-content mt-3 p-3 border rounded bg-light" style="display: none;">
-                    <h5 class="text-primary"><i class="fas fa-brain me-2"></i>Conteúdo do Modo Profundo</h5>
-                    <p>Neste modo, você terá acesso a:</p>
-                    <ul>
-                        <li><strong>Exercícios Práticos:</strong> Aplicações detalhadas dos conceitos</li>
-                        <li><strong>Projeto Guiado:</strong> Implementação passo-a-passo</li>
-                        <li><strong>Análise Aprofundada:</strong> Explicações conceituais detalhadas</li>
-                    </ul>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>Este conteúdo requer aproximadamente 2-3 horas para ser completado.
                     </div>
                 </div>
-            </div>
-            
-            <!-- Footer com recursos adicionais -->
-            <div class="card-footer bg-light p-0">
-                <div class="p-3">
-                    <!-- Conceitos-chave -->
-                    <div class="mb-3 concepts-container">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-tags text-success me-2"></i>
-                            <h5 class="mb-0 fw-medium">Conceitos-chave</h5>
-                        </div>
-                        <div class="mt-1">
-                            ${Array.isArray(part.concepts) && part.concepts.length > 0 
-                                ? part.concepts.map(concept => `<span class="badge bg-light text-success me-1 mb-1">${concept}</span>`).join('')
-                                : '<span class="badge bg-light text-muted me-1 mb-1">Sem conceitos-chave definidos</span>'
-                            }
+                
+                <!-- 6. AUTOAVALIAÇÃO -->
+                <div class="self-assessment">
+                    <div class="assessment-header mb-3 pb-2 border-bottom">
+                        <h4 class="d-flex align-items-center" style="font-family: 'Exo 2', sans-serif; font-weight: 700;">
+                            <i class="fas fa-chart-simple text-secondary me-2"></i>
+                            Verifique Seu Progresso
+                        </h4>
+                    </div>
+                    
+                    <!-- Checklist de Domínio -->
+                    <div class="mb-3">
+                        <div class="card border-secondary border-opacity-25">
+                            <div class="card-header bg-secondary bg-opacity-10">
+                                <h5 class="mb-0 d-flex align-items-center">
+                                    <i class="fas fa-check-circle text-secondary me-2"></i>
+                                    Checklist de Domínio
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="checklist-container">
+                                    ${metadata.domainChecklist ? 
+                                        createStructuredChecklist(metadata.domainChecklist, cardId) : 
+                                        createDefaultChecklist(part, cardId)
+                                    }
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- Checklist de domínio - aproveitando dados formatados ou padrão -->
-                    <div class="mt-4 mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-tasks text-primary me-2"></i>
-                            <h5 class="mb-0 fw-medium">Checklist de Domínio</h5>
-                        </div>
-                        <div class="checklist-container p-3 border rounded-3 bg-light mt-2">
-                            ${metadata.domainChecklist ? 
-                                createStructuredChecklist(metadata.domainChecklist, cardId) : 
-                                createDefaultChecklist(part, cardId)
-                            }
-                        </div>
-                    </div>
-                    
-                    <!-- Recursos adicionais organizados em accordions -->
-                    <div class="mt-4">
-                        <div class="accordion" id="resources-${cardId}">
-                            <!-- Artefatos esperados -->
-                            <div class="accordion-item">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#artifacts-${cardId}">
-                                        <i class="fas fa-clipboard-check text-primary me-2"></i>Artefatos Esperados
-                                    </button>
-                                </h2>
-                                <div id="artifacts-${cardId}" class="accordion-collapse collapse show" data-bs-parent="#resources-${cardId}">
-                                    <div class="accordion-body">
-                                        <ul class="mb-0">
-                                            <li>Documento com exemplo prático de ${part.concepts.length > 0 ? part.concepts[0] : 'aplicação do conceito'}</li>
-                                            <li>Exercício resolvido demonstrando entendimento do tópico</li>
-                                            <li>Resumo dos pontos principais (máx. 1 página)</li>
-                                        </ul>
+                    <!-- Reflexão e Autoavaliação -->
+                    <div class="row">
+                        ${part.reflection ? 
+                            `<div class="col-md-6 mb-3">
+                                <div class="card h-100 border-info border-opacity-25">
+                                    <div class="card-header bg-info bg-opacity-10">
+                                        <h5 class="mb-0 d-flex align-items-center">
+                                            <i class="fas fa-lightbulb text-info me-2"></i>
+                                            Reflexão
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="fst-italic mb-0">${part.reflection}${!part.reflection.endsWith('?') ? '?' : ''}</p>
+                                    </div>
+                                </div>
+                            </div>` : ''
+                        }
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-secondary border-opacity-25">
+                                <div class="card-header bg-secondary bg-opacity-10">
+                                    <h5 class="mb-0 d-flex align-items-center">
+                                        <i class="fas fa-sliders text-secondary me-2"></i>
+                                        Autoavaliação
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-2">Em uma escala de 1-5, qual seu nível de entendimento?</p>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="rating-labels d-flex justify-content-between w-100 px-2">
+                                            <span class="small">Iniciante</span>
+                                            <span class="small">Intermediário</span>
+                                            <span class="small">Avançado</span>
+                                        </div>
+                                    </div>
+                                    <div class="rating-container d-flex align-items-center mt-1">
+                                        <input type="range" class="form-range" min="1" max="5" value="3" id="rating-${cardId}">
+                                    </div>
+                                    <div class="mt-2 p-2 border rounded d-none feedback-area" id="feedback-${cardId}">
+                                        <p class="feedback-text mb-0 small"></p>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Desafio Relâmpago -->
-                            ${metadata.challenge ? 
-                                `<div class="accordion-item">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#challenge-${cardId}">
-                                            <i class="fas fa-bolt text-warning me-2"></i>Desafio Relâmpago
-                                        </button>
-                                    </h2>
-                                    <div id="challenge-${cardId}" class="accordion-collapse collapse show" data-bs-parent="#resources-${cardId}">
-                                        <div class="accordion-body">
-                                            <div class="d-flex">
-                                                <div class="challenge-timer-badge bg-warning-subtle rounded-circle p-2 me-3">
-                                                    <i class="fas fa-stopwatch text-warning fs-5"></i>
-                                                </div>
-                                                <div>
-                                                    <p class="fw-medium mb-1">Em 15 minutos:</p>
-                                                    <p class="mb-0">${metadata.challenge}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>` : ''
-                            }
-                            
-                            <!-- Caso Real -->
-                            ${metadata.realCase ? 
-                                `<div class="accordion-item">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#case-${cardId}">
-                                            <i class="fas fa-user-check text-info me-2"></i>Caso Real
-                                        </button>
-                                    </h2>
-                                    <div id="case-${cardId}" class="accordion-collapse collapse show" data-bs-parent="#resources-${cardId}">
-                                        <div class="accordion-body">
-                                            <p class="mb-0 fst-italic">"${metadata.realCase}"</p>
-                                        </div>
-                                    </div>
-                                </div>` : ''
-                            }
-                            
-                            <!-- Prompt de IA -->
-                            ${metadata.aiPrompt || part.instructionPrompt ? 
-                                `<div class="accordion-item">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#prompt-${cardId}">
-                                            <i class="fas fa-robot text-info me-2"></i>Prompt de IA
-                                        </button>
-                                    </h2>
-                                    <div id="prompt-${cardId}" class="accordion-collapse collapse" data-bs-parent="#resources-${cardId}">
-                                        <div class="accordion-body">
-                                            <div class="d-flex justify-content-end mb-2">
-                                                <button class="btn btn-sm btn-outline-info copy-prompt" data-prompt="${encodeURIComponent(metadata.aiPrompt || part.instructionPrompt)}">
-                                                    <i class="fas fa-copy me-1"></i>Copiar
-                                                </button>
-                                            </div>
-                                            <pre class="m-0 p-2 bg-light border rounded">${metadata.aiPrompt || part.instructionPrompt}</pre>
-                                        </div>
-                                    </div>
-                                </div>` : ''
-                            }
-                            
-                            <!-- Autoavaliação -->
-                            <div class="accordion-item">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#assessment-${cardId}">
-                                        <i class="fas fa-chart-line text-secondary me-2"></i>Autoavaliação
-                                    </button>
-                                </h2>
-                                <div id="assessment-${cardId}" class="accordion-collapse collapse" data-bs-parent="#resources-${cardId}">
-                                    <div class="accordion-body">
-                                        <p class="mb-2">Em uma escala de 1-5, avalie seu entendimento desta parte:</p>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="rating-labels d-flex justify-content-between w-100 px-2">
-                                                <span class="small">Iniciante</span>
-                                                <span class="small">Intermediário</span>
-                                                <span class="small">Avançado</span>
-                                            </div>
-                                        </div>
-                                        <div class="rating-container d-flex align-items-center mt-1">
-                                            <input type="range" class="form-range" min="1" max="5" value="3" id="rating-${cardId}">
-                                        </div>
-                                        <div class="mt-2 p-2 border rounded d-none feedback-area" id="feedback-${cardId}">
-                                            <p class="feedback-text mb-0 small"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Reflexão (se existir) -->
-                            ${part.reflection ? 
-                                `<div class="accordion-item">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#reflection-${cardId}">
-                                            <i class="fas fa-lightbulb text-warning me-2"></i>Reflexão
-                                        </button>
-                                    </h2>
-                                    <div id="reflection-${cardId}" class="accordion-collapse collapse" data-bs-parent="#resources-${cardId}">
-                                        <div class="accordion-body">
-                                            <p class="mb-0">${part.reflection}${!part.reflection.endsWith('?') ? '?' : ''}</p>
-                                        </div>
-                                    </div>
-                                </div>` : ''
-                            }
                         </div>
                     </div>
                 </div>
@@ -887,234 +914,326 @@ function createPartCard(part, index) {
 }
 
 /**
- * Extrai informações de emoji e duração do título da parte
- * @param {string} title - Título da parte
- * @returns {Object} - Objeto com emoji e duração extraídos
+ * Organiza o conteúdo estruturado a partir do HTML bruto da parte
+ * @param {string} contentHTML - HTML do conteúdo da parte
+ * @param {Object} metadata - Metadados extraídos do conteúdo
+ * @returns {Object} - Objeto com conteúdo estruturado em HTML para cada seção
  */
-function extractTitleInfo(title) {
+function organizeStructuredContent(contentHTML, metadata) {
     const result = {
-        emoji: null,
-        duration: null
+        nucleosHTML: '',
+        rotasHTML: '',
+        armadilhasHTML: ''
     };
     
-    // Extrair emoji usando regex
-    const emojiMatch = title.match(/→\s*([^\s(]+)/);
-    if (emojiMatch && emojiMatch[1]) {
-        result.emoji = emojiMatch[1].trim();
-    }
+    // Criar um elemento temporário para analisar o HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = contentHTML;
     
-    // Extrair duração usando regex para encontrar texto entre parênteses
-    const durationMatch = title.match(/\(([^)]+)\)/);
-    if (durationMatch && durationMatch[1]) {
-        result.duration = durationMatch[1].trim();
-    }
+    // Extrair os núcleos (tópicos principais)
+    result.nucleosHTML = extractNucleosHTML(tempDiv);
+    
+    // Extrair rotas alternativas
+    result.rotasHTML = extractRotasHTML(tempDiv);
+    
+    // Extrair armadilhas comuns
+    result.armadilhasHTML = extractArmadilhasHTML(tempDiv);
     
     return result;
 }
 
 /**
- * Extrai metadados estruturados da parte do conteúdo HTML
- * @param {string} contentHTML - HTML do conteúdo da parte
- * @returns {Object} - Objeto com metadados extraídos
+ * Extrai os núcleos formatados como jornada de aprendizado
+ * @param {HTMLElement} container - Container com o conteúdo HTML
+ * @returns {string} - HTML formatado dos núcleos
  */
-function extractPartMetadata(contentHTML) {
-    // Criar um elemento temporário para analisar o HTML
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = contentHTML;
+function extractNucleosHTML(container) {
+    // Procurar pela seção "Tópicos Nucleares"
+    const nucleosSections = Array.from(container.querySelectorAll('p, li'))
+        .filter(el => el.textContent.includes('Tópicos Nucleares:'));
     
-    const metadata = {
-        difficulty: null,
-        bloomTaxonomy: null,
-        learningStyle: null,
-        prerequisites: null,
-        mapInfo: null,
-        progressPercent: null,
-        connections: null,
-        knowledgeTree: null,
-        domainChecklist: null,
-        challenge: null,
-        realCase: null,
-        aiPrompt: null
-    };
+    if (nucleosSections.length === 0) return '';
     
-    // Extrair informações básicas do primeiro parágrafo
-    const firstParagraph = tempDiv.querySelector('p');
-    if (firstParagraph) {
-        const text = firstParagraph.textContent;
-        
-        // Extrair dificuldade
-        const difficultyMatch = text.match(/Dificuldade:\s*([^,\n]+)/);
-        if (difficultyMatch) metadata.difficulty = difficultyMatch[1].trim();
-        
-        // Extrair taxonomia de Bloom
-        const bloomMatch = text.match(/Taxonomia de Bloom:\s*([^,\n]+)/);
-        if (bloomMatch) metadata.bloomTaxonomy = bloomMatch[1].trim();
-        
-        // Extrair estilo de aprendizado
-        const styleMatch = text.match(/Estilo de Aprendizado:\s*([^,\n]+)/);
-        if (styleMatch) metadata.learningStyle = styleMatch[1].trim();
-        
-        // Extrair pré-requisitos
-        const prereqMatch = text.match(/Pré-requisitos Técnicos:\s*([^,\n]+)/);
-        if (prereqMatch) metadata.prerequisites = prereqMatch[1].trim();
-    }
+    // Localizar a lista de núcleos (geralmente é a primeira lista após a seção "Tópicos Nucleares")
+    let nuclearList = null;
+    let currentElement = nucleosSections[0];
     
-    // Extrair mapa da parte
-    const mapElement = Array.from(tempDiv.querySelectorAll('p')).find(p => 
-        p.textContent.includes('Mapa da Parte:'));
-    if (mapElement) {
-        metadata.mapInfo = mapElement.textContent.replace('Mapa da Parte:', '').trim();
-    }
-    
-    // Extrair progresso acumulado
-    const progressElement = Array.from(tempDiv.querySelectorAll('p')).find(p => 
-        p.textContent.includes('Progresso Acumulado:'));
-    if (progressElement) {
-        const progressText = progressElement.textContent;
-        const percentMatch = progressText.match(/(\d+)%/);
-        if (percentMatch) {
-            metadata.progressPercent = percentMatch[1];
-        }
-        
-        // Extrair conexões da mesma linha
-        const connectionsMatch = progressText.match(/Conexões com Partes:(.*?)(?:$|Árvore)/);
-        if (connectionsMatch) {
-            metadata.connections = connectionsMatch[1].trim();
-        }
-    }
-    
-    // Extrair árvore de conhecimento
-    const treeElement = Array.from(tempDiv.querySelectorAll('p')).find(p => 
-        p.textContent.includes('Árvore de Conhecimento:'));
-    if (treeElement) {
-        metadata.knowledgeTree = treeElement.textContent.replace('Árvore de Conhecimento:', '').trim();
-    }
-    
-    // Extrair checklist de domínio
-    const checklistElement = Array.from(tempDiv.querySelectorAll('div')).find(div => {
-        const p = div.querySelector('p');
-        return p && p.textContent.includes('Checklist de Domínio:');
-    });
-    if (checklistElement) {
-        const items = checklistElement.querySelectorAll('li');
-        if (items.length > 0) {
-            metadata.domainChecklist = Array.from(items).map(li => li.textContent.trim());
-        }
-    }
-    
-    // Extrair desafio relâmpago
-    const challengeElement = Array.from(tempDiv.querySelectorAll('p')).find(p => 
-        p.textContent.includes('Desafio Relâmpago:'));
-    if (challengeElement) {
-        const challengeText = challengeElement.textContent;
-        const challengeMatch = challengeText.match(/Em 15 minutos:(.*?)(?:$)/);
-        if (challengeMatch) {
-            metadata.challenge = challengeMatch[1].trim();
+    // Procurar pela lista de núcleos
+    while (currentElement && !nuclearList) {
+        const nextElement = currentElement.nextElementSibling;
+        if (nextElement && (nextElement.tagName === 'UL' || nextElement.tagName === 'OL')) {
+            nuclearList = nextElement;
+        } else if (currentElement.querySelector('ul, ol')) {
+            nuclearList = currentElement.querySelector('ul, ol');
         } else {
-            metadata.challenge = challengeText.replace('Desafio Relâmpago:', '').trim();
+            currentElement = nextElement;
         }
     }
     
-    // Extrair caso real
-    const caseElement = Array.from(tempDiv.querySelectorAll('p')).find(p => 
-        p.textContent.includes('Caso Real #'));
-    if (caseElement) {
-        metadata.realCase = caseElement.textContent.replace(/Caso Real #\d+:/, '').trim();
-    }
+    if (!nuclearList) return '';
     
-    // Extrair prompt de IA acionável
-    const promptElement = tempDiv.querySelector('pre code.language-prompt');
-    if (promptElement) {
-        metadata.aiPrompt = promptElement.textContent.trim();
-    }
+    // Extrair os núcleos da lista
+    const nucleos = [];
+    const nucleoItems = nuclearList.querySelectorAll(':scope > li');
     
-    return metadata;
+    nucleoItems.forEach((item, index) => {
+        // Extrair o título do núcleo (geralmente está dentro de um <strong>)
+        let nucleoTitle = '';
+        const strongEl = item.querySelector('strong');
+        if (strongEl) {
+            nucleoTitle = strongEl.textContent.replace(/^\d+\.\s+/, '').replace(/:$/, '');
+        } else {
+            // Se não houver <strong>, extrair do texto do item
+            const titleMatch = item.textContent.match(/^(\d+\.\s+)?([^:]+):/);
+            nucleoTitle = titleMatch ? titleMatch[2] : `Núcleo ${index + 1}`;
+        }
+        
+        // Extrair os subtópicos (geralmente estão em uma sublista)
+        const subtopics = [];
+        const sublist = item.querySelector('ul, ol');
+        if (sublist) {
+            const subitems = sublist.querySelectorAll('li');
+            subitems.forEach(subitem => {
+                subtopics.push(subitem.innerHTML);
+            });
+        }
+        
+        nucleos.push({
+            title: nucleoTitle,
+            subtopics,
+            color: getColorForIndex(index)
+        });
+    });
+    
+    // Criar o HTML da jornada de aprendizado
+    let result = '';
+    
+    nucleos.forEach((nucleo, index) => {
+        result += `
+            <div class="learning-step mb-4">
+                <div class="step-header d-flex align-items-center mb-3">
+                    <div class="step-number rounded-circle bg-${nucleo.color} text-white d-flex align-items-center justify-content-center me-3"
+                         style="width: 40px; height: 40px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                        ${index + 1}
+                    </div>
+                    <h5 class="mb-0 step-title fw-bold" style="font-family: 'Exo 2', sans-serif;">${nucleo.title}</h5>
+                </div>
+                
+                ${nucleo.subtopics.length > 0 ? `
+                    <div class="step-content ms-5 ps-3 border-start border-${nucleo.color}">
+                        <ul class="step-list">
+                            ${nucleo.subtopics.map(subtopic => `
+                                <li class="step-item mb-2">${subtopic}</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+    
+    return result || '<p class="text-muted">Não foram encontrados tópicos nucleares definidos.</p>';
 }
 
 /**
- * Limpa o HTML do conteúdo para melhor apresentação
- * @param {string} contentHTML - HTML original do conteúdo
- * @returns {string} - HTML limpo para apresentação
+ * Extrai o HTML para rotas alternativas
+ * @param {HTMLElement} container - Container com o conteúdo HTML
+ * @returns {string} - HTML formatado das rotas alternativas
  */
-function cleanContentHTML(contentHTML) {
-    // Criar um elemento temporário para limpar o HTML
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = contentHTML;
+function extractRotasHTML(container) {
+    // Procurar pela seção "Rotas Alternativas"
+    const rotasSections = Array.from(container.querySelectorAll('p, li'))
+        .filter(el => el.textContent.includes('Rotas Alternativas:'));
     
-    // Remover parágrafos de metadados que já foram extraídos
-    const paragraphs = tempDiv.querySelectorAll('p');
-    paragraphs.forEach(p => {
-        const text = p.textContent;
-        if (text.includes('Dificuldade:') || 
-            text.includes('Taxonomia de Bloom:') || 
-            text.includes('Estilo de Aprendizado:') || 
-            text.includes('Mapa da Parte:') || 
-            text.includes('Progresso Acumulado:') || 
-            text.includes('Árvore de Conhecimento:') ||
-            text.includes('Desafio Relâmpago:') ||
-            text.includes('Prompt de IA Acionável:') ||
-            text.includes('Caso Real #')) {
-            p.remove();
+    if (rotasSections.length === 0) return '';
+    
+    // Localizar os itens das rotas alternativas
+    let rotasList = null;
+    let currentElement = rotasSections[0];
+    
+    // Procurar pela lista de rotas
+    while (currentElement && !rotasList) {
+        const nextElement = currentElement.nextElementSibling;
+        if (nextElement && (nextElement.tagName === 'UL' || nextElement.tagName === 'OL')) {
+            rotasList = nextElement;
+        } else if (currentElement.querySelector('ul, ol')) {
+            rotasList = currentElement.querySelector('ul, ol');
+        } else {
+            currentElement = nextElement;
+        }
+    }
+    
+    if (!rotasList) return '';
+    
+    // Extrair as rotas
+    const routes = [];
+    const routeItems = rotasList.querySelectorAll('li');
+    
+    routeItems.forEach(item => {
+        // Extrair o tipo de rota e sua descrição
+        const strongEl = item.querySelector('strong');
+        if (!strongEl) return;
+        
+        const routeType = strongEl.textContent.replace(/:$/, '');
+        
+        // Classificar as rotas
+        let routeClass = '';
+        let routeIcon = '';
+        
+        if (routeType.toLowerCase().includes('simples') || 
+            routeType.toLowerCase().includes('básico') || 
+            routeType.toLowerCase().includes('iniciante')) {
+            routeClass = 'success';
+            routeIcon = 'turtle';
+        } else {
+            routeClass = 'danger';
+            routeIcon = 'rocket';
+        }
+        
+        // Extrair a descrição (texto após o <strong>)
+        let description = '';
+        let currentNode = strongEl.nextSibling;
+        
+        while (currentNode) {
+            if (currentNode.nodeType === Node.TEXT_NODE) {
+                description += currentNode.textContent;
+            } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
+                description += currentNode.outerHTML;
+            }
+            currentNode = currentNode.nextSibling;
+        }
+        
+        // Limpar a descrição
+        description = description.replace(/^:/, '').trim();
+        
+        routes.push({
+            type: routeType,
+            description,
+            class: routeClass,
+            icon: routeIcon
+        });
+    });
+    
+    // Criar o HTML das rotas alternativas
+    let result = '';
+    
+    routes.forEach((route, index) => {
+        result += `
+            <div class="route-item d-flex ${index < routes.length - 1 ? 'mb-3 pb-3 border-bottom' : ''}">
+                <div class="route-icon rounded-circle bg-${route.class} bg-opacity-10 p-2 me-3 d-flex align-items-center justify-content-center"
+                     style="width: 45px; height: 45px;">
+                    <i class="fas fa-${route.icon} text-${route.class}"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-1">${route.type}</h6>
+                    <p class="mb-0">${route.description}</p>
+                </div>
+            </div>
+        `;
+    });
+    
+    return result;
+}
+
+/**
+ * Extrai o HTML para armadilhas comuns
+ * @param {HTMLElement} container - Container com o conteúdo HTML
+ * @returns {string} - HTML formatado das armadilhas comuns
+ */
+function extractArmadilhasHTML(container) {
+    // Procurar pela seção "Armadilhas Comuns"
+    const armadilhasSections = Array.from(container.querySelectorAll('p, li'))
+        .filter(el => el.textContent.includes('Armadilhas Comuns:'));
+    
+    if (armadilhasSections.length === 0) return '';
+    
+    // Localizar a lista de armadilhas
+    let armadilhasList = null;
+    let currentElement = armadilhasSections[0];
+    
+    // Procurar pela lista de armadilhas
+    while (currentElement && !armadilhasList) {
+        const nextElement = currentElement.nextElementSibling;
+        if (nextElement && (nextElement.tagName === 'UL' || nextElement.tagName === 'OL')) {
+            armadilhasList = nextElement;
+        } else if (currentElement.querySelector('ul, ol')) {
+            armadilhasList = currentElement.querySelector('ul, ol');
+        } else {
+            currentElement = nextElement;
+        }
+    }
+    
+    if (!armadilhasList) return '';
+    
+    // Extrair as armadilhas
+    const pitfalls = [];
+    const pitfallItems = armadilhasList.querySelectorAll('li');
+    
+    pitfallItems.forEach(item => {
+        const itemText = item.innerHTML;
+        
+        // Tentar extrair problema e solução
+        const parts = itemText.split(/<strong>Solução:<\/strong>/i);
+        
+        if (parts.length >= 2) {
+            let problem = parts[0].replace(/<strong>Problema:<\/strong>/i, '').trim();
+            let solution = parts[1].trim();
+            
+            pitfalls.push({
+                problem,
+                solution
+            });
+        } else {
+            // Formato alternativo: texto regular
+            pitfalls.push({
+                problem: itemText,
+                solution: ''
+            });
         }
     });
     
-    // Agora o conteúdo deve conter principalmente os tópicos nucleares e rotas alternativas
-    return tempDiv.innerHTML;
-}
-
-/**
- * Cria um checklist estruturado a partir dos itens extraídos
- * @param {Array} items - Array de itens para o checklist
- * @param {string} cardId - ID do card atual
- * @returns {string} - HTML do checklist estruturado
- */
-function createStructuredChecklist(items, cardId) {
-    if (!items || !Array.isArray(items) || items.length === 0) {
-        return createDefaultChecklist(null, cardId);
-    }
+    // Criar o HTML das armadilhas comuns
+    let result = '';
     
-    return items.map((item, index) => {
-        const itemId = `check-${cardId}-item-${index}`;
-        const isChecked = item.startsWith('[x]') ? 'checked' : '';
-        const cleanItem = item.replace(/\[[x\s]?\]/i, '').trim();
-        
-        return `
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="${itemId}" ${isChecked}>
-                <label class="form-check-label" for="${itemId}">
-                    ${cleanItem}
-                </label>
+    pitfalls.forEach((pitfall, index) => {
+        result += `
+            <div class="pitfall-item ${index < pitfalls.length - 1 ? 'mb-3 pb-3 border-bottom' : ''}">
+                <div class="d-flex align-items-start mb-2">
+                    <div class="flex-shrink-0 me-2" style="color: var(--bs-danger);">
+                        <i class="fas fa-exclamation-circle fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-danger mb-1">Problema:</h6>
+                        <p class="mb-0">${pitfall.problem}</p>
+                    </div>
+                </div>
+                
+                ${pitfall.solution ? `
+                    <div class="d-flex align-items-start mt-2 ms-4">
+                        <div class="flex-shrink-0 me-2" style="color: var(--bs-success);">
+                            <i class="fas fa-check-circle fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-success mb-1">Solução:</h6>
+                            <p class="mb-0">${pitfall.solution}</p>
+                        </div>
+                    </div>
+                ` : ''}
             </div>
         `;
-    }).join('');
+    });
+    
+    return result;
 }
 
 /**
- * Cria um checklist padrão baseado nos conceitos da parte
- * @param {Object} part - Objeto com dados da parte
- * @param {string} cardId - ID do card atual
- * @returns {string} - HTML do checklist padrão
+ * Retorna uma cor Bootstrap baseada no índice
+ * @param {number} index - Índice do item
+ * @returns {string} - Nome da cor Bootstrap
  */
-function createDefaultChecklist(part, cardId) {
-    if (part && Array.isArray(part.concepts) && part.concepts.length > 0) {
-        return part.concepts.slice(0, 3).map(concept => `
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="check-${cardId}-${concept.replace(/\W+/g, '')}">
-                <label class="form-check-label" for="check-${cardId}-${concept.replace(/\W+/g, '')}">
-                    Compreendo ${concept} e posso explicar para outra pessoa
-                </label>
-            </div>
-        `).join('');
-    } else {
-        return `
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="check-${cardId}-generic">
-                <label class="form-check-label" for="check-${cardId}-generic">
-                    Compreendo os conceitos principais desta parte
-                </label>
-            </div>
-        `;
-    }
+function getColorForIndex(index) {
+    const colors = ['primary', 'success', 'info', 'warning', 'danger', 'secondary'];
+    return colors[index % colors.length];
 }
 
 /**
@@ -1219,15 +1338,15 @@ function initializeLayout() {
     try {
         const cardsContainer = document.getElementById('cards-container');
         if (cardsContainer && window.Masonry) {
-            state.masonry = new Masonry(cardsContainer, {
-                itemSelector: '.col-12, .col-md-6, .col-md-4',
-                gutter: 20,
-                percentPosition: true
-            });
+            // Garantir que o container possua posição relativa para conter os itens posicionados absolutamente
+            cardsContainer.style.position = 'relative';
             
-            // Atualizar layout quando as imagens carregam
-            window.addEventListener('load', () => {
-                state.masonry.layout();
+            // Inicializar o Masonry com opções para layout responsivo sem overflow
+            new Masonry(cardsContainer, {
+                itemSelector: '.col-12',
+                percentPosition: true,
+                originTop: true,
+                gutter: 20
             });
         }
     } catch (error) {
@@ -1245,9 +1364,11 @@ function hideLoadingAndCleanup() {
         loadingContainer.classList.add('d-none');
     }
     
-    // Remover fallback
+    // Garantir que o fallback esteja escondido
     const fallbackContent = document.getElementById('fallback-content');
     if (fallbackContent) {
+        fallbackContent.classList.add('d-none');
+        // Para garantir, podemos até remover completamente em vez de apenas esconder
         fallbackContent.remove();
     }
     
@@ -1255,6 +1376,13 @@ function hideLoadingAndCleanup() {
     const htmlContentContainer = document.getElementById('html-content-container');
     if (htmlContentContainer) {
         htmlContentContainer.remove();
+    }
+    
+    // Verificar se os cards foram criados corretamente
+    const cardsContainer = document.getElementById('cards-container');
+    if (cardsContainer && DEBUG.enabled) {
+        console.log("Cards no container:", cardsContainer.children.length);
+        console.log("Conteúdo do container de cards:", cardsContainer.innerHTML.substring(0, 100) + "...");
     }
     
     // Remover elementos temporários
@@ -1336,28 +1464,50 @@ function initializeNewCardFeatures() {
         radio.addEventListener('change', function() {
             const cardId = this.name.split('-')[1];
             const card = document.getElementById(cardId);
-            const deepModeContent = card.querySelector('.deep-mode-content');
+            if (!card) return;
             
-            if (this.id.startsWith('deep')) {
-                deepModeContent.style.display = 'block';
-            } else {
-                deepModeContent.style.display = 'none';
-            }
+            const deepModeContent = card.querySelector('.deep-mode-content');
+            if (!deepModeContent) return;
+            
+            deepModeContent.style.display = this.id.startsWith('deep') ? 'block' : 'none';
         });
     });
     
     // Configurar controles de autoavaliação
     document.querySelectorAll('input[type="range"][id^="rating-"]').forEach(slider => {
         const updateFeedback = function() {
-            const cardId = slider.id.split('-')[1];
+            const sliderId = slider.id;
+            const cardId = sliderId.replace('rating-', '');
+            
+            if (!cardId) {
+                console.warn('ID do card não pôde ser extraído do slider:', slider.id);
+                return;
+            }
+            
+            if (DEBUG.enabled) {
+                console.log(`Processando feedback para o card com ID: ${cardId}`);
+            }
+            
             const value = parseInt(slider.value);
             const feedbackArea = document.getElementById(`feedback-${cardId}`);
-            const feedbackText = feedbackArea.querySelector('.feedback-text');
+            
+            if (!feedbackArea) {
+                console.warn(`Elemento feedback-${cardId} não encontrado`);
+                return;
+            }
+            
+            // Tenta selecionar o elemento .feedback-text dentro do feedbackArea
+            let feedbackText = feedbackArea.querySelector('.feedback-text');
+            if (!feedbackText) {
+                console.warn(`Elemento .feedback-text não encontrado dentro de feedback-${cardId}. Criando novo elemento.`);
+                feedbackText = document.createElement('p');
+                feedbackText.className = 'feedback-text mb-0 small';
+                feedbackArea.appendChild(feedbackText);
+            }
             
             // Mostrar a área de feedback
             feedbackArea.classList.remove('d-none');
             
-            // Definir o texto de feedback baseado no valor
             const feedbacks = [
                 "Você está começando! Continue estudando os conceitos básicos.",
                 "Você tem alguma familiaridade. Revise os conceitos-chave novamente.",
@@ -1369,10 +1519,16 @@ function initializeNewCardFeatures() {
             feedbackText.textContent = feedbacks[value - 1];
         };
         
-        // Atualizar feedback ao mudar o valor
-        slider.addEventListener('input', updateFeedback);
-        // Inicializar com o valor atual
-        updateFeedback();
+        try {
+            slider.addEventListener('input', updateFeedback);
+            try {
+                updateFeedback();
+            } catch (initError) {
+                console.warn('Erro ao inicializar o feedback:', initError);
+            }
+        } catch (error) {
+            console.warn('Erro ao configurar evento de input para slider:', error);
+        }
     });
 }
 
@@ -1909,4 +2065,206 @@ function showFallbackContent() {
     if (fallbackContent) {
         fallbackContent.classList.remove('d-none');
     }
+}
+
+/**
+ * Extrai metadados do conteúdo da parte
+ * @param {string} content - HTML do conteúdo da parte
+ * @returns {Object} - Objeto com metadados extraídos
+ */
+function extractPartMetadata(content) {
+    const metadata = {
+        difficulty: '1/5',
+        bloomTaxonomy: 'Compreender',
+        learningStyle: 'Visual',
+        progressPercent: null,
+        connections: null,
+        aiPrompt: null,
+        challenge: null,
+        realCase: null,
+        domainChecklist: null
+    };
+    
+    // Criar um elemento temporário para analisar o conteúdo
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    
+    // Extrair dificuldade
+    const difficultyMatch = content.match(/Dificuldade:\s*(\d+\/\d+)/i);
+    if (difficultyMatch) {
+        metadata.difficulty = difficultyMatch[1];
+    }
+    
+    // Extrair taxonomia de Bloom
+    const bloomMatch = content.match(/Taxonomia de Bloom:\s*([^<\n\r]+)/i);
+    if (bloomMatch) {
+        metadata.bloomTaxonomy = bloomMatch[1].trim();
+    }
+    
+    // Extrair estilo de aprendizado
+    const styleMatch = content.match(/Estilo de Aprendizado:\s*([^<\n\r]+)/i);
+    if (styleMatch) {
+        metadata.learningStyle = styleMatch[1].trim();
+    }
+    
+    // Extrair progresso acumulado
+    const progressMatch = content.match(/Progresso Acumulado:\s*(\d+)%/i);
+    if (progressMatch) {
+        metadata.progressPercent = progressMatch[1];
+    }
+    
+    // Extrair conexões com outras partes
+    const connectionsElements = Array.from(tempDiv.querySelectorAll('p'))
+        .filter(p => p.textContent.includes('Conexões com partes anteriores e posteriores:'));
+    
+    if (connectionsElements.length > 0) {
+        const connectionsEl = connectionsElements[0];
+        let connectionsText = connectionsEl.textContent.split('Conexões com partes anteriores e posteriores:')[1] || '';
+        metadata.connections = connectionsText.trim();
+    }
+    
+    // Extrair prompt de IA
+    const promptElements = Array.from(tempDiv.querySelectorAll('p'))
+        .filter(p => p.textContent.includes('Prompt de IA:'));
+    
+    if (promptElements.length > 0) {
+        const promptEl = promptElements[0];
+        let promptText = promptEl.textContent.split('Prompt de IA:')[1] || '';
+        metadata.aiPrompt = promptText.trim();
+    }
+    
+    // Extrair desafio relâmpago
+    const challengeElements = Array.from(tempDiv.querySelectorAll('p, li'))
+        .filter(el => el.textContent.includes('Desafio Relâmpago:'));
+    
+    if (challengeElements.length > 0) {
+        const challengeEl = challengeElements[0];
+        let challengeText = challengeEl.textContent.split('Desafio Relâmpago:')[1] || '';
+        // Remover especificação de tempo se existir
+        challengeText = challengeText.replace(/\(\d+ minutos\):/i, '');
+        challengeText = challengeText.replace(/\d+ minutos:/i, '');
+        metadata.challenge = challengeText.trim();
+    }
+    
+    // Extrair caso real
+    const caseElements = Array.from(tempDiv.querySelectorAll('p, li'))
+        .filter(el => el.textContent.includes('Caso Real:'));
+    
+    if (caseElements.length > 0) {
+        const caseEl = caseElements[0];
+        let caseText = caseEl.textContent.split('Caso Real:')[1] || '';
+        metadata.realCase = caseText.trim();
+    }
+    
+    // Extrair checklist de domínio
+    const checklistElements = Array.from(tempDiv.querySelectorAll('p'))
+        .filter(p => p.textContent.includes('Checklist de Domínio:'));
+    
+    if (checklistElements.length > 0) {
+        const checklistEl = checklistElements[0];
+        const nextElement = checklistEl.nextElementSibling;
+        
+        if (nextElement && (nextElement.tagName === 'UL' || nextElement.tagName === 'OL')) {
+            const checklistItems = Array.from(nextElement.querySelectorAll('li'))
+                .map(item => item.textContent.trim());
+            
+            if (checklistItems.length > 0) {
+                metadata.domainChecklist = checklistItems;
+            }
+        }
+    }
+    
+    return metadata;
+}
+
+/**
+ * Extrai informações específicas do título
+ * @param {string} title - Título da parte
+ * @returns {Object} - Objeto com informações extraídas
+ */
+function extractTitleInfo(title) {
+    const info = {
+        emoji: '📚',
+        duration: '1.5h'
+    };
+    
+    // Extrair emoji do título se existir
+    const emojiMatch = title.match(/([\u{1F300}-\u{1F6FF}]|[\u{2700}-\u{27BF}])/u);
+    if (emojiMatch) {
+        info.emoji = emojiMatch[1];
+    }
+    
+    // Extrair duração entre parênteses
+    const durationMatch = title.match(/\(([^)]+)\)/);
+    if (durationMatch) {
+        info.duration = durationMatch[1];
+    }
+    
+    return info;
+}
+
+/**
+ * Cria um checklist estruturado a partir de uma lista de itens
+ * @param {Array<string>} items - Lista de itens do checklist
+ * @param {string} cardId - ID do card para referência
+ * @returns {string} - HTML do checklist
+ */
+function createStructuredChecklist(items, cardId) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
+        return '<p class="text-muted">Nenhum item de checklist definido</p>';
+    }
+    
+    return `
+        <div class="checklist-container">
+            ${items.map((item, index) => `
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="check-${cardId}-${index}">
+                    <label class="form-check-label" for="check-${cardId}-${index}">
+                        ${item}
+                    </label>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+/**
+ * Cria um checklist padrão a partir dos dados da parte
+ * @param {Object} part - Objeto da parte
+ * @param {string} cardId - ID do card para referência
+ * @returns {string} - HTML do checklist
+ */
+function createDefaultChecklist(part, cardId) {
+    // Criar itens padrão baseados nos conceitos-chave
+    const items = [];
+    
+    // Adicionar item de objetivo
+    if (part.objective) {
+        items.push(`Compreender o objetivo: ${part.objective}`);
+    }
+    
+    // Adicionar itens baseados nos conceitos-chave
+    if (part.concepts && part.concepts.length > 0) {
+        // Limitar a 3 conceitos para não sobrecarregar
+        const conceptsTouse = part.concepts.slice(0, 3);
+        conceptsTouse.forEach(concept => {
+            items.push(`Dominar o conceito: ${concept}`);
+        });
+    }
+    
+    // Adicionar item de reflexão
+    if (part.reflection) {
+        items.push(`Refletir sobre: ${part.reflection}`);
+    }
+    
+    // Se não houver itens, adicionar alguns genéricos
+    if (items.length === 0) {
+        items.push(
+            "Compreender os conceitos fundamentais desta parte",
+            "Aplicar o conhecimento em exemplos práticos",
+            "Refletir sobre a aplicação destes conceitos"
+        );
+    }
+    
+    return createStructuredChecklist(items, cardId);
 }

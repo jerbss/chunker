@@ -1589,3 +1589,164 @@ html.dark-theme .badge.text-muted {
     margin-bottom: 1.5rem;
 }
 
+/* ========== Nova Estrutura de Cards de Parte ========== */
+/* Estilos para o bloco de contexto da aprendizagem */
+.context-block {
+    background-color: var(--bs-light);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+html.dark-theme .context-block {
+    background-color: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.context-progress, 
+.context-connections {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.context-progress:hover, 
+.context-connections:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+html.dark-theme .context-progress, 
+html.dark-theme .context-connections {
+    background-color: rgba(255,255,255,0.05) !important;
+}
+
+/* Estilos para a jornada de aprendizado */
+.learning-journey {
+    position: relative;
+}
+
+.journey-header {
+    margin-bottom: 1.5rem;
+}
+
+.learning-step {
+    position: relative;
+    margin-bottom: 2rem;
+    transition: transform 0.2s ease;
+}
+
+.learning-step:hover {
+    transform: translateX(5px);
+}
+
+.step-number {
+    transition: transform 0.2s ease;
+}
+
+.learning-step:hover .step-number {
+    transform: scale(1.1);
+}
+
+.step-content {
+    position: relative;
+    margin-left: 1.25rem;
+    padding-left: 1.5rem;
+    border-left-width: 2px !important;
+}
+
+.step-title {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 600;
+}
+
+.step-list {
+    padding-left: 1.25rem;
+    margin-bottom: 0;
+}
+
+.step-item {
+    margin-bottom: 0.5rem;
+}
+
+.step-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Estilos para guia prático */
+.challenge-timer {
+    font-size: 0.85rem;
+}
+
+.route-item, .pitfall-item {
+    transition: transform 0.2s ease;
+}
+
+.route-item:hover, .pitfall-item:hover {
+    transform: translateY(-2px);
+}
+
+.route-icon {
+    font-size: 1.25rem;
+}
+
+/* Estilos para recursos de suporte */
+.support-resources .card, 
+.self-assessment .card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.support-resources .card:hover, 
+.self-assessment .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.concepts-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+/* Ajustes para botões e elementos interativos */
+.copy-prompt {
+    transition: all 0.2s ease;
+}
+
+.copy-prompt:hover {
+    transform: translateY(-1px);
+}
+
+.feedback-area {
+    transition: all 0.3s ease;
+}
+
+/* Estilos para código e detalhes técnicos */
+pre {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 0.9rem;
+}
+
+.step-item code {
+    background-color: rgba(0,0,0,0.05);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .context-block .d-flex {
+        flex-direction: column;
+    }
+    
+    .context-block .flex-shrink-0 {
+        margin-bottom: 1rem;
+        margin-right: 0 !important;
+    }
+    
+    .learning-step:hover {
+        transform: none;
+    }
+}
+
+/* ...existing code... */
+
