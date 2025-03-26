@@ -310,8 +310,10 @@ function extractContent(element) {
         }
     }
     
-    // Processar conclusão
+    // Processar conclusão - Melhorando a detecção
+    let conclusionFound = false;
     if (conclusionSection) {
+        conclusionFound = true;
         let conclusionHtml = conclusionSection.outerHTML;
         let nextElement = conclusionSection.nextElementSibling;
         
@@ -321,6 +323,37 @@ function extractContent(element) {
         }
         
         state.conclusion = conclusionHtml;
+        console.log("Conclusão encontrada no HTML original");
+    } else {
+        // Buscar conclusão alternativa procurando por elementos que contenham texto relacionado
+        const possibleConclusions = Array.from(element.querySelectorAll('h1, h2, h3'))
+            .filter(el => {
+                const text = el.textContent.toLowerCase();
+                return text.includes('conclus') || text.includes('final') || 
+                       text.includes('síntese') || text.includes('resumo');
+            });
+        
+        if (possibleConclusions.length > 0) {
+            // Usar o primeiro elemento encontrado como conclusão
+            const altConclusionSection = possibleConclusions[0];
+            conclusionFound = true;
+            let conclusionHtml = altConclusionSection.outerHTML;
+            let nextElement = altConclusionSection.nextElementSibling;
+            
+            while (nextElement) {
+                conclusionHtml += nextElement.outerHTML;
+                nextElement = nextElement.nextElementSibling;
+            }
+            
+            state.conclusion = conclusionHtml;
+            console.log("Conclusão alternativa encontrada:", altConclusionSection.textContent);
+        }
+    }
+    
+    // Se ainda não encontrou conclusão, gerar uma conclusão padrão
+    if (!conclusionFound && state.parts.length > 0) {
+        state.conclusion = createDefaultConclusion();
+        console.log("Criada conclusão padrão");
     }
     
     // Log para debugging
@@ -507,14 +540,19 @@ function createCards() {
         });
     }
     
-    // Divisor de conclusão - mudando para "CONSIDERAÇÕES FINAIS"
+    // Verificar a conclusão antes de criar o card
     if (state.conclusion) {
+        console.log("Criando card de conclusão...");
+        // Divisor de conclusão
         const conclusionDivider = createSectionDivider('CONSIDERAÇÕES FINAIS', 'primary');
         cardsContainer.appendChild(conclusionDivider);
         
         // Card de Conclusão
         const conclusionCard = createConclusionCard();
         cardsContainer.appendChild(conclusionCard);
+        console.log("Card de conclusão adicionado ao container");
+    } else {
+        console.warn("Conclusão não encontrada, nenhum card de conclusão criado");
     }
 }
 
@@ -1262,6 +1300,18 @@ function createConclusionCard() {
 }
 
 /**
+ * Cria uma conclusão padrão quando nenhuma for encontrada no HTML original
+ */
+function createDefaultConclusion() {
+    return `
+        <h1>Conclusão</h1>
+        <p>Neste guia, exploramos ${state.mainTitle} em várias partes, abordando os principais conceitos e aplicações.</p>
+        <p>Agora que você compreendeu cada aspecto individualmente, pode integrar esse conhecimento para ter uma visão completa do tema.</p>
+        <p>Continue praticando os conceitos aprendidos e aprofunde seu conhecimento nas áreas que mais lhe interessaram.</p>
+    `;
+}
+
+/**
  * Cria o índice de navegação
  */
 function createTableOfContents() {
@@ -1338,16 +1388,52 @@ function initializeLayout() {
     try {
         const cardsContainer = document.getElementById('cards-container');
         if (cardsContainer && window.Masonry) {
-            // Garantir que o container possua posição relativa para conter os itens posicionados absolutamente
+            // Remover qualquer instância prévia do Masonry
+            if (state.masonry) {
+                state.masonry.destroy();
+            }
+            
+            // Remover posições absolutas que podem estar causando problemas
+            Array.from(cardsContainer.children).forEach(child => {
+                if (child.style.position === 'absolute') {
+                    child.style.position = '';
+                    child.style.left = '';
+                    child.style.top = '';
+                }
+            });
+            
+            // Garantir que o container pai tenha posição relativa
             cardsContainer.style.position = 'relative';
             
-            // Inicializar o Masonry com opções para layout responsivo sem overflow
-            new Masonry(cardsContainer, {
+            // Inicializar o Masonry com configurações otimizadas
+            state.masonry = new Masonry(cardsContainer, {
                 itemSelector: '.col-12',
+                columnWidth: '.col-12',
                 percentPosition: true,
-                originTop: true,
-                gutter: 20
+                transitionDuration: '0.2s',
+                stagger: 30,
+                initLayout: true,
+                resize: true,
+                fitWidth: false
             });
+            
+            // Recalcular layout após carregar imagens e conteúdo dinâmico
+            setTimeout(() => {
+                if (state.masonry) {
+                    state.masonry.layout();
+                }
+            }, 500);
+            
+            // Adicionar listener para redimensionamento da janela
+            window.addEventListener('resize', () => {
+                if (state.masonry) {
+                    state.masonry.layout();
+                }
+            });
+            
+            if (DEBUG.enabled) {
+                console.log("Masonry inicializado com sucesso");
+            }
         }
     } catch (error) {
         console.error('Erro ao inicializar Masonry:', error);
@@ -1391,6 +1477,13 @@ function hideLoadingAndCleanup() {
     
     // Inicializar comportamentos dos cards
     initializeCardBehaviors();
+    
+    // Recalcular o layout após inicializar os comportamentos
+    setTimeout(() => {
+        if (state.masonry) {
+            state.masonry.layout();
+        }
+    }, 1000);
 }
 
 /**
