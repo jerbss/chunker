@@ -89,7 +89,7 @@ def test_gemini(request):
                 logger.info(f"Processando '{tema}' com {num_partes} partes usando abordagem de requisição por parte")
                 
                 # Definir o modelo Gemini a ser utilizado
-                gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+                gemini_model = genai.GenerativeModel('gemini-2.0-flash')
                 
                 # Resultado final para ser concatenado
                 final_result = ""
