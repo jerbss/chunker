@@ -1,9 +1,3 @@
-/**
- * Chunkify - Sistema de processamento e exibição de conteúdo em chunks
- * Este script processa o conteúdo HTML gerado pela IA e o exibe em cards organizados
- */
-
-// Estado global da aplicação
 const state = {
     mainTitle: '',
     introContent: null,
@@ -12,32 +6,21 @@ const state = {
     masonry: null
 };
 
-// Configuração global para debugging
 const DEBUG = {
-    enabled: false,   // Ative para depuração
+    enabled: false,
     logStructure: true,
     highlightElements: true
 };
 
-// Quando o DOM estiver carregado, iniciar o processamento
 document.addEventListener('DOMContentLoaded', () => {
-    // Configurar o aviso para muitos chunks
     setupWarnings();
-    
-    // Iniciar o processamento do conteúdo
     processContent();
-    
-    // Configurar comportamentos da interface
     setupUIBehaviors();
 });
 
-/**
- * Ativa o modo de depuração para identificar problemas
- */
 function enableDebugMode() {
     DEBUG.enabled = true;
     
-    // Aplicar classe de debug para visualizar estrutura HTML
     if (DEBUG.highlightElements) {
         const contentContainer = document.getElementById('html-content-container');
         if (contentContainer) {
@@ -49,9 +32,6 @@ function enableDebugMode() {
     return "Modo de depuração ativado. Verifique o console para mais informações.";
 }
 
-/**
- * Configura avisos e interações iniciais
- */
 function setupWarnings() {
     const numPartesInput = document.querySelector('input[name="num_partes"]');
     if (numPartesInput) {
@@ -62,7 +42,6 @@ function setupWarnings() {
             }
         });
         
-        // Verificar valor inicial
         const warning = document.getElementById('parts-warning');
         if (warning) {
             warning.classList.toggle('d-none', parseInt(numPartesInput.value) <= 8);
@@ -70,11 +49,7 @@ function setupWarnings() {
     }
 }
 
-/**
- * Configura comportamentos da UI
- */
 function setupUIBehaviors() {
-    // Toggle para o índice de navegação
     const tocToggle = document.getElementById('toc-toggle');
     if (tocToggle) {
         tocToggle.addEventListener('click', () => {
@@ -82,13 +57,11 @@ function setupUIBehaviors() {
             const icon = tocToggle.querySelector('i');
             
             if (icon.classList.contains('fa-chevron-up')) {
-                // Recolher
                 icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
                 tocContent.style.maxHeight = '0';
                 tocContent.style.padding = '0';
                 tocContent.style.overflow = 'hidden';
             } else {
-                // Expandir
                 icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
                 tocContent.style.maxHeight = '';
                 tocContent.style.padding = '';
@@ -97,10 +70,8 @@ function setupUIBehaviors() {
         });
     }
     
-    // Input Group interactions - fazer com que clicar nos ícones ative o input correspondente
     document.querySelectorAll('.input-group .input-group-text').forEach(icon => {
         icon.addEventListener('click', function() {
-            // Encontra o input mais próximo dentro do mesmo input-group
             const input = this.closest('.input-group').querySelector('input');
             if (input) {
                 input.focus();
@@ -108,7 +79,6 @@ function setupUIBehaviors() {
         });
     });
     
-    // Inicializar tooltips do Bootstrap
     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -117,9 +87,6 @@ function setupUIBehaviors() {
     }
 }
 
-/**
- * Função para diagnóstico da estrutura HTML
- */
 function analyzeHtmlStructure() {
     const contentContainer = document.getElementById('html-content-container');
     if (!contentContainer) {
@@ -137,7 +104,6 @@ function analyzeHtmlStructure() {
         complete: contentContainer.innerHTML.substring(0, 500) + '...'
     };
     
-    // Analisar headers H1
     contentContainer.querySelectorAll('h1').forEach((h1, index) => {
         structure.h1.push({
             index,
@@ -146,7 +112,6 @@ function analyzeHtmlStructure() {
         });
     });
     
-    // Analisar headers H2
     contentContainer.querySelectorAll('h2').forEach((h2, index) => {
         structure.h2.push({
             index,
@@ -155,9 +120,8 @@ function analyzeHtmlStructure() {
         });
     });
     
-    // Analisar elementos strong
     contentContainer.querySelectorAll('strong').forEach((strong, index) => {
-        if (index < 10) { // limitar para não sobrecarregar
+        if (index < 10) {
             structure.strong.push({
                 index,
                 text: strong.textContent
@@ -172,48 +136,36 @@ function analyzeHtmlStructure() {
     return structure;
 }
 
-/**
- * Processa o conteúdo HTML
- */
 function processContent() {
     const contentContainer = document.getElementById('html-content-container');
     if (!contentContainer) return;
     
-    // Analisar a estrutura HTML para diagnóstico se debugging estiver ativo
     if (DEBUG.enabled && DEBUG.logStructure) {
         analyzeHtmlStructure();
     }
     
     try {
-        // Criar elemento temporário para processar o HTML
         const tempElement = document.createElement('div');
         tempElement.innerHTML = contentContainer.innerHTML;
         
-        // Extrair o conteúdo e organizar em chunks
         extractContent(tempElement);
         
-        // Debugging para verificar extração de partes
         if (DEBUG.enabled) {
             console.log("Partes extraídas:", state.parts.length);
             console.log("Partes:", state.parts.map(p => p.title));
         }
         
-        // Remover o fallback content imediatamente para evitar que ele seja mostrado
         const fallbackContent = document.getElementById('fallback-content');
         if (fallbackContent) {
             fallbackContent.classList.add('d-none');
         }
         
-        // Criar os cards baseados no conteúdo extraído
         createCards();
         
-        // Criar a navegação (TOC)
         createTableOfContents();
         
-        // Inicializar Masonry para layout responsivo
         initializeLayout();
         
-        // Esconder loading e remover conteúdo original
         hideLoadingAndCleanup();
     } catch (error) {
         console.error('Erro ao processar conteúdo:', error);
@@ -221,48 +173,35 @@ function processContent() {
     }
 }
 
-/**
- * Extrai o conteúdo do HTML temporário
- */
 function extractContent(element) {
-    // Extrair título principal
     const mainTitle = element.querySelector('h1');
     state.mainTitle = mainTitle ? mainTitle.textContent.trim() : 'Chunkify';
     
-    // Encontrar todas as seções h1 e h2
     const h1Sections = element.querySelectorAll('h1');
     const h2Sections = element.querySelectorAll('h2');
     
-    // Variáveis para processamento
     let introContentHtml = '';
     let partSections = [];
     let conclusionSection = null;
     
-    // Classificar todas as seções h1 (titulo principal, partes e conclusão)
     h1Sections.forEach(section => {
         const sectionText = section.textContent.toLowerCase();
         
         if (sectionText.includes('parte')) {
-            // É uma parte numerada
             partSections.push(section);
         } 
         else if (sectionText.includes('conclus')) {
-            // É a conclusão
             conclusionSection = section;
         }
-        // O título principal já foi capturado acima
     });
     
-    // Processar seções h2 (contextualização e objetivos gerais)
     h2Sections.forEach(section => {
         const sectionText = section.textContent.toLowerCase();
         
         if (sectionText.includes('contextualiza') || sectionText.includes('objetivos')) {
-            // Pertence à introdução
             const sectionClone = section.cloneNode(true);
             introContentHtml += sectionClone.outerHTML;
             
-            // Capturar conteúdo até a próxima seção (h1 ou h2)
             let nextElement = section.nextElementSibling;
             while (nextElement && nextElement.tagName !== 'H2' && nextElement.tagName !== 'H1') {
                 introContentHtml += nextElement.outerHTML;
@@ -271,7 +210,6 @@ function extractContent(element) {
         }
     });
     
-    // Se não temos conteúdo de introdução das seções h2, pegar tudo entre h1 principal e primeira parte
     if (!introContentHtml && mainTitle) {
         let nextElement = mainTitle.nextElementSibling;
         while (nextElement && 
@@ -283,22 +221,17 @@ function extractContent(element) {
         }
     }
     
-    // Armazenar introdução
     state.introContent = introContentHtml;
     
-    // Processar partes
     state.parts = processPartSections(partSections);
     
-    // Verificação adicional para evitar partes com título duplicado ou sem título correto
     if (state.parts.length > 0) {
-        // Remover partes que têm o mesmo título que o título principal, vazias ou iguais a "PARTES"
         state.parts = state.parts.filter(part => 
             part.title !== state.mainTitle && 
             part.title.trim() !== "" &&
             part.title.trim().toLowerCase() !== "partes"
         );
         
-        // Se ainda não temos partes após a filtragem, criar pelo menos uma parte genérica
         if (state.parts.length === 0) {
             state.parts.push({
                 title: `Parte 1: ${state.mainTitle}`,
@@ -310,7 +243,6 @@ function extractContent(element) {
         }
     }
     
-    // Processar conclusão - Melhorando a detecção
     let conclusionFound = false;
     if (conclusionSection) {
         conclusionFound = true;
@@ -325,7 +257,6 @@ function extractContent(element) {
         state.conclusion = conclusionHtml;
         console.log("Conclusão encontrada no HTML original");
     } else {
-        // Buscar conclusão alternativa procurando por elementos que contenham texto relacionado
         const possibleConclusions = Array.from(element.querySelectorAll('h1, h2, h3'))
             .filter(el => {
                 const text = el.textContent.toLowerCase();
@@ -334,7 +265,6 @@ function extractContent(element) {
             });
         
         if (possibleConclusions.length > 0) {
-            // Usar o primeiro elemento encontrado como conclusão
             const altConclusionSection = possibleConclusions[0];
             conclusionFound = true;
             let conclusionHtml = altConclusionSection.outerHTML;
@@ -350,13 +280,11 @@ function extractContent(element) {
         }
     }
     
-    // Se ainda não encontrou conclusão, gerar uma conclusão padrão
     if (!conclusionFound && state.parts.length > 0) {
         state.conclusion = createDefaultConclusion();
         console.log("Criada conclusão padrão");
     }
     
-    // Log para debugging
     if (DEBUG.enabled) {
         console.log("Extração concluída:", {
             title: state.mainTitle,
@@ -376,20 +304,17 @@ function processPartSections(partSections) {
         
         const part = {
             title: section.textContent.trim(),
-            content: '',  // Inicializa vazio para adicionar apenas o conteúdo sem o título
+            content: '', 
             objective: null,
             concepts: [],
             reflection: null,
-            instructionPrompt: null // Novo campo para prompt de instrução
+            instructionPrompt: null
         };
         
-        // Pular o H1 inicial (título) e começar a capturar a partir do próximo elemento
         let nextElement = section.nextElementSibling;
         while (nextElement && nextElement.tagName !== 'H1') {
-            // Adicionar o elemento ao conteúdo da parte
             part.content += nextElement.outerHTML;
             
-            // Extrair metadados se existirem
             const elementText = nextElement.textContent || '';
             
             if (elementText.includes('Objetivo de Aprendizagem:')) {
@@ -397,14 +322,12 @@ function processPartSections(partSections) {
             }
             
             if (elementText.includes('Conceitos-chave:')) {
-                // Extrair e preparar a string completa de conceitos
                 const conceptsText = elementText.split('Conceitos-chave:')[1].trim();
-                // Dividir conceitos por vírgulas e pontos, tratar cada item individualmente
                 part.concepts = conceptsText
-                    .replace(/\.$/, '') // Remover ponto final
-                    .split(/,\s*|\.\s*/) // Dividir por vírgula ou ponto
+                    .replace(/\.$/, '')  
+                    .split(/,\s*|\.\s*/) 
                     .map(c => c.trim())
-                    .filter(c => c && c.length > 0); // Filtrar itens vazios
+                    .filter(c => c && c.length > 0);
             }
             
             if (elementText.includes('Pergunta de Reflexão:')) {
@@ -418,7 +341,6 @@ function processPartSections(partSections) {
             nextElement = nextElement.nextElementSibling;
         }
 
-        // Remover o título da parte do conteúdo
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = part.content;
         const firstH1 = tempDiv.querySelector('h1');
@@ -426,7 +348,6 @@ function processPartSections(partSections) {
             firstH1.remove();
         }
 
-        // Remover TODOS os parágrafos que contenham conceitos-chave, com busca mais abrangente
         const allParagraphs = tempDiv.querySelectorAll('p');
         allParagraphs.forEach(paragraph => {
             if (paragraph.textContent.includes('Conceitos-chave:')) {
@@ -434,7 +355,6 @@ function processPartSections(partSections) {
             }
         });
 
-        // Remover a pergunta de reflexão do conteúdo
         const reflectionElements = tempDiv.querySelectorAll('strong');
         reflectionElements.forEach(el => {
             if (el.textContent.includes('Reflexão:')) {
@@ -447,7 +367,6 @@ function processPartSections(partSections) {
             }
         });
 
-        // Remover o objetivo de aprendizagem do conteúdo
         const objectiveElements = tempDiv.querySelectorAll('strong');
         objectiveElements.forEach(el => {
             if (el.textContent.includes('Objetivo de Aprendizagem:')) {
@@ -460,7 +379,6 @@ function processPartSections(partSections) {
             }
         });
 
-        // Remover os conceitos-chave do conteúdo também
         const conceptElements = tempDiv.querySelectorAll('strong');
         conceptElements.forEach(el => {
             if (el.textContent.includes('Conceitos-chave:')) {
@@ -473,7 +391,6 @@ function processPartSections(partSections) {
             }
         });
 
-        // Remover o prompt de instrução do conteúdo também
         const instructionPromptElements = tempDiv.querySelectorAll('strong');
         instructionPromptElements.forEach(el => {
             if (el.textContent.includes('Prompt de Instrução:')) {
@@ -486,18 +403,14 @@ function processPartSections(partSections) {
             }
         });
 
-        // Remover marcadores de lista indesejados
         part.content = tempDiv.innerHTML.replace(/^(\s*--\s*Tópicos Principais:)/m, '')
                                          .replace(/(\s*Conceitos-chave:\s*--)$/m, '');
         
         part.content = part.content.trim();
         
-        // Gerar automaticamente um prompt de instrução se não existir
         if (!part.instructionPrompt) {
-            // Extrair título principal sem "Parte X: "
             let cleanTitle = part.title.replace(/^Parte \d+:\s*/i, '').trim();
             
-            // Gerar um prompt estruturado baseado no título e conceitos
             part.instructionPrompt = `Explique detalhadamente sobre ${cleanTitle}, abordando os seguintes aspectos:${
                 part.concepts.length > 0 
                 ? '\n\n1. ' + part.concepts.slice(0, 5).map(c => `O que é ${c} e qual sua importância?`).join('\n2. ') 
@@ -524,7 +437,7 @@ function createCards() {
     
     cardsContainer.innerHTML = '';
     
-    // Card de Introdução
+    
     if (state.introContent) {
         const introCard = createIntroCard();
         if (introCard) {
@@ -532,7 +445,6 @@ function createCards() {
         }
     }
     
-    // Criar cards de partes INDIVIDUALMENTE, sem wrapper row
     if (state.parts.length > 0) {
         state.parts.forEach((part, index) => {
             const partCard = createPartCard(part, index);
@@ -540,14 +452,11 @@ function createCards() {
         });
     }
     
-    // Verificar a conclusão antes de criar o card
     if (state.conclusion) {
         console.log("Criando card de conclusão...");
-        // Divisor de conclusão
         const conclusionDivider = createSectionDivider('CONSIDERAÇÕES FINAIS', 'primary');
         cardsContainer.appendChild(conclusionDivider);
         
-        // Card de Conclusão
         const conclusionCard = createConclusionCard();
         cardsContainer.appendChild(conclusionCard);
         console.log("Card de conclusão adicionado ao container");
@@ -556,9 +465,6 @@ function createCards() {
     }
 }
 
-/**
- * Cria um divisor de seção
- */
 function createSectionDivider(title, colorClass) {
     const divider = document.createElement('div');
     divider.className = 'col-12 mb-4';
@@ -576,7 +482,6 @@ function createSectionDivider(title, colorClass) {
  * Cria o card de introdução
  */
 function createIntroCard() {
-    // Se a introdução estiver vazia, não criar o card
     if (!state.introContent || !state.introContent.trim()) {
         return null;
     }
@@ -608,24 +513,19 @@ function createIntroCard() {
 function createPartCard(part, index) {
     const partNumber = index + 1;
     const cardId = `card-part-${partNumber}`;
-    const colClass = 'col-12'; // Usa largura total
-    
+    const colClass = 'col-12';
     const card = document.createElement('div');
     card.className = `${colClass} mb-4`;
     card.id = cardId;
     
-    // Extrair metadados do conteúdo da parte
     const metadata = extractPartMetadata(part.content);
     
-    // Extrair informações específicas do título
     const titleInfo = extractTitleInfo(part.title);
     const emoji = titleInfo.emoji || '📚';
     const duration = titleInfo.duration || '1.5h';
     
-    // Construir o conteúdo estruturado
     const structuredContent = organizeStructuredContent(part.content, metadata);
     
-    // Criar a estrutura do card com layout melhorado para autodidatas
     card.innerHTML = `
         <div class="card shadow h-100">
             <!-- 1. HEADER DO CARD -->
@@ -964,17 +864,13 @@ function organizeStructuredContent(contentHTML, metadata) {
         armadilhasHTML: ''
     };
     
-    // Criar um elemento temporário para analisar o HTML
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = contentHTML;
     
-    // Extrair os núcleos (tópicos principais)
     result.nucleosHTML = extractNucleosHTML(tempDiv);
     
-    // Extrair rotas alternativas
     result.rotasHTML = extractRotasHTML(tempDiv);
     
-    // Extrair armadilhas comuns
     result.armadilhasHTML = extractArmadilhasHTML(tempDiv);
     
     return result;
@@ -986,17 +882,14 @@ function organizeStructuredContent(contentHTML, metadata) {
  * @returns {string} - HTML formatado dos núcleos
  */
 function extractNucleosHTML(container) {
-    // Procurar pela seção "Tópicos Nucleares"
     const nucleosSections = Array.from(container.querySelectorAll('p, li'))
         .filter(el => el.textContent.includes('Tópicos Nucleares:'));
     
     if (nucleosSections.length === 0) return '';
     
-    // Localizar a lista de núcleos (geralmente é a primeira lista após a seção "Tópicos Nucleares")
     let nuclearList = null;
     let currentElement = nucleosSections[0];
     
-    // Procurar pela lista de núcleos
     while (currentElement && !nuclearList) {
         const nextElement = currentElement.nextElementSibling;
         if (nextElement && (nextElement.tagName === 'UL' || nextElement.tagName === 'OL')) {
@@ -1010,23 +903,19 @@ function extractNucleosHTML(container) {
     
     if (!nuclearList) return '';
     
-    // Extrair os núcleos da lista
     const nucleos = [];
     const nucleoItems = nuclearList.querySelectorAll(':scope > li');
     
     nucleoItems.forEach((item, index) => {
-        // Extrair o título do núcleo (geralmente está dentro de um <strong>)
         let nucleoTitle = '';
         const strongEl = item.querySelector('strong');
         if (strongEl) {
             nucleoTitle = strongEl.textContent.replace(/^\d+\.\s+/, '').replace(/:$/, '');
         } else {
-            // Se não houver <strong>, extrair do texto do item
             const titleMatch = item.textContent.match(/^(\d+\.\s+)?([^:]+):/);
             nucleoTitle = titleMatch ? titleMatch[2] : `Núcleo ${index + 1}`;
         }
         
-        // Extrair os subtópicos (geralmente estão em uma sublista)
         const subtopics = [];
         const sublist = item.querySelector('ul, ol');
         if (sublist) {
@@ -1043,7 +932,6 @@ function extractNucleosHTML(container) {
         });
     });
     
-    // Criar o HTML da jornada de aprendizado
     let result = '';
     
     nucleos.forEach((nucleo, index) => {
@@ -1079,17 +967,14 @@ function extractNucleosHTML(container) {
  * @returns {string} - HTML formatado das rotas alternativas
  */
 function extractRotasHTML(container) {
-    // Procurar pela seção "Rotas Alternativas"
     const rotasSections = Array.from(container.querySelectorAll('p, li'))
         .filter(el => el.textContent.includes('Rotas Alternativas:'));
     
     if (rotasSections.length === 0) return '';
     
-    // Localizar os itens das rotas alternativas
     let rotasList = null;
     let currentElement = rotasSections[0];
     
-    // Procurar pela lista de rotas
     while (currentElement && !rotasList) {
         const nextElement = currentElement.nextElementSibling;
         if (nextElement && (nextElement.tagName === 'UL' || nextElement.tagName === 'OL')) {
@@ -1103,18 +988,15 @@ function extractRotasHTML(container) {
     
     if (!rotasList) return '';
     
-    // Extrair as rotas
     const routes = [];
     const routeItems = rotasList.querySelectorAll('li');
     
     routeItems.forEach(item => {
-        // Extrair o tipo de rota e sua descrição
         const strongEl = item.querySelector('strong');
         if (!strongEl) return;
         
         const routeType = strongEl.textContent.replace(/:$/, '');
         
-        // Classificar as rotas
         let routeClass = '';
         let routeIcon = '';
         
@@ -1128,7 +1010,6 @@ function extractRotasHTML(container) {
             routeIcon = 'rocket';
         }
         
-        // Extrair a descrição (texto após o <strong>)
         let description = '';
         let currentNode = strongEl.nextSibling;
         
@@ -1141,7 +1022,6 @@ function extractRotasHTML(container) {
             currentNode = currentNode.nextSibling;
         }
         
-        // Limpar a descrição
         description = description.replace(/^:/, '').trim();
         
         routes.push({
@@ -1152,7 +1032,6 @@ function extractRotasHTML(container) {
         });
     });
     
-    // Criar o HTML das rotas alternativas
     let result = '';
     
     routes.forEach((route, index) => {
@@ -1179,17 +1058,14 @@ function extractRotasHTML(container) {
  * @returns {string} - HTML formatado das armadilhas comuns
  */
 function extractArmadilhasHTML(container) {
-    // Procurar pela seção "Armadilhas Comuns"
     const armadilhasSections = Array.from(container.querySelectorAll('p, li'))
         .filter(el => el.textContent.includes('Armadilhas Comuns:'));
     
     if (armadilhasSections.length === 0) return '';
     
-    // Localizar a lista de armadilhas
     let armadilhasList = null;
     let currentElement = armadilhasSections[0];
     
-    // Procurar pela lista de armadilhas
     while (currentElement && !armadilhasList) {
         const nextElement = currentElement.nextElementSibling;
         if (nextElement && (nextElement.tagName === 'UL' || nextElement.tagName === 'OL')) {
@@ -1203,14 +1079,12 @@ function extractArmadilhasHTML(container) {
     
     if (!armadilhasList) return '';
     
-    // Extrair as armadilhas
     const pitfalls = [];
     const pitfallItems = armadilhasList.querySelectorAll('li');
     
     pitfallItems.forEach(item => {
         const itemText = item.innerHTML;
         
-        // Tentar extrair problema e solução
         const parts = itemText.split(/<strong>Solução:<\/strong>/i);
         
         if (parts.length >= 2) {
@@ -1222,7 +1096,6 @@ function extractArmadilhasHTML(container) {
                 solution
             });
         } else {
-            // Formato alternativo: texto regular
             pitfalls.push({
                 problem: itemText,
                 solution: ''
@@ -1230,7 +1103,6 @@ function extractArmadilhasHTML(container) {
         }
     });
     
-    // Criar o HTML das armadilhas comuns
     let result = '';
     
     pitfalls.forEach((pitfall, index) => {
@@ -1318,12 +1190,10 @@ function createTableOfContents() {
     const tocContent = document.getElementById('toc-content');
     if (!tocContent) return;
     
-    // Limpar conteúdo existente
     tocContent.innerHTML = '';
     
     const nav = document.createElement('nav');
     
-    // Adicionar link para introdução
     if (state.introContent) {
         const introItem = document.createElement('div');
         introItem.className = 'mb-3';
@@ -1336,7 +1206,6 @@ function createTableOfContents() {
         nav.appendChild(introItem);
     }
     
-    // Adicionar links para partes
     if (state.parts.length > 0) {
         const partsHeader = document.createElement('h6');
         partsHeader.className = 'text-uppercase text-muted mt-4 mb-2 border-top pt-2';
@@ -1345,7 +1214,6 @@ function createTableOfContents() {
         partsHeader.innerHTML = '<i class="fas fa-layer-group me-1"></i> Partes';
         nav.appendChild(partsHeader);
         
-        // Lista de partes
         const partsList = document.createElement('div');
         partsList.className = 'ms-2 mb-3';
         
@@ -1365,7 +1233,6 @@ function createTableOfContents() {
         nav.appendChild(partsList);
     }
     
-    // Adicionar link para conclusão - mantendo "Conclusão" apenas no TOC
     if (state.conclusion) {
         const conclusionItem = document.createElement('div');
         conclusionItem.className = 'mt-3 border-top pt-2';
@@ -1388,12 +1255,10 @@ function initializeLayout() {
     try {
         const cardsContainer = document.getElementById('cards-container');
         if (cardsContainer && window.Masonry) {
-            // Remover qualquer instância prévia do Masonry
             if (state.masonry) {
                 state.masonry.destroy();
             }
             
-            // Remover posições absolutas que podem estar causando problemas
             Array.from(cardsContainer.children).forEach(child => {
                 if (child.style.position === 'absolute') {
                     child.style.position = '';
@@ -1402,10 +1267,8 @@ function initializeLayout() {
                 }
             });
             
-            // Garantir que o container pai tenha posição relativa
             cardsContainer.style.position = 'relative';
             
-            // Inicializar o Masonry com configurações otimizadas
             state.masonry = new Masonry(cardsContainer, {
                 itemSelector: '.col-12',
                 columnWidth: '.col-12',
@@ -1417,14 +1280,12 @@ function initializeLayout() {
                 fitWidth: false
             });
             
-            // Recalcular layout após carregar imagens e conteúdo dinâmico
             setTimeout(() => {
                 if (state.masonry) {
                     state.masonry.layout();
                 }
             }, 500);
             
-            // Adicionar listener para redimensionamento da janela
             window.addEventListener('resize', () => {
                 if (state.masonry) {
                     state.masonry.layout();
@@ -1444,41 +1305,34 @@ function initializeLayout() {
  * Esconde loading e limpa conteúdo desnecessário
  */
 function hideLoadingAndCleanup() {
-    // Remover loading spinner completamente
     const loadingContainer = document.getElementById('loading-container');
     if (loadingContainer) {
         loadingContainer.remove();
     }
     
-    // Garantir que o fallback esteja escondido e removido para evitar duplicatas
     const fallbackContent = document.getElementById('fallback-content');
     if (fallbackContent) {
         fallbackContent.classList.add('d-none');
         fallbackContent.remove();
     }
     
-    // Remover o conteúdo HTML original
     const htmlContentContainer = document.getElementById('html-content-container');
     if (htmlContentContainer) {
         htmlContentContainer.remove();
     }
     
-    // Verificar se os cards foram criados corretamente
     const cardsContainer = document.getElementById('cards-container');
     if (cardsContainer && DEBUG.enabled) {
         console.log("Cards no container:", cardsContainer.children.length);
         console.log("Conteúdo do container de cards:", cardsContainer.innerHTML.substring(0, 100) + "...");
     }
     
-    // Remover elementos temporários
     document.querySelectorAll('.formatted-content, .formatted-content-visible').forEach(el => {
         if (el) el.remove();
     });
     
-    // Inicializar comportamentos dos cards
     initializeCardBehaviors();
     
-    // Recalcular o layout após inicializar os comportamentos
     setTimeout(() => {
         if (state.masonry) {
             state.masonry.layout();
@@ -1490,22 +1344,18 @@ function hideLoadingAndCleanup() {
  * Inicializa comportamentos dinâmicos após a criação dos cards
  */
 function initializeCardBehaviors() {
-    // Adicionar evento para botões de cópia de prompt
     document.querySelectorAll('.copy-prompt').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             const promptText = decodeURIComponent(this.getAttribute('data-prompt'));
             
-            // Copiar para a área de transferência
             navigator.clipboard.writeText(promptText)
                 .then(() => {
-                    // Feedback visual temporário
                     const originalText = this.innerHTML;
                     this.innerHTML = '<i class="fas fa-check"></i> Copiado!';
                     this.classList.remove('btn-outline-info');
                     this.classList.add('btn-success');
                     
-                    // Restaurar após 2 segundos
                     setTimeout(() => {
                         this.innerHTML = originalText;
                         this.classList.remove('btn-success');
@@ -1519,39 +1369,29 @@ function initializeCardBehaviors() {
         });
     });
 
-    // Converter parágrafos com listas em elementos <ul> e processar seções especiais
     processAllContentSections();
 
-    // Inicializar comportamentos para novos elementos
     initializeNewCardFeatures();
 }
 
-/**
- * Inicializa os comportamentos para os novos recursos dos cards
- */
 function initializeNewCardFeatures() {
-    // Toggle dos detalhes do mini-desafio
     document.querySelectorAll('.toggle-challenge-details').forEach(button => {
         button.addEventListener('click', function() {
             const detailsContainer = this.closest('.border-start').querySelector('.challenge-details');
             const isHidden = detailsContainer.style.display === 'none';
             
-            // Toggle da visibilidade
             detailsContainer.style.display = isHidden ? 'block' : 'none';
             
-            // Atualizar o ícone
             const icon = this.querySelector('i');
             icon.classList.toggle('fa-chevron-down', !isHidden);
             icon.classList.toggle('fa-chevron-up', isHidden);
             
-            // Atualizar o texto do botão
             this.innerHTML = isHidden 
                 ? '<i class="fas fa-chevron-up"></i> Ocultar Dicas'
                 : '<i class="fas fa-chevron-down"></i> Dicas';
         });
     });
     
-    // Toggle entre modos de estudo
     document.querySelectorAll('.btn-check[name^="mode-"]').forEach(radio => {
         radio.addEventListener('change', function() {
             const cardId = this.name.split('-')[1];
@@ -1565,7 +1405,6 @@ function initializeNewCardFeatures() {
         });
     });
     
-    // Configurar controles de autoavaliação
     document.querySelectorAll('input[type="range"][id^="rating-"]').forEach(slider => {
         const updateFeedback = function() {
             const sliderId = slider.id;
@@ -1588,7 +1427,6 @@ function initializeNewCardFeatures() {
                 return;
             }
             
-            // Tenta selecionar o elemento .feedback-text dentro do feedbackArea
             let feedbackText = feedbackArea.querySelector('.feedback-text');
             if (!feedbackText) {
                 console.warn(`Elemento .feedback-text não encontrado dentro de feedback-${cardId}. Criando novo elemento.`);
@@ -1597,7 +1435,6 @@ function initializeNewCardFeatures() {
                 feedbackArea.appendChild(feedbackText);
             }
             
-            // Mostrar a área de feedback
             feedbackArea.classList.remove('d-none');
             
             const feedbacks = [
