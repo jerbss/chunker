@@ -1004,10 +1004,10 @@ function extractRotasHTML(container) {
             routeType.toLowerCase().includes('básico') || 
             routeType.toLowerCase().includes('iniciante')) {
             routeClass = 'success';
-            routeIcon = 'turtle';
+            routeIcon = 'shield-halved'; // Ícone corrigido - mais visível que 'turtle'
         } else {
             routeClass = 'danger';
-            routeIcon = 'rocket';
+            routeIcon = 'rocket'; // Mantido o rocket
         }
         
         let description = '';
@@ -1037,8 +1037,8 @@ function extractRotasHTML(container) {
     routes.forEach((route, index) => {
         result += `
             <div class="route-item d-flex ${index < routes.length - 1 ? 'mb-3 pb-3 border-bottom' : ''}">
-                <div class="route-icon rounded-circle bg-${route.class} bg-opacity-10 p-2 me-3 d-flex align-items-center justify-content-center"
-                     style="width: 45px; height: 45px;">
+                <div class="route-icon bg-${route.class} bg-opacity-10 d-flex align-items-center justify-content-center"
+                     style="width: 48px; height: 48px;">
                     <i class="fas fa-${route.icon} text-${route.class}"></i>
                 </div>
                 <div>

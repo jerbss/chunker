@@ -1632,10 +1632,6 @@ html.dark-theme .context-connections {
     transition: transform 0.2s ease;
 }
 
-.learning-step:hover {
-    transform: translateX(5px);
-}
-
 .step-number {
     transition: transform 0.2s ease;
 }
@@ -1746,6 +1742,440 @@ pre {
     .learning-step:hover {
         transform: none;
     }
+}
+
+/* ...existing code... */
+
+/* ========== Nova Estrutura de Cards de Parte - Melhorias Visuais ========== */
+/* Melhorias gerais para cards */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: box-shadow 0.3s ease;
+}
+
+html.dark-theme .card {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+html.dark-theme .card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+/* Melhoria nos headers dos cards */
+.card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.card-header h3 {
+    margin-bottom: 0;
+    line-height: 1.4;
+}
+
+/* Corpo do card com melhor espaçamento */
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Seção de metadados superiores com melhor organização */
+.card-header.metadata-header {
+    background-color: rgba(0,0,0,0.02);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 0.75rem 1.25rem;
+}
+
+html.dark-theme .card-header.metadata-header {
+    background-color: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.metadata-header .d-flex {
+    gap: 0.5rem;
+}
+
+.metadata-header .fw-medium {
+    color: var(--text-color);
+}
+
+/* Bloco de contexto mais limpo */
+.context-block {
+    background-color: rgba(0,0,0,0.01);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 1.5rem;
+}
+
+html.dark-theme .context-block {
+    background-color: rgba(255,255,255,0.02);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Melhorias nos elementos de contexto */
+.context-progress, 
+.context-connections {
+    transition: box-shadow 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+}
+
+.context-progress:hover, 
+.context-connections:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+html.dark-theme .context-progress, 
+html.dark-theme .context-connections {
+    background-color: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+html.dark-theme .context-progress:hover, 
+html.dark-theme .context-connections:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Jornada de aprendizado - Sem translação no hover */
+.learning-journey {
+    position: relative;
+    margin-bottom: 2.5rem;
+}
+
+.journey-header {
+    margin-bottom: 1.5rem;
+}
+
+.learning-step {
+    position: relative;
+    margin-bottom: 2rem;
+    transition: background-color 0.2s ease;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+/* Substituindo o transform por highlight no background */
+.learning-step:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+html.dark-theme .learning-step:hover {
+    background-color: rgba(255,255,255,0.03);
+}
+
+/* Melhorias na numeração dos passos */
+.step-number {
+    width: 40px !important;
+    height: 40px !important;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: box-shadow 0.3s ease;
+}
+
+.learning-step:hover .step-number {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+}
+
+/* Conteúdo dos passos com melhor estrutura visual */
+.step-content {
+    position: relative;
+    margin-left: 1.25rem;
+    padding-left: 1.5rem;
+    border-left-width: 3px !important;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.step-title {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.step-list {
+    padding-left: 1.25rem;
+    margin-bottom: 0;
+}
+
+.step-item {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.step-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Melhoria para seções com cards internos */
+.support-resources .card, 
+.self-assessment .card {
+    transition: box-shadow 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+.support-resources .card:hover, 
+.self-assessment .card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+html.dark-theme .support-resources .card, 
+html.dark-theme .self-assessment .card {
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+html.dark-theme .support-resources .card:hover, 
+html.dark-theme .self-assessment .card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+/* Cards para rota e problemas comuns sem translação */
+.route-item, .pitfall-item {
+    transition: background-color 0.2s ease;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.route-item:hover, .pitfall-item:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+html.dark-theme .route-item:hover, 
+html.dark-theme .pitfall-item:hover {
+    background-color: rgba(255,255,255,0.03);
+}
+
+/* Melhorias nos títulos de seção */
+.section-header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+html.dark-theme .section-header {
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.section-header h4 {
+    margin-bottom: 0;
+    color: var(--primary-color);
+}
+
+/* Espaçamento melhorado entre seções */
+.learning-journey,
+.practical-guide,
+.support-resources,
+.self-assessment {
+    margin-bottom: 2.5rem;
+}
+
+/* Cards informativos aprimorados visualmente */
+.card-header.bg-opacity-10 {
+    background-color: rgba(var(--primary-rgb), 0.05) !important;
+}
+
+.card-header.bg-warning.bg-opacity-10 {
+    background-color: rgba(var(--warning-rgb), 0.05) !important;
+}
+
+.card-header.bg-info.bg-opacity-10 {
+    background-color: rgba(var(--info-rgb), 0.05) !important;
+}
+
+.card-header.bg-danger.bg-opacity-10 {
+    background-color: rgba(var(--danger-rgb), 0.05) !important;
+}
+
+.card-header.bg-success.bg-opacity-10 {
+    background-color: rgba(var(--secondary-rgb), 0.05) !important;
+}
+
+.card-header.bg-secondary.bg-opacity-10 {
+    background-color: rgba(var(--secondary-rgb), 0.05) !important;
+}
+
+html.dark-theme .card-header.bg-opacity-10 {
+    background-color: rgba(var(--primary-rgb), 0.1) !important;
+}
+
+html.dark-theme .card-header.bg-warning.bg-opacity-10 {
+    background-color: rgba(var(--warning-rgb), 0.1) !important;
+}
+
+html.dark-theme .card-header.bg-info.bg-opacity-10 {
+    background-color: rgba(var(--info-rgb), 0.1) !important;
+}
+
+html.dark-theme .card-header.bg-danger.bg-opacity-10 {
+    background-color: rgba(var(--danger-rgb), 0.1) !important;
+}
+
+html.dark-theme .card-header.bg-success.bg-opacity-10 {
+    background-color: rgba(var(--secondary-rgb), 0.1) !important;
+}
+
+html.dark-theme .card-header.bg-secondary.bg-opacity-10 {
+    background-color: rgba(var(--secondary-rgb), 0.1) !important;
+}
+
+/* Melhorias para badges conceituais */
+.badge.bg-success.bg-opacity-10 {
+    background-color: rgba(var(--secondary-rgb), 0.05) !important;
+    border: 1px solid rgba(var(--secondary-rgb), 0.1);
+    color: var(--secondary-color) !important;
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+html.dark-theme .badge.bg-success.bg-opacity-10 {
+    background-color: rgba(var(--secondary-rgb), 0.1) !important;
+    border: 1px solid rgba(var(--secondary-rgb), 0.2);
+}
+
+/* Checklist mais claro e organizado */
+.checklist-container {
+    padding: 0.5rem;
+}
+
+.form-check {
+    padding-left: 2rem;
+}
+
+.form-check-input {
+    margin-left: -1.75rem;
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.form-check-label {
+    line-height: 1.5;
+}
+
+/* Botão Copy Prompt aprimorado */
+.copy-prompt {
+    border-radius: 4px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Pré-código com melhor formatação */
+pre.bg-light {
+    background-color: rgba(0,0,0,0.03) !important;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    padding: 1rem !important;
+    margin-bottom: 0 !important;
+}
+
+html.dark-theme pre.bg-light {
+    background-color: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Slider de autoavaliação com estilo aprimorado */
+.rating-container {
+    margin-top: 1rem;
+    padding: 0 0.5rem;
+}
+
+.form-range {
+    height: 1.5rem;
+}
+
+.form-range::-webkit-slider-thumb {
+    background: var(--secondary-color);
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.form-range::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: rgba(0,0,0,0.1);
+}
+
+html.dark-theme .form-range::-webkit-slider-runnable-track {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.rating-labels {
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Feedback da autoavaliação */
+.feedback-area {
+    background-color: rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.08) !important;
+    border-radius: 6px;
+    margin-top: 1rem;
+}
+
+html.dark-theme .feedback-area {
+    background-color: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* ...existing code... */
+
+/* Melhorias para ícones de rotas e círculos - correção de contraste e forma */
+.route-icon {
+    width: 48px !important;
+    height: 48px !important;
+    aspect-ratio: 1 / 1;
+    padding: 0 !important;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 12px;
+    border-radius: 50%;
+}
+
+/* Aumentar o contraste do background para ícones */
+.route-icon.bg-success.bg-opacity-10 {
+    background-color: rgba(var(--secondary-rgb), 0.15) !important;
+    border: 1px solid rgba(var(--secondary-rgb), 0.3);
+}
+
+.route-icon.bg-danger.bg-opacity-10 {
+    background-color: rgba(var(--danger-rgb), 0.15) !important;
+    border: 1px solid rgba(var(--danger-rgb), 0.3);
+}
+
+html.dark-theme .route-icon.bg-success.bg-opacity-10 {
+    background-color: rgba(var(--secondary-rgb), 0.25) !important;
+    border: 1px solid rgba(var(--secondary-rgb), 0.4);
+}
+
+html.dark-theme .route-icon.bg-danger.bg-opacity-10 {
+    background-color: rgba(var(--danger-rgb), 0.25) !important;
+    border: 1px solid rgba(var(--danger-rgb), 0.4);
+}
+
+/* Melhorar o tamanho e contraste dos ícones */
+.route-icon i {
+    font-size: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* Adicionar um efeito de glow sutil para melhorar visibilidade */
+.route-icon i.text-success {
+    color: var(--secondary-color) !important;
+    text-shadow: 0 0 5px rgba(var(--secondary-rgb), 0.3);
+}
+
+.route-icon i.text-danger {
+    color: var(--danger-color) !important;
+    text-shadow: 0 0 5px rgba(var(--danger-rgb), 0.3);
 }
 
 /* ...existing code... */
