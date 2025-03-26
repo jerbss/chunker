@@ -2251,3 +2251,31 @@ html.dark-theme .pitfall-item:hover {
 
 /* ...existing code... */
 
+/* Fazer o card de autoavaliação ocupar toda a largura em desktop */
+.self-assessment .col-md-6:last-child {
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    /* Em desktop, quando há apenas um card na linha (reflexão ausente) */
+    .self-assessment .row:only-child .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    /* Quando há apenas um card filho direto na linha */
+    .self-assessment .row > .col-md-6:only-child {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    /* Quando há um elemento vazio junto com o card */
+    .self-assessment .row > .col-md-6:nth-child(2):empty + .col-md-6,
+    .self-assessment .row > .col-md-6:empty + .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ...existing code... */
+
