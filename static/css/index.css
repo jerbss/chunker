@@ -2335,3 +2335,28 @@ html.dark-theme .objective-content h5 {
 
 /* ...existing code... */
 
+/* Melhorar a consistência visual dos objetivos em todas as partes */
+.objective-content .lead {
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-color);
+    margin-bottom: 1.2rem;
+}
+
+.objective-content h5 {
+    color: var(--primary-color);
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-top: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.objective-content p {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+/* ...existing code... */
+

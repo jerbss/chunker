@@ -2437,82 +2437,50 @@ function createDefaultChecklist(part, cardId) {
 function formatObjectiveContent(content) {
     if (!content) return '';
     
-    // Dividir o conteúdo por linhas duplas para identificar seções
-    const sections = content.split(/\n\n+/);
+    // Extrair apenas as informações essenciais: objetivo principal e conexões
+    const mainObjectiveLine = content.split('\n')[0];
+    
+    // Buscar pelo bloco de conexões com partes anteriores/posteriores
+    const connectionsRegex = /Conexões com partes anteriores e posteriores:(.*?)(?:\n\n|\n(?=Tópicos Nucleares:)|$)/s;
+    const connectionsMatch = content.match(connectionsRegex);
+    const connectionsContent = connectionsMatch ? connectionsMatch[1].trim() : '';
+    
     let formattedContent = '';
     
-    // Processar cada seção
-    sections.forEach(section => {
-        // Verificar se é uma seção com título (ex: "Tópicos Nucleares:", "Rotas Alternativas:")
-        const sectionMatch = section.match(/^([^:]+):(.*)/s);
-        
-        if (sectionMatch) {
-            const sectionTitle = sectionMatch[1].trim();
-            const sectionContent = sectionMatch[2].trim();
-            
-            // Adicionar cabeçalho da seção
-            formattedContent += `<h5 class="mt-3 mb-2 text-primary">${sectionTitle}:</h5>`;
-            
-            // Processar conteúdo da seção
-            if (sectionContent) {
-                // Verificar se tem subseções (ex: "Núcleo 1:", "Subtópico 1.1:")
-                if (sectionContent.includes('Núcleo') || sectionContent.includes('Subtópico')) {
-                    // Processar núcleos e subtópicos
-                    const lines = sectionContent.split(/\n+/);
-                    let currentList = '';
-                    let inList = false;
-                    
-                    lines.forEach(line => {
-                        if (line.match(/^Núcleo \d+:/)) {
-                            // Fechar lista anterior se existir
-                            if (inList) {
-                                currentList += '</ul>';
-                                formattedContent += currentList;
-                                currentList = '';
-                                inList = false;
-                            }
-                            
-                            // Iniciar novo núcleo
-                            formattedContent += `<div class="mt-2 mb-1"><strong>${line}</strong></div>`;
-                            inList = true;
-                            currentList = '<ul class="mb-2">';
-                        } else if (line.match(/^Subtópico \d+\.\d+:/)) {
-                            // Adicionar subtópico à lista atual
-                            currentList += `<li><strong>${line.split(':')[0]}:</strong> ${line.split(':')[1]}</li>`;
-                        } else if (line.trim() && inList) {
-                            // Adicionar item normal à lista
-                            currentList += `<li>${line}</li>`;
-                        } else if (line.trim()) {
-                            // Texto normal fora de lista
-                            formattedContent += `<p>${line}</p>`;
-                        }
-                    });
-                    
-                    // Fechar lista se ainda estiver aberta
-                    if (inList) {
-                        currentList += '</ul>';
-                        formattedContent += currentList;
-                    }
-                } else if (sectionContent.includes('-') || sectionContent.trim().startsWith('•')) {
-                    // Processar como lista de marcadores
-                    const items = sectionContent.split(/\n+/).filter(item => item.trim());
-                    formattedContent += '<ul class="mb-3">';
-                    items.forEach(item => {
-                        // Limpar marcadores existentes e adicionar como item de lista
-                        const cleanItem = item.replace(/^[-•]\s*/, '').trim();
-                        formattedContent += `<li>${cleanItem}</li>`;
-                    });
-                    formattedContent += '</ul>';
-                } else {
-                    // Conteúdo simples de parágrafo
-                    formattedContent += `<p>${sectionContent}</p>`;
-                }
-            }
-        } else if (section.trim()) {
-            // Conteúdo sem título de seção
-            formattedContent += `<p>${section}</p>`;
-        }
-    });
+    // Adicionar o objetivo principal em formato consistente
+    formattedContent += `<p class="lead mb-3">${mainObjectiveLine}</p>`;
+    
+    // Adicionar as conexões quando existirem
+    if (connectionsContent) {
+        formattedContent += `<div class="mb-3">
+            <h5 class="mb-2 fw-bold text-primary">Conexões com partes anteriores e posteriores:</h5>
+            <p>${connectionsContent}</p>
+        </div>`;
+    }
+    
+    // Extrair tópicos nucleares e outros elementos relevantes apenas se necessário
+    // para exibição em seções separadas - não no bloco de objetivo principal
+    const nucleosRegex = /Tópicos Nucleares:(.*?)(?:\n\n|\n(?=Rotas Alternativas:)|$)/s;
+    const rotasRegex = /Rotas Alternativas:(.*?)(?:\n\n|\n(?=Armadilhas Comuns:)|$)/s;
+    const armadilhasRegex = /Armadilhas Comuns:(.*?)(?:\n\n|\n(?=Checklist de Domínio:)|$)/s;
+    
+    // Armazenar esses dados para uso em outras seções, mas não exibi-los no bloco de objetivo
+    const nucleosMatch = content.match(nucleosRegex);
+    const rotasMatch = content.match(rotasRegex);
+    const armadilhasMatch = content.match(armadilhasRegex);
+    
+    // Armazenar esses dados em atributos data- para uso posterior caso necessário
+    if (nucleosMatch) {
+        formattedContent += `<div class="d-none" data-nucleos="${encodeURIComponent(nucleosMatch[1].trim())}"></div>`;
+    }
+    
+    if (rotasMatch) {
+        formattedContent += `<div class="d-none" data-rotas="${encodeURIComponent(rotasMatch[1].trim())}"></div>`;
+    }
+    
+    if (armadilhasMatch) {
+        formattedContent += `<div class="d-none" data-armadilhas="${encodeURIComponent(armadilhasMatch[1].trim())}"></div>`;
+    }
     
     return formattedContent;
 }
