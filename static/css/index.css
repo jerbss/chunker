@@ -2279,3 +2279,59 @@ html.dark-theme .pitfall-item:hover {
 
 /* ...existing code... */
 
+/* Estilos para conteúdo do objetivo formatado */
+.objective-content h5 {
+    color: var(--primary-color);
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-top: 1.2rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding-bottom: 0.4rem;
+}
+
+.objective-content p {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.objective-content ul {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.objective-content li {
+    margin-bottom: 0.5rem;
+}
+
+.objective-content strong {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+/* Ajuste para o texto normal (não título) do objetivo */
+.objective-content > p:first-of-type {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 1.2rem;
+}
+
+html.dark-theme .objective-content h5 {
+    border-bottom-color: rgba(255,255,255,0.1);
+}
+
+/* Ajuste para o ícone de informação */
+.fa-info-circle {
+    cursor: help;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.fa-info-circle:hover {
+    opacity: 1;
+}
+
+/* ...existing code... */
+

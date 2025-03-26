@@ -317,23 +317,142 @@ function processPartSections(partSections) {
             
             const elementText = nextElement.textContent || '';
             
-            if (elementText.includes('Objetivo de Aprendizagem:')) {
-                part.objective = elementText.split('Objetivo de Aprendizagem:')[1].trim();
+            // Busca melhorada para Objetivo de Aprendizagem
+            if (elementText.includes('Objetivo de Aprendizagem:') || 
+                elementText.includes('Objetivo:') ||
+                elementText.match(/Objetivo Transformador:/i)) {
+                
+                let objectiveText = '';
+                if (elementText.includes('Objetivo de Aprendizagem:')) {
+                    objectiveText = elementText.split('Objetivo de Aprendizagem:')[1].trim();
+                } else if (elementText.includes('Objetivo:')) {
+                    objectiveText = elementText.split('Objetivo:')[1].trim();
+                } else if (elementText.match(/Objetivo Transformador:/i)) {
+                    objectiveText = elementText.split(/Objetivo Transformador:/i)[1].trim();
+                }
+                
+                if (objectiveText) {
+                    part.objective = objectiveText;
+                }
             }
             
-            if (elementText.includes('Conceitos-chave:')) {
-                const conceptsText = elementText.split('Conceitos-chave:')[1].trim();
-                part.concepts = conceptsText
-                    .replace(/\.$/, '')  
-                    .split(/,\s*|\.\s*/) 
-                    .map(c => c.trim())
-                    .filter(c => c && c.length > 0);
+            // Melhoria: busca mais robusta para Conceitos-chave com múltiplos formatos
+            if (elementText.match(/Conceitos[\s-]chave:?/i) || 
+                elementText.includes('Conceitos:') || 
+                elementText.match(/Principais conceitos:?/i)) {
+                
+                let conceptsText = '';
+                // Determinar o padrão de divisão correto
+                if (elementText.match(/Conceitos[\s-]chave:?/i)) {
+                    conceptsText = elementText.split(/Conceitos[\s-]chave:?/i)[1];
+                } else if (elementText.includes('Conceitos:')) {
+                    conceptsText = elementText.split('Conceitos:')[1];
+                } else if (elementText.match(/Principais conceitos:?/i)) {
+                    conceptsText = elementText.split(/Principais conceitos:?/i)[1];
+                }
+                
+                // Processar se encontrou algo
+                if (conceptsText && conceptsText.trim()) {
+                    // Remover ponto final e dividir por vírgulas, pontos ou ponto e vírgulas
+                    part.concepts = conceptsText.trim()
+                        .replace(/\.$/, '')
+                        .split(/[,;]|\.\s+/)
+                        .map(c => c.trim())
+                        .filter(c => c && c.length > 0);
+                    
+                    console.log("Conceitos extraídos via texto:", part.concepts);
+                }
             }
             
+            // Se não encontrou conceitos e o elemento tem lista, verificar se a lista contém conceitos
+            if (part.concepts.length === 0) {
+                const listEl = nextElement.querySelector('ul, ol');
+                if (listEl && (
+                    nextElement.textContent.match(/Conceitos[\s-]chave:?/i) || 
+                    nextElement.textContent.includes('Conceitos:') ||
+                    nextElement.textContent.match(/Principais conceitos:?/i)
+                )) {
+                    const items = listEl.querySelectorAll('li');
+                    if (items.length > 0) {
+                        part.concepts = Array.from(items)
+                            .map(item => item.textContent.trim())
+                            .filter(text => text && text.length > 0);
+                        
+                        console.log("Conceitos extraídos via lista:", part.concepts);
+                    }
+                }
+            }
+            
+            // Buscar conceitos no conteúdo H3
+            if (part.concepts.length === 0 && nextElement.tagName === 'H3' && 
+                nextElement.textContent.match(/Conceitos[\s-]chave:?/i)) {
+                const nextSibling = nextElement.nextElementSibling;
+                if (nextSibling && (nextSibling.tagName === 'UL' || nextSibling.tagName === 'OL')) {
+                    const items = nextSibling.querySelectorAll('li');
+                    if (items.length > 0) {
+                        part.concepts = Array.from(items)
+                            .map(item => item.textContent.trim())
+                            .filter(text => text && text.length > 0);
+                        
+                        console.log("Conceitos extraídos via H3 + lista:", part.concepts);
+                    }
+                }
+            }
+            
+            // Se ainda não encontrou, buscar conceitos em qualquer parte do texto com strong
+            if (part.concepts.length === 0) {
+                const strongEl = nextElement.querySelector('strong');
+                if (strongEl && strongEl.textContent.match(/Conceitos[\s-]chave:?/i)) {
+                    // Extrair texto após o strong que contém "Conceitos-chave"
+                    let parent = strongEl.parentNode;
+                    let conceptsText = '';
+                    
+                    // Tentar obter texto após o strong
+                    let node = strongEl.nextSibling;
+                    while (node) {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            conceptsText += node.textContent;
+                        }
+                        node = node.nextSibling;
+                    }
+                    
+                    // Se não encontrou nada, verificar se há texto após os dois-pontos no texto do strong
+                    if (!conceptsText.trim() && strongEl.textContent.includes(':')) {
+                        conceptsText = strongEl.textContent.split(':')[1];
+                    }
+                    
+                    // Verificar o próximo elemento irmão para ver se contém uma lista
+                    if (!conceptsText.trim() && parent.nextElementSibling) {
+                        const nextSibling = parent.nextElementSibling;
+                        if (nextSibling.tagName === 'UL' || nextSibling.tagName === 'OL') {
+                            const items = nextSibling.querySelectorAll('li');
+                            part.concepts = Array.from(items)
+                                .map(item => item.textContent.trim())
+                                .filter(text => text && text.length > 0);
+                            
+                            console.log("Conceitos extraídos via strong + lista irmã:", part.concepts);
+                        }
+                    }
+                    
+                    // Processar o texto de conceitos se foi encontrado
+                    if (conceptsText.trim() && part.concepts.length === 0) {
+                        part.concepts = conceptsText.trim()
+                            .replace(/\.$/, '')
+                            .split(/[,;]|\.\s+/)
+                            .map(c => c.trim())
+                            .filter(c => c && c.length > 0);
+                        
+                        console.log("Conceitos extraídos via strong + texto:", part.concepts);
+                    }
+                }
+            }
+            
+            // Pergunta de Reflexão
             if (elementText.includes('Pergunta de Reflexão:')) {
                 part.reflection = elementText.split('Pergunta de Reflexão:')[1].trim();
             }
             
+            // Prompt de Instrução
             if (elementText.includes('Prompt de Instrução:')) {
                 part.instructionPrompt = elementText.split('Prompt de Instrução:')[1].trim();
             }
@@ -341,8 +460,56 @@ function processPartSections(partSections) {
             nextElement = nextElement.nextElementSibling;
         }
 
+        // Se após toda a busca ainda não encontrou conceitos, gerar conceitos a partir do conteúdo
+        if (part.concepts.length === 0) {
+            // Buscar palavras em negrito no conteúdo como possíveis conceitos
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = part.content;
+            
+            const strongElements = tempDiv.querySelectorAll('strong');
+            const possibleConcepts = [];
+            
+            strongElements.forEach(el => {
+                const text = el.textContent.trim();
+                // Ignorar textos que parecem ser títulos/cabeçalhos ou muito longos/curtos
+                if (text && 
+                    text.length > 2 && 
+                    text.length < 40 && 
+                    !text.includes(':') && 
+                    !text.includes('Conceitos') && 
+                    !text.includes('Objetivo') &&
+                    !text.includes('Prompt') &&
+                    !text.includes('Fase') &&
+                    !text.match(/^\d/) // Não começar com número
+                   ) {
+                    possibleConcepts.push(text);
+                }
+            });
+            
+            // Também verificar elementos <b> se <strong> não resultou em nada
+            if (possibleConcepts.length === 0) {
+                const boldElements = tempDiv.querySelectorAll('b');
+                boldElements.forEach(el => {
+                    const text = el.textContent.trim();
+                    if (text && text.length > 2 && text.length < 40 && !text.includes(':')) {
+                        possibleConcepts.push(text);
+                    }
+                });
+            }
+            
+            // Limitar a um máximo de 5 conceitos
+            part.concepts = [...new Set(possibleConcepts)].slice(0, 5);
+            
+            if (part.concepts.length > 0) {
+                console.log("Conceitos extraídos via elementos em destaque:", part.concepts);
+            } else {
+                console.log("Nenhum conceito encontrado para esta parte");
+            }
+        }
+        
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = part.content;
+        
         const firstH1 = tempDiv.querySelector('h1');
         if (firstH1 && firstH1.textContent.trim() === part.title) {
             firstH1.remove();
@@ -584,14 +751,22 @@ function createPartCard(part, index) {
                                 <h4 class="fw-bold mb-2 text-success" style="font-family: 'Exo 2', sans-serif;">
                                     O que você vai dominar nesta parte:
                                 </h4>
-                                <p class="lead mb-0">${part.objective}</p>
+                                <div class="objective-content">
+                                    ${formatObjectiveContent(part.objective)}
+                                </div>
                             </div>
                         </div>
                         
                         ${metadata.progressPercent ? 
                             `<div class="mt-3 context-progress p-2 bg-white rounded shadow-sm border">
                                 <div class="d-flex justify-content-between align-items-center small mb-1">
-                                    <span class="fw-medium">Progresso acumulado no domínio completo</span>
+                                    <span class="fw-medium d-flex align-items-center">
+                                        Progresso acumulado no domínio completo
+                                        <i class="fas fa-info-circle ms-1 text-muted" 
+                                           data-bs-toggle="tooltip" 
+                                           data-bs-placement="top" 
+                                           title="Indica quanto do conhecimento total você terá dominado após concluir esta parte. O valor aumenta progressivamente a cada parte do conteúdo."></i>
+                                    </span>
                                     <span class="badge bg-success">${metadata.progressPercent}%</span>
                                 </div>
                                 <div class="progress" style="height: 8px;">
@@ -2146,6 +2321,23 @@ function extractPartMetadata(content, partIndex) {
         }
     }
     
+    // Calcular progresso dinâmico baseado na posição da parte e total de partes
+    const totalParts = state.parts.length;
+    if (totalParts > 0) {
+        // Progresso baseado na posição atual + ajuste para começar em valor não-zero
+        // Fórmula: 5% fixo no início + (partIndex+1)/totalParts * 95% restante
+        const baseProgress = 5; // Progresso mínimo (5%)
+        const variableProgress = 95; // Faixa de progresso variável (95%)
+        metadata.progressPercent = Math.round(baseProgress + ((partIndex + 1) / totalParts) * variableProgress);
+        
+        // Garantir que a última parte tenha sempre 100%
+        if (partIndex === totalParts - 1) {
+            metadata.progressPercent = 100;
+        }
+        
+        console.log(`Progresso calculado para parte ${partIndex+1}/${totalParts}: ${metadata.progressPercent}%`);
+    }
+    
     return metadata;
 }
 
@@ -2239,4 +2431,88 @@ function createDefaultChecklist(part, cardId) {
     }
     
     return createStructuredChecklist(items, cardId);
+}
+
+// Função para formatar o conteúdo do objetivo da parte com estrutura HTML adequada
+function formatObjectiveContent(content) {
+    if (!content) return '';
+    
+    // Dividir o conteúdo por linhas duplas para identificar seções
+    const sections = content.split(/\n\n+/);
+    let formattedContent = '';
+    
+    // Processar cada seção
+    sections.forEach(section => {
+        // Verificar se é uma seção com título (ex: "Tópicos Nucleares:", "Rotas Alternativas:")
+        const sectionMatch = section.match(/^([^:]+):(.*)/s);
+        
+        if (sectionMatch) {
+            const sectionTitle = sectionMatch[1].trim();
+            const sectionContent = sectionMatch[2].trim();
+            
+            // Adicionar cabeçalho da seção
+            formattedContent += `<h5 class="mt-3 mb-2 text-primary">${sectionTitle}:</h5>`;
+            
+            // Processar conteúdo da seção
+            if (sectionContent) {
+                // Verificar se tem subseções (ex: "Núcleo 1:", "Subtópico 1.1:")
+                if (sectionContent.includes('Núcleo') || sectionContent.includes('Subtópico')) {
+                    // Processar núcleos e subtópicos
+                    const lines = sectionContent.split(/\n+/);
+                    let currentList = '';
+                    let inList = false;
+                    
+                    lines.forEach(line => {
+                        if (line.match(/^Núcleo \d+:/)) {
+                            // Fechar lista anterior se existir
+                            if (inList) {
+                                currentList += '</ul>';
+                                formattedContent += currentList;
+                                currentList = '';
+                                inList = false;
+                            }
+                            
+                            // Iniciar novo núcleo
+                            formattedContent += `<div class="mt-2 mb-1"><strong>${line}</strong></div>`;
+                            inList = true;
+                            currentList = '<ul class="mb-2">';
+                        } else if (line.match(/^Subtópico \d+\.\d+:/)) {
+                            // Adicionar subtópico à lista atual
+                            currentList += `<li><strong>${line.split(':')[0]}:</strong> ${line.split(':')[1]}</li>`;
+                        } else if (line.trim() && inList) {
+                            // Adicionar item normal à lista
+                            currentList += `<li>${line}</li>`;
+                        } else if (line.trim()) {
+                            // Texto normal fora de lista
+                            formattedContent += `<p>${line}</p>`;
+                        }
+                    });
+                    
+                    // Fechar lista se ainda estiver aberta
+                    if (inList) {
+                        currentList += '</ul>';
+                        formattedContent += currentList;
+                    }
+                } else if (sectionContent.includes('-') || sectionContent.trim().startsWith('•')) {
+                    // Processar como lista de marcadores
+                    const items = sectionContent.split(/\n+/).filter(item => item.trim());
+                    formattedContent += '<ul class="mb-3">';
+                    items.forEach(item => {
+                        // Limpar marcadores existentes e adicionar como item de lista
+                        const cleanItem = item.replace(/^[-•]\s*/, '').trim();
+                        formattedContent += `<li>${cleanItem}</li>`;
+                    });
+                    formattedContent += '</ul>';
+                } else {
+                    // Conteúdo simples de parágrafo
+                    formattedContent += `<p>${sectionContent}</p>`;
+                }
+            }
+        } else if (section.trim()) {
+            // Conteúdo sem título de seção
+            formattedContent += `<p>${section}</p>`;
+        }
+    });
+    
+    return formattedContent;
 }
