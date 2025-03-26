@@ -2180,3 +2180,74 @@ html.dark-theme .route-icon.bg-danger.bg-opacity-10 {
 
 /* ...existing code... */
 
+/* Remover efeitos de hover que causam movimento nos cards de partes */
+
+/* Remover transformações nos itens de rota */
+.route-item, .pitfall-item {
+    transition: background-color 0.2s ease;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+/* Substituir o transform por um background mais suave */
+.route-item:hover, .pitfall-item:hover {
+    background-color: rgba(0,0,0,0.02);
+    transform: none; /* Removendo transform explicitamente */
+}
+
+html.dark-theme .route-item:hover, 
+html.dark-theme .pitfall-item:hover {
+    background-color: rgba(255,255,255,0.03);
+}
+
+/* Remover scale na numeração dos passos */
+.step-number {
+    transition: box-shadow 0.3s ease;
+}
+
+.learning-step:hover .step-number {
+    transform: none; /* Removendo explicitamente o scale(1.1) */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+}
+
+/* Remover transformações nos cards de recursos */
+.support-resources .card, 
+.self-assessment .card {
+    transition: box-shadow 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+.support-resources .card:hover, 
+.self-assessment .card:hover {
+    transform: none; /* Removendo o translateY */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* Remover movimento no botão de copiar prompt */
+.copy-prompt {
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.copy-prompt:hover {
+    transform: none; /* Removendo o translateY */
+}
+
+/* Remover qualquer translação nos elementos de contexto */
+.context-progress:hover, 
+.context-connections:hover {
+    transform: none; /* Removendo o translateY */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+/* Garantir que qualquer regra transform seja explicitamente removida */
+.learning-step:hover,
+.step-content:hover,
+.route-icon:hover,
+.route-icon:hover i,
+.pitfall-item:hover,
+.checklist-container:hover .form-check {
+    transform: none;
+}
+
+/* ...existing code... */
+
