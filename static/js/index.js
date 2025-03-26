@@ -1052,7 +1052,7 @@ function organizeStructuredContent(contentHTML, metadata) {
 }
 
 /**
- * Extrai os núcleos formatados como jornada de aprendizado
+ * Extrai os núcleos formatados como jornada de aprendizado com formatação padronizada
  * @param {HTMLElement} container - Container com o conteúdo HTML
  * @returns {string} - HTML formatado dos núcleos
  */
@@ -1062,6 +1062,7 @@ function extractNucleosHTML(container) {
     
     if (nucleosSections.length === 0) return '';
     
+    // Buscar a lista de núcleos
     let nuclearList = null;
     let currentElement = nucleosSections[0];
     
@@ -1078,28 +1079,89 @@ function extractNucleosHTML(container) {
     
     if (!nuclearList) return '';
     
+    // Extrair e processar os núcleos
     const nucleos = [];
     const nucleoItems = nuclearList.querySelectorAll(':scope > li');
     
+    // Histórico de conteúdo para detectar duplicações
+    const processedContents = new Set();
+    
     nucleoItems.forEach((item, index) => {
+        // Extrair o título do núcleo
         let nucleoTitle = '';
         const strongEl = item.querySelector('strong');
+        
         if (strongEl) {
-            nucleoTitle = strongEl.textContent.replace(/^\d+\.\s+/, '').replace(/:$/, '');
+            // Remover prefixos numéricos e sufixos como dois pontos
+            nucleoTitle = strongEl.textContent
+                .replace(/^(\d+\.)+\s*/, '')  // Remove numeração (ex: "1.2. " ou "3.1. ")
+                .replace(/^Núcleo \d+:\s*/, '')  // Remove "Núcleo X: "
+                .replace(/:\s*$/, '');  // Remove dois pontos no final
         } else {
-            const titleMatch = item.textContent.match(/^(\d+\.\s+)?([^:]+):/);
-            nucleoTitle = titleMatch ? titleMatch[2] : `Núcleo ${index + 1}`;
+            const titleMatch = item.textContent.match(/^(\d+\.)*\s*([^:]+):/);
+            nucleoTitle = titleMatch ? titleMatch[2].trim() : `Núcleo ${index + 1}`;
+            
+            // Remove parte do número que inclui o número da parte (ex: "3.1." -> "1.")
+            nucleoTitle = nucleoTitle.replace(/^\d+\.(\d+\.?)/, '$1');
         }
         
+        // Limpar e normalizar o título
+        nucleoTitle = nucleoTitle.trim();
+        
+        // Extrair subtópicos com detecção e remoção de duplicações
         const subtopics = [];
         const sublist = item.querySelector('ul, ol');
+        
         if (sublist) {
             const subitems = sublist.querySelectorAll('li');
+            
             subitems.forEach(subitem => {
-                subtopics.push(subitem.innerHTML);
+                // Processar o conteúdo do subtópico
+                let subtopicContent = subitem.innerHTML;
+                
+                // Remover prefixos numéricos para normalização
+                const textContent = subitem.textContent
+                    .replace(/^(\d+\.)+\s*/, '')  // Remove numeração
+                    .replace(/^Subtópico \d+\.\d+:\s*/, '')  // Remove "Subtópico X.Y: "
+                    .trim();
+                
+                // Verificar se este conteúdo já foi processado (detecção de duplicação)
+                if (!processedContents.has(textContent)) {
+                    processedContents.add(textContent);
+                    
+                    // Se tiver dois pontos, vamos estruturar melhor
+                    if (textContent.includes(': ')) {
+                        const parts = textContent.split(': ');
+                        const title = parts[0].trim();
+                        const description = parts.slice(1).join(': ').trim();
+                        
+                        subtopicContent = `<strong>${title}:</strong> ${description}`;
+                    }
+                    
+                    subtopics.push(subtopicContent);
+                }
             });
+        } else {
+            // Se não encontrar uma sublista, procurar por texto estruturado
+            const content = item.innerHTML;
+            const paragraphs = content.split('<br>');
+            
+            // Processar apenas se houver múltiplos parágrafos
+            if (paragraphs.length > 1) {
+                for (let i = 1; i < paragraphs.length; i++) {
+                    const para = paragraphs[i].trim();
+                    if (para && !para.includes('<strong>')) {
+                        // Verificar se este conteúdo já foi processado
+                        if (!processedContents.has(para)) {
+                            processedContents.add(para);
+                            subtopics.push(para);
+                        }
+                    }
+                }
+            }
         }
         
+        // Adicionar o núcleo processado
         nucleos.push({
             title: nucleoTitle,
             subtopics,
@@ -1107,6 +1169,7 @@ function extractNucleosHTML(container) {
         });
     });
     
+    // Gerar o HTML dos núcleos com formatação consistente
     let result = '';
     
     nucleos.forEach((nucleo, index) => {

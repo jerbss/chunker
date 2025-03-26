@@ -2360,3 +2360,78 @@ html.dark-theme .objective-content h5 {
 
 /* ...existing code... */
 
+/* Estilos refinados para a jornada de aprendizado */
+.learning-journey {
+    position: relative;
+    margin-bottom: 2.5rem;
+}
+
+.journey-header {
+    margin-bottom: 1.5rem;
+}
+
+.learning-step {
+    position: relative;
+    margin-bottom: 2rem;
+    transition: background-color 0.2s ease;
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.learning-step:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+html.dark-theme .learning-step:hover {
+    background-color: rgba(255,255,255,0.03);
+}
+
+.step-number {
+    width: 40px !important;
+    height: 40px !important;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: box-shadow 0.3s ease;
+}
+
+.learning-step:hover .step-number {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+}
+
+.step-content {
+    position: relative;
+    margin-left: 1.25rem;
+    padding-left: 1.5rem;
+    border-left-width: 3px !important;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.step-title {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.step-list {
+    padding-left: 1.25rem;
+    margin-bottom: 0;
+}
+
+.step-item {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.step-item:last-child {
+    margin-bottom: 0;
+}
+
+.step-item strong {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+/* ...existing code... */
+
