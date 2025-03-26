@@ -116,6 +116,12 @@ Taxonomia de Bloom: [Nível - Lembrar/Entender/Aplicar/Analisar/Avaliar/Criar]
 Estilo de Aprendizado: [Perfil - Visual/Auditivo/Leitura/Cinestésico]  
 Pré-requisitos Técnicos: [Lista de habilidades/ferramentas necessárias]
 
+IMPORTANTE: Cada parte deve ter metadados ESPECÍFICOS e DIFERENTES:
+- Dificuldade: Deve AUMENTAR progressivamente entre as partes (ex: Parte 1 = 1/5, Parte 3 = 3/5)
+- Taxonomia de Bloom: Deve PROGREDIR na hierarquia cognitiva (ex: Parte 1 = "Lembrar", Parte final = "Criar")
+- Estilo de Aprendizado: Deve VARIAR entre as partes para atender diferentes tipos de aprendizes
+- Duração: Deve REFLETIR a complexidade do conteúdo (partes mais avançadas podem levar mais tempo)
+
 **Mapa da Parte:** (Ícone) [Duração Estimada] | Pré-requisitos: [Lista Curta]
 
 **Progresso Acumulado:** ▰▰▰▰▱ [X]% do core mastery  

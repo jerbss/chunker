@@ -518,7 +518,7 @@ function createPartCard(part, index) {
     card.className = `${colClass} mb-4`;
     card.id = cardId;
     
-    const metadata = extractPartMetadata(part.content);
+    const metadata = extractPartMetadata(part.content, index);
     
     const titleInfo = extractTitleInfo(part.title);
     const emoji = titleInfo.emoji || '📚';
@@ -2030,20 +2030,32 @@ function showFallbackContent() {
 /**
  * Extrai metadados do conteúdo da parte
  * @param {string} content - HTML do conteúdo da parte
+ * @param {number} partIndex - Índice da parte (0-based)
  * @returns {Object} - Objeto com metadados extraídos
  */
-function extractPartMetadata(content) {
+function extractPartMetadata(content, partIndex) {
+    // Define valores progressivos baseados no índice da parte
+    const defaultValues = {
+        difficulty: Math.min(Math.ceil((partIndex + 1) / 2), 5) + '/5', // Aumenta a cada 2 partes
+        bloomTaxonomy: ['Lembrar', 'Entender', 'Aplicar', 'Analisar', 'Avaliar', 'Criar'][Math.min(partIndex, 5)],
+        learningStyle: ['Visual', 'Auditivo', 'Leitura/Escrita', 'Cinestésico'][partIndex % 4],
+        progressPercent: Math.min(Math.round((partIndex + 1) * (100 / state.parts.length)), 100)
+    };
+    
     const metadata = {
-        difficulty: '1/5',
-        bloomTaxonomy: 'Compreender',
-        learningStyle: 'Visual',
-        progressPercent: null,
+        difficulty: defaultValues.difficulty,
+        bloomTaxonomy: defaultValues.bloomTaxonomy,
+        learningStyle: defaultValues.learningStyle,
+        progressPercent: defaultValues.progressPercent,
         connections: null,
         aiPrompt: null,
         challenge: null,
         realCase: null,
         domainChecklist: null
     };
+    
+    // EXISTENTE: Tentar extrair do conteúdo
+    // ...existing code...
     
     // Criar um elemento temporário para analisar o conteúdo
     const tempDiv = document.createElement('div');
