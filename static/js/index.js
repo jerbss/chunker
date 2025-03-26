@@ -1255,46 +1255,77 @@ function initializeLayout() {
     try {
         const cardsContainer = document.getElementById('cards-container');
         if (cardsContainer && window.Masonry) {
+            // Remover qualquer instância prévia do Masonry
             if (state.masonry) {
                 state.masonry.destroy();
             }
             
+            // CORREÇÃO IMPORTANTE: Forçar display de bloco e remover posicionamentos absolutos
+            cardsContainer.style.position = 'relative';
+            cardsContainer.style.display = 'block';
+            
+            // Remover posições absolutas de TODOS os cards
             Array.from(cardsContainer.children).forEach(child => {
-                if (child.style.position === 'absolute') {
-                    child.style.position = '';
-                    child.style.left = '';
-                    child.style.top = '';
+                child.style.position = '';
+                child.style.left = '';
+                child.style.top = '';
+                
+                // Garantir que cada card mantenha a classe col-12 e marginBottom
+                if (!child.classList.contains('col-12')) {
+                    child.classList.add('col-12');
                 }
+                if (!child.classList.contains('mb-4')) {
+                    child.classList.add('mb-4');
+                }
+                
+                // Exibir log para debugging
+                console.log(`Configurando card: ${child.id || 'sem id'}`);
             });
             
-            cardsContainer.style.position = 'relative';
-            
+            // MUDANÇA CRUCIAL: Desabilitar posicionamento absoluto no Masonry
             state.masonry = new Masonry(cardsContainer, {
                 itemSelector: '.col-12',
                 columnWidth: '.col-12',
                 percentPosition: true,
                 transitionDuration: '0.2s',
-                stagger: 30,
-                initLayout: true,
-                resize: true,
-                fitWidth: false
+                horizontalOrder: true, // Organizar em ordem horizontal
+                fitWidth: false,
+                originLeft: true,
+                originTop: true,
+                // IMPORTANTE: Forçar o Masonry a NÃO usar posicionamento absoluto
+                isInitLayout: false,
+                isResizeBound: true
             });
             
+            // Inicializar com layout simples
+            if (state.masonry.layout) {
+                state.masonry.layout();
+                console.log("Layout Masonry inicializado com sucesso");
+            }
+            
+            // NOVA VERIFICAÇÃO: Verificar se o card de conclusão está visível
+            const conclusionCard = document.getElementById('card-conclusion');
+            if (conclusionCard) {
+                console.log("Card de conclusão encontrado: ", conclusionCard);
+                
+                // Garantir que ele seja o último elemento no container
+                cardsContainer.appendChild(conclusionCard);
+                
+                // Verificação extra para garantir que o card de conclusão seja visível
+                conclusionCard.style.display = 'block';
+                conclusionCard.style.visibility = 'visible';
+                conclusionCard.style.opacity = '1';
+            } else {
+                console.warn("Card de conclusão não encontrado!");
+            }
+            
+            // Recalcular o layout após 500ms para garantir que tudo esteja posicionado corretamente
             setTimeout(() => {
-                if (state.masonry) {
+                if (state.masonry && state.masonry.layout) {
+                    console.log("Recalculando layout após timeout");
                     state.masonry.layout();
                 }
             }, 500);
-            
-            window.addEventListener('resize', () => {
-                if (state.masonry) {
-                    state.masonry.layout();
-                }
-            });
-            
-            if (DEBUG.enabled) {
-                console.log("Masonry inicializado com sucesso");
-            }
         }
     } catch (error) {
         console.error('Erro ao inicializar Masonry:', error);
