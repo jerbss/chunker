@@ -114,11 +114,11 @@ FORMATO CORRETO (sem pronome inicial):
 [Cada fase deve ter 3-4 conquistas específicas com mini-desafios]
 
 ## Seu Plano de Ataque Personalizado:
-⏱ Escolha Seu Ritmo:
-- 🚀Modo Turbo: [X]h total ([Y]h por parte) → Foco no essencial
-- 🐢Modo Profundo: [X*2]h total → Com projetos práticos
+⏱ **Escolha Seu Ritmo:**
+- 🚀**Modo Turbo:** [X]h total ([Y]h por parte) → Foco no essencial
+- 🐢**Modo Profundo:** [X*2]h total → Com projetos práticos
 
-🛠 Kit Ferramentas Incluso:
+🛠 **Kit Ferramentas Incluso:**
 [Lista de 5 ferramentas úteis com emoji e descrição específica para {tema}]
 
 ## Primeiro Passo Imediato:
