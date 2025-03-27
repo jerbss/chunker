@@ -67,13 +67,25 @@ Use a seguinte hierarquia de formatação:
 - SEMPRE use exatamente esta estrutura de formatação para permitir o processamento correto.
 
 # SEÇÃO INICIAL
-# [TEMA] em [NÚMERO] Partes: Seu Guia para Dominar [TEMA] do Zero
+# [TEMA] em [NÚMERO] Partes: Seu Mapa para Dominar [TEMA] do Zero
 
 ## Por Onde Começar?
-[3 bullets pessoais usando "você"] Exemplo:
-- Já se sentiu sobrecarregado tentando entender o básico?
-- Quer pular direto para o que realmente importa?
-- Precisa de um caminho livre de jargões complexos?
+[3-4 bullets com perguntas diretas sobre problemas ESPECÍFICOS e QUANTIFICÁVEIS, sem começar com "Você"] Exemplos:
+- Se sente perdido ao tentar diferenciar os três tipos principais de harmonia tonal?
+- Tem dificuldade para extrair os cinco elementos-chave de um refrão sem teoria musical?
+- Precisa relacionar oito sucessos às suas influências regionais em 1h?
+- Sabe que 73% dos fãs não identificam a técnica vocal que definiu o som da banda?
+
+FORMATO CORRETO (SEM "VOCÊ"):
+- Tem dificuldade em entender [conceito específico]?
+- Se sente frustrado quando tenta [ação específica]?
+- Fica confuso ao tentar diferenciar [item A] de [item B]?
+- Precisa dominar [habilidade] em apenas [tempo específico]?
+
+FORMATO INCORRETO (EVITAR):
+- Você tem dificuldade em entender [conceito]? (NÃO use "Você")
+- Você se sente frustrado quando tenta [ação]? (NÃO use "Você")
+- Você fica confuso ao tentar diferenciar [A] de [B]? (NÃO use "Você")
 
 ## O Que Você Vai Construir:
 [Divisão em blocos progressivos] Modelo:
