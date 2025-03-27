@@ -81,10 +81,27 @@ FORMATO INCORRETO (EVITAR):
 - Você fica confuso ao tentar diferenciar [A] de [B]? (NÃO use "Você")
 
 ## O Que Você Vai Construir:
-[Divisão em blocos progressivos] Modelo:
-1️⃣ **Fase 1: [Nome da Fase] (Partes 1-X)**: [Competência concreta]
-2️⃣ **Fase 2: [Nome da Fase] (Partes X-Y)**: [Habilidade prática]
-...
+1️⃣ **Fase 1: Fundamentos Sólidos (Parte 1)**
+- **Conquista:** Implementar um formulário de contato com validação básica usando componentes daisyUI (input, textarea, button).
+    - *Mini-desafio:* Estilizar o formulário utilizando classes de tema e modificadores de estado (hover, focus).
+- **Conquista:** Criar uma barra de navegação responsiva com menu dropdown utilizando componentes daisyUI (navbar, dropdown, menu).
+    - *Mini-desafio:* Adaptar a barra de navegação para diferentes tamanhos de tela utilizando breakpoints do Tailwind e classes condicionais.
+
+2️⃣ **Fase 2: Componentes Avançados e Tematização (Parte 1 e Parte 2)**
+- **Conquista:** Utilizar componentes avançados como modal, dropdown e tabs em uma interface.
+    - *Mini-desafio:* Construir um modal com botões customizados e transições suaves.
+- **Conquista:** Aplicar temas diferentes com base na preferência do usuário (claro/escuro).
+    - *Mini-desafio:* Implementar um botão para alternar entre temas usando JavaScript e o atributo data-theme.
+- **Conquista:** Criar uma tabela de dados paginada usando table, pagination e utilitários de layout do Tailwind.
+    - *Mini-desafio:* Permitir a ordenação dinâmica das colunas da tabela.
+
+3️⃣ **Fase 3: Projetos Reais e Otimização (Parte 2)**
+- **Conquista:** Integrar daisyUI em um projeto existente com Tailwind CSS.
+    - *Mini-desafio:* Refatorar componentes existentes para utilizar os estilos daisyUI.
+- **Conquista:** Otimizar a performance do projeto daisyUI, removendo estilos não utilizados com PurgeCSS.
+    - *Mini-desafio:* Comparar o tamanho do CSS gerado antes e depois da otimização.
+- **Conquista:** Criar um portfolio pessoal responsivo com daisyUI.
+    - *Mini-desafio:* Implementar animações sutis ao rolar a página utilizando AOS (Animate on Scroll).
 
 ## Seu Plano de Ataque Personalizado:
 ⏱ **Escolha Seu Ritmo:**
