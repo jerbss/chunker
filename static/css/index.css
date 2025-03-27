@@ -321,6 +321,13 @@ code, pre {
     border-color: var(--primary-color) !important;
 }
 
+/* Melhorias para o TOC (Índice) */
+#toc-content {
+    max-height: 60vh;
+    overflow-y: auto;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
 /* ========== Conteúdo de Fallback ========== */
 .fallback-content {
     margin-bottom: 40px;

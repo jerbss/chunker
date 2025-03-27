@@ -65,7 +65,7 @@ function setupUIBehaviors() {
                 icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
                 tocContent.style.maxHeight = '';
                 tocContent.style.padding = '';
-                tocContent.style.overflow = 'auto';
+                tocContent.style.overflow = 'auto';  // Explicitamente definir como auto
             }
         });
     }
