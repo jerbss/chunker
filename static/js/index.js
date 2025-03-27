@@ -2160,6 +2160,30 @@ function processBuildSection(heading) {
     const phasesContainer = document.createElement('div');
     phasesContainer.className = 'phases-container';
     
+    // Adicionar o título principal para a seção de fases
+    const buildHeading = document.createElement('div');
+    buildHeading.className = 'build-heading text-center mb-4';
+    buildHeading.innerHTML = `
+        <h3 class="fw-bold">Sua Jornada de Aprendizado</h3>
+        <p class="text-muted">Siga este caminho estruturado para dominar completamente o tema</p>
+        <div class="progress-track mb-4">
+            <div class="progress-line"></div>
+            ${Object.keys(processedPhases).map(Number).sort((a, b) => a - b).map(phase => `
+                <div class="progress-point" data-phase="${phase}">
+                    <div class="progress-circle${phase === 1 ? ' active' : ''}">
+                        <span>${phase}</span>
+                    </div>
+                    <div class="progress-label">Fase ${phase}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    phasesContainer.appendChild(buildHeading);
+    
+    // Container para os cards de fase
+    const phasesCardsContainer = document.createElement('div');
+    phasesCardsContainer.className = 'row phases-row';
+    
     // Processar cada fase na ordem numérica
     Object.keys(processedPhases)
         .map(Number)
@@ -2167,39 +2191,337 @@ function processBuildSection(heading) {
         .forEach(phaseNumber => {
             const phase = processedPhases[phaseNumber];
             
-            // Criar container para a fase
-            const phaseContainer = document.createElement('div');
-            phaseContainer.className = 'phase-block mb-4';
+            // Extrair título da fase
+            let phaseTitle = '';
+            let phaseDescription = '';
             
-            // Adicionar título da fase
-            const titleEl = document.createElement('p');
-            titleEl.className = 'phase-title mb-2';
-            titleEl.style.fontWeight = '600';
-            titleEl.style.color = 'var(--secondary-color)';
-            titleEl.innerHTML = phase.title;
-            phaseContainer.appendChild(titleEl);
+            // Processar o título para extrair nome e descrição
+            const titleMatch = phase.title.match(/.*?(?:Fase \d+:|[0-9]️⃣)\s*(.*?)(?:\s*\(Partes?\s*\d+(?:-\d+)?\))/i);
+            if (titleMatch && titleMatch[1]) {
+                phaseTitle = titleMatch[1].trim();
+            } else {
+                // Fallback para extração simples
+                phaseTitle = phase.title
+                    .replace(/.*?(?:Fase \d+:|[0-9]️⃣)/i, '')
+                    .replace(/\(Partes?\s*\d+(?:-\d+)?\)/i, '')
+                    .trim();
+            }
+            
+            // Obter o intervalo de partes para esta fase
+            const partsMatch = phase.title.match(/\(Partes?\s*(\d+(?:-\d+)?)\)/i);
+            const partsText = partsMatch ? partsMatch[1] : phaseNumber.toString();
             
             // Juntar todos os itens da fase (principais e adicionais)
             const allItems = [...phase.mainItems, ...phase.additionalItems]
                 .filter(item => item.trim())
                 .map(item => item.replace(/^-\s+/, '').trim());
             
-            // Adicionar itens da fase como lista única
-            if (allItems.length > 0) {
-                const ul = document.createElement('ul');
-                ul.className = 'phase-items';
+            // Separar itens entre conquistas e mini-desafios
+            const achievements = [];
+            const challenges = [];
+            
+            allItems.forEach(item => {
+                const achievementMatch = item.match(/^\s*(?:<strong>)?Conquista\s*\d*:(?:<\/strong>)?\s*(.*?)(?:(?:<strong>)?Mini-desafio:(?:<\/strong>)?|$)/i);
+                const challengeMatch = item.match(/(?:<strong>)?Mini-desafio:(?:<\/strong>)?\s*(.*?)$/i);
                 
-                allItems.forEach(item => {
-                    const li = document.createElement('li');
-                    li.innerHTML = item;
-                    ul.appendChild(li);
-                });
+                if (achievementMatch && achievementMatch[1]) {
+                    achievements.push(achievementMatch[1].trim());
+                }
                 
-                phaseContainer.appendChild(ul);
+                if (challengeMatch && challengeMatch[1]) {
+                    challenges.push(challengeMatch[1].trim());
+                } else if (!achievementMatch && !item.includes('Mini-desafio:')) {
+                    // Se não é conquista nem desafio, considerar como conquista genérica
+                    achievements.push(item);
+                }
+            });
+            
+            // Criar card de fase com design moderno
+            const phaseCard = document.createElement('div');
+            phaseCard.className = 'col-md-6 col-lg-4 mb-4 phase-card-container';
+            phaseCard.innerHTML = `
+                <div class="card phase-card h-100 border-0 shadow-sm" data-phase="${phaseNumber}">
+                    <div class="card-header bg-gradient phase-header-bg-${phaseNumber} text-white border-0 py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="phase-icon me-3">
+                                ${getPhaseIcon(phaseNumber)}
+                            </div>
+                            <div>
+                                <h4 class="mb-0 phase-title">${phaseTitle}</h4>
+                                <div class="phase-parts small">Parte${partsText.includes('-') ? 's' : ''} ${partsText}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="achievements-title">
+                            <i class="fas fa-trophy text-warning me-2"></i>
+                            ${achievements.length > 1 ? 'Conquistas' : 'Conquista'}
+                        </h5>
+                        <ul class="achievements-list mb-4">
+                            ${achievements.map(achievement => `
+                                <li class="achievement-item mb-2">${achievement}</li>
+                            `).join('')}
+                        </ul>
+                        
+                        ${challenges.length > 0 ? `
+                            <div class="challenges-container">
+                                <h5 class="challenges-title">
+                                    <i class="fas fa-bolt text-primary me-2"></i>
+                                    Mini-Desafios
+                                </h5>
+                                <div class="accordion challenges-accordion" id="challenges-phase-${phaseNumber}">
+                                    ${challenges.map((challenge, idx) => `
+                                        <div class="accordion-item border-0 mb-2">
+                                            <h2 class="accordion-header" id="challenge-heading-${phaseNumber}-${idx}">
+                                                <button class="accordion-button collapsed p-2 ps-3 challenge-button" type="button" 
+                                                        data-bs-toggle="collapse" data-bs-target="#challenge-content-${phaseNumber}-${idx}">
+                                                    <div class="challenge-number me-2">
+                                                        <div class="challenge-badge">${idx + 1}</div>
+                                                    </div>
+                                                    <div class="challenge-title small fw-normal">
+                                                        Ver desafio
+                                                    </div>
+                                                </button>
+                                            </h2>
+                                            <div id="challenge-content-${phaseNumber}-${idx}" class="accordion-collapse collapse"
+                                                aria-labelledby="challenge-heading-${phaseNumber}-${idx}" 
+                                                data-bs-parent="#challenges-phase-${phaseNumber}">
+                                                <div class="accordion-body bg-light p-3 rounded-3">
+                                                    <p class="mb-0 challenge-description">${challenge}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="card-footer bg-light text-center border-0 py-3">
+                        <span class="text-muted small fw-medium">
+                            <i class="fas fa-clock me-1"></i> Tempo estimado: ${getEstimatedTime(achievements.length, challenges.length)}
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            phasesCardsContainer.appendChild(phaseCard);
+        });
+    
+    phasesContainer.appendChild(phasesCardsContainer);
+    
+    // Adicionar estilos CSS necessários
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+        /* Estilos para a estrutura de fases */
+        .phases-container {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .build-heading {
+            margin-bottom: 2.5rem;
+        }
+        
+        /* Trilha de progresso */
+        .progress-track {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .progress-line {
+            position: absolute;
+            top: 25px;
+            left: 50px;
+            right: 50px;
+            height: 3px;
+            background-color: #e9ecef;
+            z-index: 1;
+        }
+        
+        .progress-point {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .progress-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            font-weight: bold;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-circle.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 0 0 5px rgba(var(--primary-rgb), 0.2);
+        }
+        
+        .progress-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #6c757d;
+        }
+        
+        /* Cards de fase */
+        .phase-card-container {
+            transition: transform 0.2s ease;
+        }
+        
+        .phase-card {
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .phase-card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+        }
+        
+        .phase-header-bg-1 {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+        }
+        
+        .phase-header-bg-2 {
+            background: linear-gradient(45deg, #2196F3, #03A9F4);
+        }
+        
+        .phase-header-bg-3 {
+            background: linear-gradient(45deg, #9C27B0, #673AB7);
+        }
+        
+        .phase-header-bg-4 {
+            background: linear-gradient(45deg, #FF9800, #FF5722);
+        }
+        
+        .phase-header-bg-5 {
+            background: linear-gradient(45deg, #F44336, #E91E63);
+        }
+        
+        .phase-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .phase-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        .phase-parts {
+            color: rgba(255,255,255,0.8);
+        }
+        
+        /* Conquistas */
+        .achievements-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .achievements-list {
+            padding-left: 1.5rem;
+        }
+        
+        .achievement-item {
+            position: relative;
+            padding-left: 0.25rem;
+        }
+        
+        /* Desafios */
+        .challenges-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .challenges-accordion .accordion-item {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .challenge-button {
+            background-color: #f8f9fa;
+            box-shadow: none !important;
+        }
+        
+        .challenge-button:not(.collapsed) {
+            background-color: #f1f3f5;
+        }
+        
+        .challenge-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .challenge-badge {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #6c757d;
+            color: white;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .challenge-title {
+            color: #495057;
+        }
+        
+        .challenge-description {
+            color: #212529;
+            font-size: 0.95rem;
+        }
+        
+        /* Media queries para responsividade */
+        @media (max-width: 768px) {
+            .progress-track {
+                flex-wrap: wrap;
+                justify-content: center;
             }
             
-            phasesContainer.appendChild(phaseContainer);
-        });
+            .progress-line {
+                display: none;
+            }
+            
+            .progress-point {
+                width: 33.33%;
+                margin-bottom: 1.5rem;
+            }
+        }
+    `;
+    document.head.appendChild(styleElement);
     
     // Inserir o container de fases após o heading
     if (Object.keys(processedPhases).length > 0) {
@@ -2210,44 +2532,42 @@ function processBuildSection(heading) {
     }
 }
 
+// Utilitários para a criação dos cards de fase
+
 /**
- * Realiza ajustes finais na estrutura HTML
+ * Retorna o ícone apropriado para uma fase
+ * @param {number} phaseNumber - Número da fase
+ * @returns {string} - HTML do ícone
  */
-function finalizeContentStructure() {
-    // Aplicar classes de estilo específicas para melhorar a aparência
+function getPhaseIcon(phaseNumber) {
+    const icons = [
+        '<i class="fas fa-book"></i>',           // Fase 1 - Fundamentos
+        '<i class="fas fa-tools"></i>',          // Fase 2 - Ferramentas/Táticas
+        '<i class="fas fa-chart-line"></i>',     // Fase 3 - Avançado/Análise
+        '<i class="fas fa-rocket"></i>',         // Fase 4 - Especialização
+        '<i class="fas fa-crown"></i>'           // Fase 5 - Maestria
+    ];
     
-    // Estilizar listas formatadas
-    document.querySelectorAll('.formatted-list').forEach(list => {
-        list.classList.add('mb-3');
-    });
+    return icons[phaseNumber - 1] || '<i class="fas fa-star"></i>';
+}
+
+/**
+ * Retorna um tempo estimado baseado na quantidade de conteúdo
+ * @param {number} achievementCount - Número de conquistas
+ * @param {number} challengeCount - Número de desafios
+ * @returns {string} - Tempo estimado formatado
+ */
+function getEstimatedTime(achievementCount, challengeCount) {
+    // Estimativa básica: 20-30min por conquista, 10-15min por desafio
+    const baseTime = achievementCount * 25 + challengeCount * 15;
+    const hours = Math.floor(baseTime / 60);
+    const minutes = baseTime % 60;
     
-    // Estilizar títulos de fase
-    document.querySelectorAll('.phase-title').forEach(title => {
-        title.style.fontWeight = '600';
-        title.style.color = 'var(--secondary-color)';
-    });
-    
-    // Garantir que todos os emojis tenham destaque visual consistente
-    document.querySelectorAll('.card-body li').forEach(item => {
-        // Se o item tem conteúdo começando com emoji mas não foi processado
-        const content = item.innerHTML;
-        const emojiMatch = content.match(/^([\u{1F300}-\u{1F6FF}]|⏱|🛠|✅|🎯|🤖|🔄|📈|🚀|🐢|1️⃣|2️⃣|3️⃣|4️⃣|5️⃣)\s+/u);
-        
-        if (emojiMatch && !content.includes('<strong>')) {
-            const emoji = emojiMatch[1];
-            const restContent = content.slice(emojiMatch[0].length);
-            item.innerHTML = `<strong style="margin-right: 0.25rem;">${emoji}</strong> ${restContent}`;
-        }
-    });
-    
-    // Aplicar estilos para tornar os emojis mais visíveis
-    document.querySelectorAll('.card-body strong').forEach(strong => {
-        if (strong.textContent.match(/^[\u{1F300}-\u{1F6FF}]|⏱|🛠|✅|🎯|🤖|🔄|📈|🚀|🐢|1️⃣|2️⃣|3️⃣|4️⃣|5️⃣$/u)) {
-            strong.style.fontSize = '1.1em';
-            strong.style.display = 'inline-block';
-            strong.style.minWidth = '1.5em';
-        }
-    });
+    if (hours > 0) {
+        return minutes > 0 ? `${hours}h ${minutes}min` : `${hours}h`;
+    } else {
+        return `${minutes}min`;
+    }
 }
 
 /**
