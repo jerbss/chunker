@@ -1,52 +1,50 @@
 INTRO_SYSTEM_PROMPT = '''
 # INSTRUÇÕES PARA INTRODUÇÃO PERSONALIZADA
 
-**Objetivo:** Criar uma introdução engajadora e funcional para guias de estudo pessoais, focada em quem está começando do zero.
+**Objetivo**: Criar uma introdução engajadora e funcional para guias de estudo pessoais, focada em quem está começando do zero.
 
 ## ESTRUTURA OBRIGATÓRIA:
-
 ```markdown
 # [TEMA] em [NÚMERO] Partes: Seu Mapa para Dominar [TEMA] do Zero
 
 ## Por Onde Começar?
-[3-4 bullets pessoais usando "você" com problemas ESPECÍFICOS e QUANTIFICÁVEIS] Exemplos:
-- Já confundiu as três formações principais da banda entre 1998-2010?
-- Quer extrair os cinco elementos-chave de um refrão sem teoria musical?
-- Precisa relacionar oito sucessos às suas influências regionais em 1h?
-- Sabia que 73% dos fãs não identificam a técnica vocal que definiu o som da banda?
+[4 perguntas diretas sobre desafios específicos do tema, SEM usar "você"]
+
+// FORMATO IDEAL:
+- Como diferenciar [conceito A] de [conceito B] em [contexto]?
+- Quais os [número] erros mais comuns ao aprender [subtópico]?
+- Qual a relação entre [elemento X] e [elemento Y] em [situação]?
+- Que técnicas comprovadas ajudam a dominar [habilidade-chave]?
+
+// EXEMPLO PARA "HISTÓRIA DO CEARÁ":
+- Como diferenciar a atuação dos holandeses das investidas portuguesas no Ceará?
+- Quais os 3 erros mais comuns ao estudar a cronologia da Balaiada?
+- Qual a relação entre os ciclos econômicos e a formação social cearense?
+- Que técnicas ajudam a memorizar os períodos de seca mais impactantes?
 
 ## O Que Você Vai Construir:
-[Divisão em blocos progressivos com números concretos e ARTEFATOS VERIFICÁVEIS] Modelo:
-1️⃣ **Fase 1: [Título Temático Concreto] (Parte 1)**: 
-   - [Artefato específico] com [X] elementos (ex: "Linha do tempo com 5 viradas de estilo")
-   - [Habilidade mensurável específica] com resultado tangível
-   - [Métrica concreta] (ex: "Identificação de 3 músicas-chave do início da carreira")
-   - Mini-desafio: [Ação específica] em [tempo definido] (ex: "Identifique 2 influências musicais em 15 minutos")
+### Fase 1: Fundamentos Sólidos (Partes 1-X)
+- **Conquista 1**: [Habilidade mensurável] → Ex: "Identificar os 3 tipos principais de..."
+- **Mini-Desafio 1**: [Tarefa concreta] → Ex: "Mapear 5 exemplos de..."
 
-2️⃣ **Fase 2: [Título Temático Concreto] (Partes 2-3)**: 
-   - [Artefato específico] com [X] elementos
-   - [Habilidade mensurável específica] com resultado tangível
-   - [Métrica concreta] (ex: "Classificação das 10 músicas mais populares")
-   - Mini-desafio: [Ação específica] em [tempo definido]
-...
+### Fase 2: Recursos Avançados (Partes X-Y)
+- **Conquista 1**: [Aplicação prática] → Ex: "Construir um modelo de..."
+- **Mini-Desafio 2**: [Projeto específico] → Ex: "Otimizar 2 parâmetros para..."
 
 ## Seu Plano de Ataque Personalizado:
-⏱ **Escolha Seu Ritmo:**
-- 🚀 Modo Turbo: [X]h total ([Y]h/parte) → [Z] conceitos-chave + [N] exemplos práticos
-- 🧠 Modo Imersivo: [X*2]h total → Inclui [N] exercícios práticos + projeto integrador
+⏱ **Escolha Seu Ritmo**:
+- 🚀 Modo Turbo: [X]h total → Foco no essencial
+- 🐢 Modo Profundo: [X*2]h total → Com projetos extras
 
-🛠 **Kit Sob Medida:**
-- 🔍 Teste: "[Nome específico do teste]" com [X] perguntas e resultados acionáveis
-- 📋 Checklist: "[Nome do checklist]" com [X] pontos essenciais/armadilhas a evitar
-- 🤖 Prompts de IA: "[Comando preciso e específico ao tema]" (ex: "Analise a estrutura da música [TÍTULO] usando: 1) Padrão rítmico 2) Temática lírica 3) Influências detectadas")
-- 📊 Template: "[Nome da ferramenta]" para [ação específica] com [X] componentes
-- 📈 Placar de Progresso: Rastreie seu avanço com [X] métricas concretas por parte
+🛠 **Kit Sob Medida**:
+- 🔍 Teste: "[Nome]" com [X] questões práticas
+- 📋 Checklist: "[Nome]" com [X] pontos críticos
+- 🤖 Prompt de IA: "[Comando específico para o tema]"
 
 ## Primeiro Passo Imediato:
-▶️ Nos primeiros [tempo específico] você vai:
-- [Ação concreta #1] usando [método específico] (critério de sucesso: [métrica clara])
-- [Ação concreta #2] com [resultado demonstrável] (validação: [método de checagem])
-- [Autoavaliação] usando "[Nome da ferramenta/escala]" (medindo: [variável específica])
+▶️ Nos primeiros [tempo]:
+- [Ação 1] → Ex: "Assimilar os 3 pilares de..."
+- [Resultado 2] → Ex: "Rascunhar um diagrama de..."
 '''
 
 CHUNKING_SYSTEM_PROMPT = """
@@ -69,7 +67,7 @@ Use a seguinte hierarquia de formatação:
 - SEMPRE use exatamente esta estrutura de formatação para permitir o processamento correto.
 
 # SEÇÃO INICIAL
-# [TEMA] em [NÚMERO] Partes: Seu Mapa para Dominar [TEMA] do Zero
+# [TEMA] em [NÚMERO] Partes: Seu Guia para Dominar [TEMA] do Zero
 
 ## Por Onde Começar?
 [3 bullets pessoais usando "você"] Exemplo:
