@@ -259,10 +259,35 @@ Seja específico sobre {tema}, não use texto genérico."""
             # Converter markdown para HTML
             if result:
                 try:
+                    # Pré-processar o markdown para corrigir o aninhamento dos mini-desafios
+                    def process_mini_challenges(markdown_text):
+                        # Esta regex procura por padrões de mini-desafio que seguem uma conquista
+                        # Adiciona marcadores HTML para garantir que o aninhamento seja preservado
+                        import re
+                        
+                        # Primeiro, identificamos as linhas que contêm mini-desafios
+                        pattern = r'(- \*\*Conquista:\*\* .*?)(\n\s+- \*Mini-desafio:\* .*?)(\n-|\n\n|$)'
+                        
+                        def replacement(match):
+                            conquista = match.group(1)
+                            mini_desafio = match.group(2)
+                            ending = match.group(3)
+                            
+                            # Convertemos para um formato que garante o aninhamento no HTML final
+                            # Usando formato de lista HTML diretamente no markdown
+                            return f"{conquista}\n<ul>\n{mini_desafio.strip()}\n</ul>{ending}"
+                        
+                        processed_text = re.sub(pattern, replacement, markdown_text, flags=re.DOTALL)
+                        return processed_text
+                    
+                    # Aplicar o pré-processamento
+                    processed_result = process_mini_challenges(result)
+                    
                     # Usar safe para garantir que o HTML não é escapado
                     html_result = mark_safe(markdown.markdown(
-                        result, 
-                        extensions=['extra', 'fenced_code', 'tables', 'nl2br', 'sane_lists']
+                        processed_result, 
+                        extensions=['extra', 'fenced_code', 'tables', 'nl2br', 'sane_lists'],
+                        output_format='html5'
                     ))
                     
                     # Verificar se temos um resultado válido
@@ -301,3 +326,90 @@ Seja específico sobre {tema}, não use texto genérico."""
     }
     
     return render(request, 'index.html', context)
+
+def visualize_markdown(request):
+    """
+    Função para visualizar a saída markdown original da API Gemini (apenas introdução)
+    """
+    raw_markdown = None
+    error = None
+    tema = request.GET.get('tema', 'Python')
+    num_partes = int(request.GET.get('num_partes', '3'))
+    
+    try:
+        # Configurar o cliente Gemini
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        
+        # Usar o mesmo modelo da função principal
+        gemini_model = genai.GenerativeModel('gemini-2.0-flash')
+        
+        # Usar o mesmo prompt para gerar a introdução
+        intro_prompt = f"""Crie apenas a introdução para um guia de estudos sobre "{tema}" em {num_partes} partes.
+
+Use esta formatação:
+# {tema} em {num_partes} Partes: Seu Mapa para Dominar {tema} do Zero
+
+## Por Onde Começar?
+[4 perguntas específicas com problemas relacionados a {tema}, sem começar com "Você"]
+FORMATO CORRETO (sem pronome inicial):
+- Se sente perdido ao tentar [ação específica de {tema}]?
+- Tem dificuldade em entender [conceito específico de {tema}]?
+- Fica confuso ao tentar [ação relacionada a {tema}]?
+- Precisa dominar [habilidade específica] em [tempo determinado]?
+
+## O Que Você Vai Construir:
+1️⃣ **Fase 1: Fundamentos Sólidos (Parte 1)**
+- **Conquista:** Implementar um formulário de contato com validação básica usando componentes daisyUI (input, textarea, button).
+    - *Mini-desafio:* Estilizar o formulário utilizando classes de tema e modificadores de estado (hover, focus).
+- **Conquista:** Criar uma barra de navegação responsiva com menu dropdown utilizando componentes daisyUI (navbar, dropdown, menu).
+    - *Mini-desafio:* Adaptar a barra de navegação para diferentes tamanhos de tela utilizando breakpoints do Tailwind e classes condicionais.
+
+2️⃣ **Fase 2: Componentes Avançados e Tematização (Parte 1 e Parte 2)**
+- **Conquista:** Utilizar componentes avançados como modal, dropdown e tabs em uma interface.
+    - *Mini-desafio:* Construir um modal com botões customizados e transições suaves.
+- **Conquista:** Aplicar temas diferentes com base na preferência do usuário (claro/escuro).
+    - *Mini-desafio:* Implementar um botão para alternar entre temas usando JavaScript e o atributo data-theme.
+- **Conquista:** Criar uma tabela de dados paginada usando table, pagination e utilitários de layout do Tailwind.
+    - *Mini-desafio:* Permitir a ordenação dinâmica das colunas da tabela.
+
+3️⃣ **Fase 3: Projetos Reais e Otimização (Parte 2)**
+- **Conquista:** Integrar daisyUI em um projeto existente com Tailwind CSS.
+    - *Mini-desafio:* Refatorar componentes existentes para utilizar os estilos daisyUI.
+- **Conquista:** Otimizar a performance do projeto daisyUI, removendo estilos não utilizados com PurgeCSS.
+    - *Mini-desafio:* Comparar o tamanho do CSS gerado antes e depois da otimização.
+- **Conquista:** Criar um portfolio pessoal responsivo com daisyUI.
+    - *Mini-desafio:* Implementar animações sutis ao rolar a página utilizando AOS (Animate on Scroll).
+
+## Seu Plano de Ataque Personalizado:
+⏱ **Escolha Seu Ritmo:**
+- 🚀Modo Turbo: [X]h total ([Y]h por parte) → Foco no essencial
+- 🐢Modo Profundo: [X*2]h total → Com projetos práticos
+
+🛠 **Kit Ferramentas Incluso:**
+[Lista de 5 ferramentas úteis com emoji e descrição específica para {tema}]
+
+## Primeiro Passo Imediato:
+[3 ações concretas para começar com {tema} em 1 hora]
+
+Seja MUITO ESPECÍFICO sobre {tema}, usando exemplos concretos e terminologia própria desta área.
+IMPORTANTE: Escreva APENAS a introdução, não comece as partes!"""
+
+        # Gerar apenas a introdução
+        intro_response = gemini_model.generate_content(intro_prompt)
+        if hasattr(intro_response, 'text'):
+            raw_markdown = intro_response.text
+        else:
+            error = "Resposta inválida da API Gemini."
+            
+    except Exception as e:
+        error = f"Erro ao gerar o markdown: {str(e)}"
+        if settings.DEBUG:
+            logger.error(traceback.format_exc())
+    
+    # Renderizar uma página simples com o markdown bruto
+    return render(request, 'visualize_markdown.html', {
+        'raw_markdown': raw_markdown,
+        'tema': tema,
+        'num_partes': num_partes,
+        'error': error
+    })
