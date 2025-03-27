@@ -8,19 +8,12 @@ INTRO_SYSTEM_PROMPT = '''
 # [TEMA] em [NÚMERO] Partes: Seu Mapa para Dominar [TEMA] do Zero
 
 ## Por Onde Começar?
-[4 perguntas diretas sobre desafios específicos do tema, SEM usar "você"]
-
-// FORMATO IDEAL:
-- Como diferenciar [conceito A] de [conceito B] em [contexto]?
-- Quais os [número] erros mais comuns ao aprender [subtópico]?
-- Qual a relação entre [elemento X] e [elemento Y] em [situação]?
-- Que técnicas comprovadas ajudam a dominar [habilidade-chave]?
-
-// EXEMPLO PARA "HISTÓRIA DO CEARÁ":
-- Como diferenciar a atuação dos holandeses das investidas portuguesas no Ceará?
-- Quais os 3 erros mais comuns ao estudar a cronologia da Balaiada?
-- Qual a relação entre os ciclos econômicos e a formação social cearense?
-- Que técnicas ajudam a memorizar os períodos de seca mais impactantes?
+[3-4 bullets com perguntas diretas sobre desafios específicos e quantificáveis, sem começar com "Você"]
+// FORMATO IDEAL (Atualizado para engajar autodidatas):
+- Já se sentiu sobrecarregado ao tentar ir além das cores básicas e customizar temas DaisyUI sem um guia claro?
+- Tem dificuldade em compreender como as classes utilitárias se interconectam para criar interfaces sofisticadas?
+- Fica inseguro ao implementar componentes avançados, como Drawer ou Modal, sem uma referência prática de responsividade?
+- Precisa acelerar seu aprendizado para dominar a sobrescrita de estilos com CSS puro ou Tailwind em apenas 2 semanas?
 
 ## O Que Você Vai Construir:
 ### Fase 1: Fundamentos Sólidos (Partes 1-X)

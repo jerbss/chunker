@@ -102,7 +102,12 @@ Use esta formatação:
 # {tema} em {num_partes} Partes: Seu Mapa para Dominar {tema} do Zero
 
 ## Por Onde Começar?
-[4 perguntas específicas usando "você" com problemas relacionados a {tema}]
+[4 perguntas específicas com problemas relacionados a {tema}, sem começar com "Você"]
+FORMATO CORRETO (sem pronome inicial):
+- Se sente perdido ao tentar [ação específica de {tema}]?
+- Tem dificuldade em entender [conceito específico de {tema}]?
+- Fica confuso quando tenta [ação relacionada a {tema}]?
+- Precisa dominar [habilidade específica] em [tempo determinado]?
 
 ## O Que Você Vai Construir:
 [Divida em 3 fases progressivas, indicando quais partes numeradas estão em cada fase]
