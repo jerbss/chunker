@@ -109,6 +109,49 @@ def test_gemini(request):
                 
                 phase_distribution = calculate_phase_distribution(num_partes)
                 
+                # ETAPA NOVA: Gerar esqueleto estrutural (invisível ao usuário)
+                logger.info("Gerando esqueleto estrutural invisível para guiar a estrutura...")
+                
+                skeleton_prompt = f"""Crie um esqueleto estrutural detalhado e CONSISTENTE para um guia de estudos sobre "{tema}" em {num_partes} partes.
+
+Para cada parte, defina:
+1. Um título específico (começando com um verbo e incluindo um emoji)
+2. 3-4 tópicos principais que serão abordados nesta parte
+3. Nível de dificuldade (1-5, aumentando progressivamente)
+
+Use EXATAMENTE este formato estruturado:
+Parte {num_partes}:
+- Título: [Título específico com verbo e emoji]
+- Tópicos principais:
+  - [Tópico 1]
+  - [Tópico 2]
+  - [Tópico 3]
+- Nível de dificuldade: [Nível de dificuldade]"""
+
+                skeleton_response = gemini_model.generate_content(skeleton_prompt)
+                if hasattr(skeleton_response, 'text'):
+                    skeleton_content = skeleton_response.text
+                    logger.info(f"Esqueleto estrutural gerado com sucesso:\n{skeleton_content}")
+                else:
+                    raise Exception("Resposta inválida na geração do esqueleto estrutural.")
+                
+                # Parsear o esqueleto para extrair títulos e tópicos
+                skeleton_parts = {}
+                for part in range(1, num_partes + 1):
+                    match = re.search(
+                        rf"Parte {part}:\n- Título: (.*?)\n- Tópicos principais:\n(.*?)\n- Nível de dificuldade: (\d+)",
+                        skeleton_content, re.DOTALL
+                    )
+                    if match:
+                        title = match.group(1).strip()
+                        topics = match.group(2).strip().split("\n")
+                        difficulty = int(match.group(3).strip())
+                        skeleton_parts[part] = {
+                            "title": title,
+                            "topics": topics,
+                            "difficulty": difficulty
+                        }
+                
                 # Gerar introdução
                 logger.info("Gerando introdução...")
                 intro_prompt = f"""Crie apenas a introdução para um guia de estudos sobre "{tema}" em {num_partes} partes.
@@ -125,13 +168,13 @@ FORMATO CORRETO (sem pronome inicial):
 - Precisa dominar [habilidade específica] em [tempo determinado]?
 
 ## O Que Você Vai Construir:
-1️⃣ **Fase 1: [Título Específico de Nível Básico sobre {tema}] (Parte{'s' if phase_distribution[0][1] > phase_distribution[0][0] else ''} {phase_distribution[0][0]}{f'-{phase_distribution[0][1]}' if phase_distribution[0][1] > phase_distribution[0][0] else ''})**
+1️⃣ **Fase 1: {skeleton_parts[1]['title']} (Parte{'s' if phase_distribution[0][1] > phase_distribution[0][0] else ''} {phase_distribution[0][0]}{f'-{phase_distribution[0][1]}' if phase_distribution[0][1] > phase_distribution[0][0] else ''})**
 - **Conquista:** [Habilidade concreta específica sobre {tema}]
     - *Mini-desafio:* [Tarefa prática sobre {tema} relacionada à conquista acima]
 - **Conquista:** [Outra habilidade concreta específica sobre {tema}]
     - *Mini-desafio:* [Outra tarefa prática sobre {tema} relacionada à conquista acima]
 
-2️⃣ **Fase 2: [Título Específico de Nível Intermediário sobre {tema}] (Parte{'s' if phase_distribution[1][1] > phase_distribution[1][0] else ''} {phase_distribution[1][0]}{f'-{phase_distribution[1][1]}' if phase_distribution[1][1] > phase_distribution[1][0] else ''})**
+2️⃣ **Fase 2: {skeleton_parts[2]['title']} (Parte{'s' if phase_distribution[1][1] > phase_distribution[1][0] else ''} {phase_distribution[1][0]}{f'-{phase_distribution[1][1]}' if phase_distribution[1][1] > phase_distribution[1][0] else ''})**
 - **Conquista:** [Habilidade intermediária específica sobre {tema}]
     - *Mini-desafio:* [Tarefa mais complexa sobre {tema} relacionada à conquista acima]
 - **Conquista:** [Outra habilidade intermediária específica sobre {tema}]
@@ -139,7 +182,7 @@ FORMATO CORRETO (sem pronome inicial):
 - **Conquista:** [Terceira habilidade intermediária sobre {tema}]
     - *Mini-desafio:* [Tarefa desafiadora sobre {tema} relacionada à conquista acima]
 
-3️⃣ **Fase 3: [Título Específico de Nível Avançado sobre {tema}] (Parte{'s' if phase_distribution[2][1] > phase_distribution[2][0] else ''} {phase_distribution[2][0]}{f'-{phase_distribution[2][1]}' if phase_distribution[2][1] > phase_distribution[2][0] else ''})**
+3️⃣ **Fase 3: {skeleton_parts[3]['title']} (Parte{'s' if phase_distribution[2][1] > phase_distribution[2][0] else ''} {phase_distribution[2][0]}{f'-{phase_distribution[2][1]}' if phase_distribution[2][1] > phase_distribution[2][0] else ''})**
 - **Conquista:** [Habilidade avançada específica sobre {tema}]
     - *Mini-desafio:* [Projeto avançado sobre {tema} relacionado à conquista acima]
 - **Conquista:** [Outra habilidade avançada sobre {tema}]
@@ -184,16 +227,16 @@ IMPORTANTE: Os títulos das fases devem:
                     part_prompt = f"""Crie APENAS a parte {part_num} de um guia de estudos sobre "{tema}" em {num_partes} partes.
 
 Use exatamente esta formatação:
-# Parte {part_num}: [Verbo + Substantivo específico de {tema}] → [Emoji]
+# Parte {part_num}: {skeleton_parts[part_num]['title']}
 
 Inclua para a Parte {part_num}:
-- Dificuldade: [X]/5  
+- Dificuldade: {skeleton_parts[part_num]['difficulty']}/5  
 - Taxonomia de Bloom: [Nível]
 - Estilo de Aprendizado: [Perfil]
 - Progresso Acumulado: [{part_num*10}]% do core mastery
 - Objetivo Transformador: frase específica sobre o que a pessoa conseguirá fazer
 - Conexões com partes anteriores e posteriores
-- Tópicos Nucleares: 2-3 núcleos detalhados com subtópicos práticos e ESPECÍFICOS
+- Tópicos Nucleares: {', '.join(skeleton_parts[part_num]['topics'])}
 - Rotas Alternativas: caminho simples e avançado para aprender
 - Armadilhas Comuns: problemas reais frequentes com soluções concretas
 - Checklist de Domínio: 3-4 itens verificáveis sobre habilidades concretas
