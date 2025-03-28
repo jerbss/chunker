@@ -207,6 +207,11 @@ code, pre {
     font-size: 1.1rem;
 }
 
+/* Add rule for section-heading margin */
+h2.section-heading {
+    margin-top: 0;
+}
+
 /* Cards específicos */
 .context-card {
     grid-column: 1 / -1; /* Span todas as colunas por padrão */
@@ -1366,8 +1371,6 @@ html.light-theme .brand-link:hover .text-accent {
     color: #ff922b !important;
 }
 
-/* ...existing code... */
-
 /* Ajuste de estilo no Footer para melhor UX */
 .footer {
     background-color: var(--light-bg);
@@ -1751,9 +1754,6 @@ pre {
     }
 }
 
-/* ...existing code... */
-
-/* ========== Nova Estrutura de Cards de Parte - Melhorias Visuais ========== */
 /* Melhorias gerais para cards */
 .card {
     border-radius: 10px;
@@ -2129,8 +2129,6 @@ html.dark-theme .feedback-area {
     border: 1px solid rgba(255,255,255,0.08) !important;
 }
 
-/* ...existing code... */
-
 /* Melhorias para ícones de rotas e círculos - correção de contraste e forma */
 .route-icon {
     width: 48px !important;
@@ -2184,8 +2182,6 @@ html.dark-theme .route-icon.bg-danger.bg-opacity-10 {
     color: var(--danger-color) !important;
     text-shadow: 0 0 5px rgba(var(--danger-rgb), 0.3);
 }
-
-/* ...existing code... */
 
 /* Remover efeitos de hover que causam movimento nos cards de partes */
 
@@ -2256,8 +2252,6 @@ html.dark-theme .pitfall-item:hover {
     transform: none;
 }
 
-/* ...existing code... */
-
 /* Fazer o card de autoavaliação ocupar toda a largura em desktop */
 .self-assessment .col-md-6:last-child {
     width: 100%;
@@ -2283,8 +2277,6 @@ html.dark-theme .pitfall-item:hover {
         max-width: 100%;
     }
 }
-
-/* ...existing code... */
 
 /* Estilos para conteúdo do objetivo formatado */
 .objective-content h5 {
@@ -2340,8 +2332,6 @@ html.dark-theme .objective-content h5 {
     opacity: 1;
 }
 
-/* ...existing code... */
-
 /* Melhorar a consistência visual dos objetivos em todas as partes */
 .objective-content .lead {
     font-size: 1.1rem;
@@ -2364,8 +2354,6 @@ html.dark-theme .objective-content h5 {
     margin-bottom: 0.75rem;
     line-height: 1.5;
 }
-
-/* ...existing code... */
 
 /* Estilos refinados para a jornada de aprendizado */
 .learning-journey {
@@ -2439,6 +2427,4 @@ html.dark-theme .learning-step:hover {
     color: var(--secondary-color);
     font-weight: 600;
 }
-
-/* ...existing code... */
 
