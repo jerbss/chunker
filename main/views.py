@@ -190,30 +190,63 @@ Parte {num_partes}:
                         # Para fases com múltiplas partes, realizar uma verdadeira síntese
                         part_titles = [skeleton_parts[i]['title'] for i in range(start, end + 1)]
                         part_titles_base = [re.sub(r'[\U00010000-\U0010ffff]', '', title).strip() for title in part_titles]
-                        
-                        # Extrair emojis de ambas as partes e escolher um
+
+                        # Extrair emojis de todas as partes
                         emojis = []
                         for i in range(start, end + 1):
                             emoji = extract_emoji(skeleton_parts[i]['title'])
                             if emoji:
                                 emojis.append(emoji)
-                        
-                        selected_emoji = emojis[0] if emojis else "🔄"  # Emoji padrão para fases combinadas
-                        
-                        # Criar um título sintético real (não apenas uma instrução)
+
+                        selected_emoji = "".join(emojis[:2]) if emojis else "🔄"  # Usar até 2 emojis
+
+                        # Criar um título sintético que lida corretamente com dois-pontos
                         if len(part_titles_base) == 2:
-                            # Combinar os verbos iniciais com os substantivos principais de cada título
-                            words1 = part_titles_base[0].split(' ', 1)
-                            words2 = part_titles_base[1].split(' ', 1)
+                            # Processar cada título para lidar com dois-pontos internos
+                            processed_titles = []
+                            for title in part_titles_base:
+                                if ":" in title:
+                                    # Dividir pelo primeiro dois-pontos
+                                    prefix, suffix = title.split(":", 1)
+                                    processed_titles.append((prefix.strip(), suffix.strip()))
+                                else:
+                                    processed_titles.append((title, ""))
                             
-                            if len(words1) > 1 and len(words2) > 1:
-                                synthetic_title = f"{words1[0]} e {words2[0]} {words1[1]} e {words2[1]}"
+                            # Extrair componentes para combinar
+                            if len(processed_titles) == 2:
+                                # Se ambos os títulos têm estrutura com dois-pontos
+                                if processed_titles[0][1] and processed_titles[1][1]:
+                                    # Combine os prefixos e os sufixos separadamente
+                                    prefix1, suffix1 = processed_titles[0]
+                                    prefix2, suffix2 = processed_titles[1]
+                                    synthetic_title = f"{prefix1} e {prefix2} – {suffix1} e {suffix2}"
+                                # Se apenas um título tem dois-pontos
+                                elif processed_titles[0][1]:
+                                    prefix1, suffix1 = processed_titles[0]
+                                    title2 = processed_titles[1][0]
+                                    synthetic_title = f"{prefix1} e {title2} – {suffix1}"
+                                elif processed_titles[1][1]:
+                                    title1 = processed_titles[0][0]
+                                    prefix2, suffix2 = processed_titles[1]
+                                    synthetic_title = f"{title1} e {prefix2} – {suffix2}"
+                                else:
+                                    # Se nenhum tem dois-pontos, simplesmente combine
+                                    synthetic_title = f"{processed_titles[0][0]} e {processed_titles[1][0]}"
                             else:
-                                synthetic_title = f"{part_titles_base[0]} e {part_titles_base[1]}"
+                                # Fallback para caso o processamento falhe
+                                synthetic_title = " e ".join([t.replace(":", " –") for t in part_titles_base])
                         else:
-                            # Para mais de duas partes, use uma abordagem mais genérica
-                            synthetic_title = " & ".join(part_titles_base)
-                        
+                            # Para 3 ou 4 partes, use uma abordagem mais genérica
+                            processed_titles = []
+                            for title in part_titles_base:
+                                if ":" in title:
+                                    prefix, suffix = title.split(":", 1)
+                                    processed_titles.append(f"{prefix} – {suffix}")
+                                else:
+                                    processed_titles.append(title)
+                            
+                            synthetic_title = " + ".join(processed_titles)
+
                         # Adicionar o emoji selecionado
                         synthetic_title = f"{synthetic_title} {selected_emoji}"
                         phase_titles.append(synthetic_title)
