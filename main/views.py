@@ -111,26 +111,26 @@ FORMATO CORRETO (sem pronome inicial):
 
 ## O Que Você Vai Construir:
 1️⃣ **Fase 1: Fundamentos Sólidos (Parte 1)**
-- **Conquista:** Implementar um formulário de contato com validação básica usando componentes daisyUI (input, textarea, button).
-     *Mini-desafio:* Estilizar o formulário utilizando classes de tema e modificadores de estado (hover, focus).
-- **Conquista:** Criar uma barra de navegação responsiva com menu dropdown utilizando componentes daisyUI (navbar, dropdown, menu).
-     *Mini-desafio:* Adaptar a barra de navegação para diferentes tamanhos de tela utilizando breakpoints do Tailwind e classes condicionais.
+- **Conquista:** [Habilidade concreta específica sobre {tema}]
+    - *Mini-desafio:* [Tarefa prática sobre {tema} relacionada à conquista acima]
+- **Conquista:** [Outra habilidade concreta específica sobre {tema}]
+    - *Mini-desafio:* [Outra tarefa prática sobre {tema} relacionada à conquista acima]
 
-2️⃣ **Fase 2: Componentes Avançados e Tematização (Parte 1 e Parte 2)**
-- **Conquista:** Utilizar componentes avançados como modal, dropdown e tabs em uma interface.
-     *Mini-desafio:* Construir um modal com botões customizados e transições suaves.
-- **Conquista:** Aplicar temas diferentes com base na preferência do usuário (claro/escuro).
-     *Mini-desafio:* Implementar um botão para alternar entre temas usando JavaScript e o atributo data-theme.
-- **Conquista:** Criar uma tabela de dados paginada usando table, pagination e utilitários de layout do Tailwind.
-     *Mini-desafio:* Permitir a ordenação dinâmica das colunas da tabela.
+2️⃣ **Fase 2: Aplicação Intermediária (Parte 1 e Parte 2)**
+- **Conquista:** [Habilidade intermediária específica sobre {tema}]
+    - *Mini-desafio:* [Tarefa mais complexa sobre {tema} relacionada à conquista acima]
+- **Conquista:** [Outra habilidade intermediária específica sobre {tema}]
+    - *Mini-desafio:* [Outra tarefa complexa sobre {tema} relacionada à conquista acima]
+- **Conquista:** [Terceira habilidade intermediária sobre {tema}]
+    - *Mini-desafio:* [Tarefa desafiadora sobre {tema} relacionada à conquista acima]
 
-3️⃣ **Fase 3: Projetos Reais e Otimização (Parte 2)**
-- **Conquista:** Integrar daisyUI em um projeto existente com Tailwind CSS.
-     *Mini-desafio:* Refatorar componentes existentes para utilizar os estilos daisyUI.
-- **Conquista:** Otimizar a performance do projeto daisyUI, removendo estilos não utilizados com PurgeCSS.
-     *Mini-desafio:* Comparar o tamanho do CSS gerado antes e depois da otimização.
-- **Conquista:** Criar um portfolio pessoal responsivo com daisyUI.
-     *Mini-desafio:* Implementar animações sutis ao rolar a página utilizando AOS (Animate on Scroll).
+3️⃣ **Fase 3: Domínio Avançado (Parte 2)**
+- **Conquista:** [Habilidade avançada específica sobre {tema}]
+    - *Mini-desafio:* [Projeto avançado sobre {tema} relacionado à conquista acima]
+- **Conquista:** [Outra habilidade avançada sobre {tema}]
+    - *Mini-desafio:* [Outro projeto avançado sobre {tema} relacionado à conquista acima]
+- **Conquista:** [Habilidade de expert em {tema}]
+    - *Mini-desafio:* [Projeto complexo sobre {tema} para demonstrar maestria]
 
 ## Seu Plano de Ataque Personalizado:
 ⏱ **Escolha Seu Ritmo:**
@@ -143,8 +143,12 @@ FORMATO CORRETO (sem pronome inicial):
 ## Primeiro Passo Imediato:
 [3 ações concretas para começar com {tema} em 1 hora]
 
-Seja MUITO ESPECÍFICO sobre {tema}, usando exemplos concretos e terminologia própria desta área.
-IMPORTANTE: Escreva APENAS a introdução, não comece as partes!"""
+IMPORTANTE: 
+1. Use APENAS exemplos e termos específicos de {tema}, NUNCA use exemplos genéricos ou de outros temas
+2. NÃO mencione assuntos como DaisyUI, Tailwind, programação ou tecnologia se o tema não for relacionado a estes assuntos
+3. Adapte todos os exemplos para serem extremamente específicos de {tema}
+4. Seja MUITO ESPECÍFICO sobre {tema}, usando exemplos concretos e terminologia própria desta área
+5. Escreva APENAS a introdução, não comece as partes!"""
 
                 intro_response = gemini_model.generate_content(intro_prompt)
                 if hasattr(intro_response, 'text'):
@@ -259,48 +263,161 @@ Seja específico sobre {tema}, não use texto genérico."""
             # Converter markdown para HTML
             if result:
                 try:
-                    # Pré-processar o markdown para corrigir o aninhamento dos mini-desafios
+                    # Função aprimorada para processamento de mini-desafios
                     def process_mini_challenges(markdown_text):
+                        # Garantir quebras de linha consistentes
+                        markdown_text = markdown_text.replace("\r\n", "\n")
+                        
+                        # Pré-processamento: inserir marcadores de início de fase
+                        phase_pattern = r'(^\d+️⃣\s+\*\*Fase\s+\d+:.*?\*\*\s*$)'
+                        markdown_text = re.sub(phase_pattern, r'<!-- phase-marker -->\n\1', markdown_text, flags=re.MULTILINE)
+                        
+                        # Dividir o conteúdo em linhas para processamento
                         lines = markdown_text.split('\n')
                         result_lines = []
-                        i = 0
                         
+                        # Mapeamento para rastrear as conquistas e seus mini-desafios
+                        conquest_map = {}
+                        current_conquest = None
+                        current_phase = None
+                        
+                        # Primeira passagem: identificar todas as conquistas e fases
+                        for i, line in enumerate(lines):
+                            if '<!-- phase-marker -->' in line:
+                                current_phase = i + 1  # A linha seguinte contém a fase
+                            
+                            if "**Conquista:**" in line or "*Conquista:*" in line:
+                                conquest_id = f"conquest-{len(conquest_map)}"
+                                conquest_map[conquest_id] = {
+                                    'line_number': i,
+                                    'phase': current_phase,
+                                    'mini_challenges': []
+                                }
+                                current_conquest = conquest_id
+                            
+                            if ("*Mini-desafio:*" in line or "Mini-desafio:" in line) and current_conquest:
+                                conquest_map[current_conquest]['mini_challenges'].append(i)
+                        
+                        # Segunda passagem: processar todas as linhas e criar estrutura aninhada
+                        i = 0
                         while i < len(lines):
                             line = lines[i]
                             
-                            # Checar se a linha atual contém "Conquista:"
-                            if "Conquista:" in line:
-                                # Adicionar a linha de conquista
-                                result_lines.append(line)
+                            # Substituir marcador de fase
+                            if '<!-- phase-marker -->' in line:
+                                result_lines.append('')  # Linha em branco para separar
+                                i += 1
+                                continue
+                            
+                            # Identificar linhas de conquistas e aplicar classes
+                            if "**Conquista:**" in line or "*Conquista:*" in line:
+                                # Adicionar classe e começar uma estrutura para a conquista
+                                conquest_line = line.replace("- **Conquista:**", "- <span class='conquest-marker'>**Conquista:**</span>")
+                                conquest_line = conquest_line.replace("- *Conquista:*", "- <span class='conquest-marker'>*Conquista:*</span>")
+                                result_lines.append(conquest_line)
                                 
                                 # Verificar se a próxima linha é um mini-desafio
-                                if i + 1 < len(lines) and "Mini-desafio:" in lines[i + 1]:
-                                    mini_desafio = lines[i + 1].strip()
+                                has_mini_challenge = False
+                                
+                                # Procurar pela próxima linha para verificar se é um mini-desafio
+                                next_index = i + 1
+                                while next_index < len(lines) and not ("**Conquista:**" in lines[next_index] or "*Conquista:*" in lines[next_index]):
+                                    if "*Mini-desafio:*" in lines[next_index] or "Mini-desafio:" in lines[next_index]:
+                                        has_mini_challenge = True
+                                        break
+                                    next_index += 1
+                                
+                                if has_mini_challenge:
+                                    # Começar uma lista HTML explícita para os mini-desafios
+                                    result_lines.append("<ul class='mini-challenges-list'>")
                                     
-                                    # Remover o hífen inicial se existir
-                                    if mini_desafio.startswith("- "):
-                                        mini_desafio = mini_desafio[2:]
+                                    # Encontrar e processar todos os mini-desafios consecutivos
+                                    next_i = i + 1
+                                    while next_i < len(lines):
+                                        if "**Conquista:**" in lines[next_i] or "*Conquista:*" in lines[next_i]:
+                                            break
+                                        
+                                        if "*Mini-desafio:*" in lines[next_i] or "Mini-desafio:" in lines[next_i]:
+                                            mini_line = lines[next_i].strip()
+                                            if mini_line.startswith("- "):
+                                                mini_line = mini_line[2:]
+                                            
+                                            # Aplicar formatação consistente
+                                            mini_line = mini_line.replace("*Mini-desafio:*", "<span class='mini-desafio'>↳ <em>Mini-desafio:</em></span>")
+                                            mini_line = mini_line.replace("Mini-desafio:", "<span class='mini-desafio'>↳ <em>Mini-desafio:</em></span>")
+                                            
+                                            # Adicionar como item de lista
+                                            result_lines.append(f"  <li class='mini-challenge'>{mini_line}</li>")
+                                            
+                                            # Marcar como processado para evitar duplicação
+                                            lines[next_i] = f"<!-- processed: {next_i} -->"
+                                        
+                                        next_i += 1
                                     
-                                    # Tratar os dois casos possíveis
-                                    if "*Mini-desafio:*" in mini_desafio:
-                                        # Se já tem asteriscos, substitui tudo de uma vez
-                                        mini_desafio = mini_desafio.replace("*Mini-desafio:*", "<em>Mini-desafio:</em>")
-                                    else:
-                                        # Se não tem asteriscos, apenas substitui o texto
-                                        mini_desafio = mini_desafio.replace("Mini-desafio:", "<em>Mini-desafio:</em>")
-                                    
-                                    # Usar HTML para garantir a indentação correta
-                                    result_lines.append("<ul><li>" + mini_desafio + "</li></ul>")
-                                    
-                                    # Pular a linha do mini-desafio na próxima iteração
-                                    i += 2
-                                    continue
+                                    # Fechar a lista de mini-desafios
+                                    result_lines.append("</ul>")
                             
-                            # Para todas as outras linhas
-                            result_lines.append(line)
+                            # Se for um mini-desafio já processado, pular
+                            elif line.startswith("<!-- processed:"):
+                                pass
+                            # Se for um mini-desafio órfão (não vinculado diretamente a uma conquista)
+                            elif "*Mini-desafio:*" in line or "Mini-desafio:" in line:
+                                # Tentar encontrar a última conquista para associar
+                                last_conquest_index = -1
+                                for j in range(len(result_lines) - 1, -1, -1):
+                                    if "conquest-marker" in result_lines[j]:
+                                        last_conquest_index = j
+                                        break
+                                
+                                if last_conquest_index >= 0:
+                                    # Verificar se já existe uma lista de mini-desafios
+                                    if last_conquest_index + 1 < len(result_lines) and result_lines[last_conquest_index + 1] == "<ul class='mini-challenges-list'>":
+                                        # Encontrar o último </ul> para adicionar antes dele
+                                        for k in range(last_conquest_index + 2, len(result_lines)):
+                                            if result_lines[k] == "</ul>":
+                                                # Formatar mini-desafio
+                                                mini_line = line.strip()
+                                                if mini_line.startswith("- "):
+                                                    mini_line = mini_line[2:]
+                                                
+                                                mini_line = mini_line.replace("*Mini-desafio:*", "<span class='mini-desafio'>↳ <em>Mini-desafio:</em></span>")
+                                                mini_line = mini_line.replace("Mini-desafio:", "<span class='mini-desafio'>↳ <em>Mini-desafio:</em></span>")
+                                                
+                                                # Adicionar à lista existente
+                                                result_lines.insert(k, f"  <li class='mini-challenge'>{mini_line}</li>")
+                                                break
+                                    else:
+                                        # Criar nova lista para mini-desafios
+                                        result_lines.insert(last_conquest_index + 1, "<ul class='mini-challenges-list'>")
+                                        
+                                        # Formatar mini-desafio
+                                        mini_line = line.strip()
+                                        if mini_line.startswith("- "):
+                                            mini_line = mini_line[2:]
+                                        
+                                        mini_line = mini_line.replace("*Mini-desafio:*", "<span class='mini-desafio'>↳ <em>Mini-desafio:</em></span>")
+                                        mini_line = mini_line.replace("Mini-desafio:", "<span class='mini-desafio'>↳ <em>Mini-desafio:</em></span>")
+                                        
+                                        # Adicionar mini-desafio à lista
+                                        result_lines.insert(last_conquest_index + 2, f"  <li class='mini-challenge'>{mini_line}</li>")
+                                        result_lines.insert(last_conquest_index + 3, "</ul>")
+                                else:
+                                    # Se não encontrar conquista, adicionar o mini-desafio normalmente
+                                    result_lines.append(line)
+                            else:
+                                # Outras linhas são adicionadas sem alteração
+                                result_lines.append(line)
+                            
                             i += 1
                         
-                        return '\n'.join(result_lines)
+                        # Limpar linhas vazias consecutivas
+                        cleaned_lines = []
+                        for i, line in enumerate(result_lines):
+                            if i > 0 and line.strip() == '' and result_lines[i-1].strip() == '':
+                                continue
+                            cleaned_lines.append(line)
+                        
+                        return '\n'.join(cleaned_lines)
                     
                     # Aplicar o pré-processamento
                     processed_result = process_mini_challenges(result)
@@ -381,26 +498,26 @@ FORMATO CORRETO (sem pronome inicial):
 
 ## O Que Você Vai Construir:
 1️⃣ **Fase 1: Fundamentos Sólidos (Parte 1)**
-- **Conquista:** Implementar um formulário de contato com validação básica usando componentes daisyUI (input, textarea, button).
-     *Mini-desafio:* Estilizar o formulário utilizando classes de tema e modificadores de estado (hover, focus).
-- **Conquista:** Criar uma barra de navegação responsiva com menu dropdown utilizando componentes daisyUI (navbar, dropdown, menu).
-     *Mini-desafio:* Adaptar a barra de navegação para diferentes tamanhos de tela utilizando breakpoints do Tailwind e classes condicionais.
+- **Conquista:** [Habilidade concreta específica sobre {tema}]
+    - *Mini-desafio:* [Tarefa prática sobre {tema} relacionada à conquista acima]
+- **Conquista:** [Outra habilidade concreta específica sobre {tema}]
+    - *Mini-desafio:* [Outra tarefa prática sobre {tema} relacionada à conquista acima]
 
-2️⃣ **Fase 2: Componentes Avançados e Tematização (Parte 1 e Parte 2)**
-- **Conquista:** Utilizar componentes avançados como modal, dropdown e tabs em uma interface.
-     *Mini-desafio:* Construir um modal com botões customizados e transições suaves.
-- **Conquista:** Aplicar temas diferentes com base na preferência do usuário (claro/escuro).
-     *Mini-desafio:* Implementar um botão para alternar entre temas usando JavaScript e o atributo data-theme.
-- **Conquista:** Criar uma tabela de dados paginada usando table, pagination e utilitários de layout do Tailwind.
-     *Mini-desafio:* Permitir a ordenação dinâmica das colunas da tabela.
+2️⃣ **Fase 2: Aplicação Intermediária (Parte 1 e Parte 2)**
+- **Conquista:** [Habilidade intermediária específica sobre {tema}]
+    - *Mini-desafio:* [Tarefa mais complexa sobre {tema} relacionada à conquista acima]
+- **Conquista:** [Outra habilidade intermediária específica sobre {tema}]
+    - *Mini-desafio:* [Outra tarefa complexa sobre {tema} relacionada à conquista acima]
+- **Conquista:** [Terceira habilidade intermediária sobre {tema}]
+    - *Mini-desafio:* [Tarefa desafiadora sobre {tema} relacionada à conquista acima]
 
-3️⃣ **Fase 3: Projetos Reais e Otimização (Parte 2)**
-- **Conquista:** Integrar daisyUI em um projeto existente com Tailwind CSS.
-     *Mini-desafio:* Refatorar componentes existentes para utilizar os estilos daisyUI.
-- **Conquista:** Otimizar a performance do projeto daisyUI, removendo estilos não utilizados com PurgeCSS.
-     *Mini-desafio:* Comparar o tamanho do CSS gerado antes e depois da otimização.
-- **Conquista:** Criar um portfolio pessoal responsivo com daisyUI.
-     *Mini-desafio:* Implementar animações sutis ao rolar a página utilizando AOS (Animate on Scroll).
+3️⃣ **Fase 3: Domínio Avançado (Parte 2)**
+- **Conquista:** [Habilidade avançada específica sobre {tema}]
+    - *Mini-desafio:* [Projeto avançado sobre {tema} relacionado à conquista acima]
+- **Conquista:** [Outra habilidade avançada sobre {tema}]
+    - *Mini-desafio:* [Outro projeto avançado sobre {tema} relacionado à conquista acima]
+- **Conquista:** [Habilidade de expert em {tema}]
+    - *Mini-desafio:* [Projeto complexo sobre {tema} para demonstrar maestria]
 
 ## Seu Plano de Ataque Personalizado:
 ⏱ **Escolha Seu Ritmo:**
@@ -413,8 +530,12 @@ FORMATO CORRETO (sem pronome inicial):
 ## Primeiro Passo Imediato:
 [3 ações concretas para começar com {tema} em 1 hora]
 
-Seja MUITO ESPECÍFICO sobre {tema}, usando exemplos concretos e terminologia própria desta área.
-IMPORTANTE: Escreva APENAS a introdução, não comece as partes!"""
+IMPORTANTE: 
+1. Use APENAS exemplos e termos específicos de {tema}, NUNCA use exemplos genéricos ou de outros temas
+2. NÃO mencione assuntos como DaisyUI, Tailwind, programação ou tecnologia se o tema não for relacionado a estes assuntos
+3. Adapte todos os exemplos para serem extremamente específicos de {tema}
+4. Seja MUITO ESPECÍFICO sobre {tema}, usando exemplos concretos e terminologia própria desta área
+5. Escreva APENAS a introdução, não comece as partes!"""
 
         # Gerar apenas a introdução
         intro_response = gemini_model.generate_content(intro_prompt)
