@@ -261,28 +261,52 @@ Seja específico sobre {tema}, não use texto genérico."""
                 try:
                     # Pré-processar o markdown para corrigir o aninhamento dos mini-desafios
                     def process_mini_challenges(markdown_text):
-                        # Esta regex procura por padrões de mini-desafio que seguem uma conquista
-                        # Adiciona marcadores HTML para garantir que o aninhamento seja preservado
-                        import re
+                        lines = markdown_text.split('\n')
+                        result_lines = []
+                        i = 0
                         
-                        # Primeiro, identificamos as linhas que contêm mini-desafios
-                        pattern = r'(- \*\*Conquista:\*\* .*?)(\n\s+- \*Mini-desafio:\* .*?)(\n-|\n\n|$)'
-                        
-                        def replacement(match):
-                            conquista = match.group(1)
-                            mini_desafio = match.group(2)
-                            ending = match.group(3)
+                        while i < len(lines):
+                            line = lines[i]
                             
-                            # Convertemos para um formato que garante o aninhamento no HTML final
-                            # Usando formato de lista HTML diretamente no markdown
-                            return f"{conquista}\n<ul>\n{mini_desafio.strip()}\n</ul>{ending}"
+                            # Checar se a linha atual contém "Conquista:"
+                            if "Conquista:" in line:
+                                # Adicionar a linha de conquista
+                                result_lines.append(line)
+                                
+                                # Verificar se a próxima linha é um mini-desafio
+                                if i + 1 < len(lines) and "Mini-desafio:" in lines[i + 1]:
+                                    mini_desafio = lines[i + 1].strip()
+                                    
+                                    # Começar o bloco ul
+                                    result_lines.append("<ul>")
+                                    
+                                    # Garantir que o mini-desafio está formatado corretamente
+                                    if not mini_desafio.startswith("- "):
+                                        mini_desafio = "- " + mini_desafio
+                                    
+                                    # Aplicar formatação em itálico se necessário
+                                    if "*Mini-desafio:*" not in mini_desafio:
+                                        mini_desafio = mini_desafio.replace("Mini-desafio:", "*Mini-desafio:*")
+                                    
+                                    # Adicionar o mini-desafio formatado
+                                    result_lines.append(mini_desafio)
+                                    
+                                    # Fechar o bloco ul
+                                    result_lines.append("</ul>")
+                                    
+                                    # Pular a linha do mini-desafio na próxima iteração
+                                    i += 2
+                                    continue
+                            
+                            # Para todas as outras linhas
+                            result_lines.append(line)
+                            i += 1
                         
-                        processed_text = re.sub(pattern, replacement, markdown_text, flags=re.DOTALL)
-                        return processed_text
+                        return '\n'.join(result_lines)
                     
                     # Aplicar o pré-processamento
                     processed_result = process_mini_challenges(result)
-                    
+
                     # Usar safe para garantir que o HTML não é escapado
                     html_result = mark_safe(markdown.markdown(
                         processed_result, 
