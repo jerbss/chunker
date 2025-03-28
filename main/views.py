@@ -150,7 +150,7 @@ FORMATO CORRETO (sem pronome inicial):
 ## Kit Ferramentas Incluso:
 [Lista de 5 ferramentas principais para {tema}, cada uma com emoji e descrição específica de uso]
 Exemplo de formato para cada ferramenta:
-- [Emoji] [Nome da Ferramenta]: [Descrição curta e específica do uso para {tema}]
+- [Emoji] **[Nome da Ferramenta]:** [Descrição curta e específica do uso para {tema}]
 
 ## Primeiro Passo Imediato:
 [3 ações concretas e verificáveis para começar com {tema} em 1 hora, com foco em resultados práticos]
@@ -540,6 +540,8 @@ FORMATO CORRETO (sem pronome inicial):
 
 ## Kit Ferramentas Incluso:
 [Lista de 5 ferramentas úteis com emoji e descrição específica para {tema}]
+Exemplo de formato para cada ferramenta:
+- [Emoji] **[Nome da Ferramenta]:** [Descrição curta e específica do uso para {tema}]
 
 ## Primeiro Passo Imediato:
 [3 ações concretas para começar com {tema} em 1 hora]
