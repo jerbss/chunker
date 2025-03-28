@@ -1,0 +1,74 @@
+/* Estilos para mini-desafios */
+
+/* Estilo padrão para itens de conquista */
+.conquest-item, li.has-mini-challenge {
+    margin-bottom: 0.5rem !important;
+    position: relative;
+}
+
+/* Marcador visual de conquista */
+.conquest-marker {
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* Container para mini-desafios aninhados */
+.mini-challenges-list {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+    list-style-type: none !important;
+    padding-left: 1.5rem !important;
+}
+
+/* Estilo para itens de mini-desafio */
+.mini-challenge, li:has(.mini-desafio) {
+    position: relative;
+    color: #17a2b8 !important;
+    font-size: 0.95em;
+    margin-bottom: 0.25rem !important;
+}
+
+/* Texto de mini-desafio */
+.mini-desafio {
+    color: #17a2b8 !important;
+    display: inline-block;
+    position: relative;
+}
+
+/* Destacar conquista que tem mini-desafios */
+li.has-mini-challenge > strong, 
+.conquest-item > strong,
+.conquest-item.has-mini-challenge > strong {
+    color: #28a745 !important;
+}
+
+/* Correção para todos os tipos de listas */
+ul li ul.mini-challenges-list,
+ol li ul.mini-challenges-list {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+    padding-left: 1.5rem !important;
+}
+
+/* Forçar estilo para mini-desafios dentro de qualquer estrutura */
+.mini-challenges-list li,
+.mini-challenge {
+    color: #17a2b8 !important;
+}
+
+/* Modo escuro */
+html.dark-theme .mini-challenge,
+html.dark-theme .mini-desafio,
+html.dark-theme li:has(.mini-desafio) {
+    color: #5bc0de !important;
+}
+
+html.dark-theme .conquest-marker {
+    color: #5cb85c;
+}
+
+html.dark-theme li.has-mini-challenge > strong,
+html.dark-theme .conquest-item > strong,
+html.dark-theme .conquest-item.has-mini-challenge > strong {
+    color: #5cb85c !important;
+}
