@@ -295,18 +295,14 @@ Exemplo de formato para cada ferramenta:
 - [Emoji] **[Nome da Ferramenta]:** [Descrição curta e específica do uso para {tema}]
 
 ## Primeiro Passo Imediato:
-[3 ações concretas e verificáveis para começar com {tema} em 1 hora, com foco em resultados práticos]
+[3 ações concretas e verificáveis para começar com {tema}, com foco em resultados práticos]
 Exemplo de formato para cada ação:
-1️⃣ [Ação específica com duração] → [Resultado esperado]
+1️⃣ **[Ação específica]** → [Resultado esperado]
 
-IMPORTANTE: Os títulos das fases devem:
-1. EVITAR termos genéricos como "Fundamentos", "Intermediário" ou "Avançado"
-2. USAR terminologia específica de {tema}, como:
-   - Para Django: "Construindo Views", "Modelagem de Dados", "APIs REST"
-   - Para IA: "Redes Neurais", "Deep Learning", "Processamento Natural"
-   - Para Playstation: "História dos Consoles", "Jogos Exclusivos", "Evolução Gráfica"
-3. SE ADAPTAR ao número total de {num_partes} partes
-4. INCLUIR corretamente "Parte" (singular) ou "Partes" (plural) com números"""
+IMPORTANTE: 
+1. NÃO mencione tempo ou duração (minutos, horas, etc.) nos primeiros passos
+2. Coloque TODO o texto do passo em negrito (incluindo a ação e o resultado)
+3. Use APENAS exemplos e termos específicos de {tema}"""
 
                 intro_response = gemini_model.generate_content(intro_prompt)
                 if hasattr(intro_response, 'text'):
@@ -695,12 +691,14 @@ Exemplo de formato para cada ferramenta:
 - [Emoji] **[Nome da Ferramenta]:** [Descrição curta e específica do uso para {tema}]
 
 ## Primeiro Passo Imediato:
-[3 ações concretas para começar com {tema} em 1 hora]
+[3 ações concretas e verificáveis para começar com {tema}, com foco em resultados práticos]
+Exemplo de formato para cada ação:
+1️⃣ **[Ação específica] → [Resultado esperado]**
 
 IMPORTANTE: 
-1. Use APENAS exemplos e termos específicos de {tema}, NUNCA use exemplos genéricos ou de outros temas
-2. NÃO mencione assuntos como DaisyUI, Tailwind, programação ou tecnologia se o tema não for relacionado a estes assuntos
-3. Adapte todos os exemplos para serem extremamente específicos de {tema}
+1. NÃO mencione tempo ou duração (minutos, horas, etc.) nos primeiros passos
+2. Coloque TODO o texto do passo em negrito (incluindo a ação e o resultado)
+3. Use APENAS exemplos e termos específicos de {tema}
 4. Seja MUITO ESPECÍFICO sobre {tema}, usando exemplos concretos e terminologia própria desta área
 5. Escreva APENAS a introdução, não comece as partes!"""
 
