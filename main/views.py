@@ -184,13 +184,12 @@ IMPORTANTE: Os títulos das fases devem:
                     part_prompt = f"""Crie APENAS a parte {part_num} de um guia de estudos sobre "{tema}" em {num_partes} partes.
 
 Use exatamente esta formatação:
-# Parte {part_num}: [Verbo + Substantivo específico de {tema}] → [Emoji] ([Duração])
+# Parte {part_num}: [Verbo + Substantivo específico de {tema}] → [Emoji]
 
 Inclua para a Parte {part_num}:
 - Dificuldade: [X]/5  
 - Taxonomia de Bloom: [Nível]
 - Estilo de Aprendizado: [Perfil]
-- Duração: [Tempo específico]
 - Progresso Acumulado: [{part_num*10}]% do core mastery
 - Objetivo Transformador: frase específica sobre o que a pessoa conseguirá fazer
 - Conexões com partes anteriores e posteriores
@@ -200,12 +199,13 @@ Inclua para a Parte {part_num}:
 - Checklist de Domínio: 3-4 itens verificáveis sobre habilidades concretas
 - Caso Real: exemplo específico de uso de {tema} no mundo real
 - Prompt de IA: um prompt detalhado para praticar o aprendizado
-- Desafio Relâmpago: desafio específico de 15 minutos
+- Desafio Relâmpago: desafio específico
 
 IMPORTANTE:
 1. Seja ALTAMENTE ESPECÍFICO sobre {tema}, use exemplos reais e termos técnicos
 2. Crie APENAS a parte {part_num}, sem introdução ou conclusão
-3. Use linguagem técnica própria de {tema}"""
+3. Use linguagem técnica própria de {tema}
+4. NÃO INCLUA nenhuma referência a tempo de estudo (horas, dias, semanas, etc.)"""
 
                     part_response = gemini_model.generate_content(part_prompt)
                     if hasattr(part_response, 'text'):

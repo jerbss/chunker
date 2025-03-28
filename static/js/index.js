@@ -689,7 +689,6 @@ function createPartCard(part, index) {
     
     const titleInfo = extractTitleInfo(part.title);
     const emoji = titleInfo.emoji || '📚';
-    const duration = titleInfo.duration || '1.5h';
     
     const structuredContent = organizeStructuredContent(part.content, metadata);
     
@@ -706,32 +705,25 @@ function createPartCard(part, index) {
             <!-- Metadados superiores: dificuldade, taxonomia, etc. -->
             <div class="card-header metadata-header py-2 px-3 bg-light border-bottom">
                 <div class="row g-2">
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-sm-6 col-lg-4">
                         <div class="d-flex align-items-center">
                             <i class="fas fa-gauge-high text-secondary me-2"></i>
                             <span class="text-muted small">Dificuldade: </span>
                             <span class="ms-1 fw-medium">${metadata.difficulty || '1/5'}</span>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-sm-6 col-lg-4">
                         <div class="d-flex align-items-center">
                             <i class="fas fa-brain text-secondary me-2"></i>
                             <span class="text-muted small">Bloom: </span>
                             <span class="ms-1 fw-medium">${metadata.bloomTaxonomy || 'Compreender'}</span>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-sm-6 col-lg-4">
                         <div class="d-flex align-items-center">
                             <i class="fas fa-graduation-cap text-secondary me-2"></i>
                             <span class="text-muted small">Estilo: </span>
                             <span class="ms-1 fw-medium">${metadata.learningStyle || 'Visual'}</span>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-clock text-secondary me-2"></i>
-                            <span class="text-muted small">Duração: </span>
-                            <span class="ms-1 fw-medium">${duration}</span>
                         </div>
                     </div>
                 </div>
@@ -2732,19 +2724,12 @@ function extractPartMetadata(content, partIndex) {
 function extractTitleInfo(title) {
     const info = {
         emoji: '📚',
-        duration: '1.5h'
     };
     
     // Extrair emoji do título se existir
     const emojiMatch = title.match(/([\u{1F300}-\u{1F6FF}]|[\u{2700}-\u{27BF}])/u);
     if (emojiMatch) {
         info.emoji = emojiMatch[1];
-    }
-    
-    // Extrair duração entre parênteses
-    const durationMatch = title.match(/\(([^)]+)\)/);
-    if (durationMatch) {
-        info.duration = durationMatch[1];
     }
     
     return info;
