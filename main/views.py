@@ -94,7 +94,22 @@ def test_gemini(request):
                 # Resultado final para ser concatenado
                 final_result = ""
                 
-                # Passo 1: Gerar introdução
+                # Calcular distribuição das partes entre as fases
+                def calculate_phase_distribution(total_parts):
+                    # Para 6 partes exemplo: [1-2], [3-4], [5-6]
+                    first_phase = max(1, total_parts // 3)
+                    third_phase = max(1, total_parts // 3)
+                    second_phase = total_parts - first_phase - third_phase
+                    
+                    return [
+                        (1, first_phase),
+                        (first_phase + 1, first_phase + second_phase),
+                        (first_phase + second_phase + 1, total_parts)
+                    ]
+                
+                phase_distribution = calculate_phase_distribution(num_partes)
+                
+                # Gerar introdução
                 logger.info("Gerando introdução...")
                 intro_prompt = f"""Crie apenas a introdução para um guia de estudos sobre "{tema}" em {num_partes} partes.
 
@@ -110,13 +125,13 @@ FORMATO CORRETO (sem pronome inicial):
 - Precisa dominar [habilidade específica] em [tempo determinado]?
 
 ## O Que Você Vai Construir:
-1️⃣ **Fase 1: Fundamentos Sólidos (Parte 1)**
+1️⃣ **Fase 1: [Título Específico de Nível Básico sobre {tema}] (Parte{'s' if phase_distribution[0][1] > phase_distribution[0][0] else ''} {phase_distribution[0][0]}{f'-{phase_distribution[0][1]}' if phase_distribution[0][1] > phase_distribution[0][0] else ''})**
 - **Conquista:** [Habilidade concreta específica sobre {tema}]
     - *Mini-desafio:* [Tarefa prática sobre {tema} relacionada à conquista acima]
 - **Conquista:** [Outra habilidade concreta específica sobre {tema}]
     - *Mini-desafio:* [Outra tarefa prática sobre {tema} relacionada à conquista acima]
 
-2️⃣ **Fase 2: Aplicação Intermediária (Parte 1 e Parte 2)**
+2️⃣ **Fase 2: [Título Específico de Nível Intermediário sobre {tema}] (Parte{'s' if phase_distribution[1][1] > phase_distribution[1][0] else ''} {phase_distribution[1][0]}{f'-{phase_distribution[1][1]}' if phase_distribution[1][1] > phase_distribution[1][0] else ''})**
 - **Conquista:** [Habilidade intermediária específica sobre {tema}]
     - *Mini-desafio:* [Tarefa mais complexa sobre {tema} relacionada à conquista acima]
 - **Conquista:** [Outra habilidade intermediária específica sobre {tema}]
@@ -124,7 +139,7 @@ FORMATO CORRETO (sem pronome inicial):
 - **Conquista:** [Terceira habilidade intermediária sobre {tema}]
     - *Mini-desafio:* [Tarefa desafiadora sobre {tema} relacionada à conquista acima]
 
-3️⃣ **Fase 3: Domínio Avançado (Parte 2)**
+3️⃣ **Fase 3: [Título Específico de Nível Avançado sobre {tema}] (Parte{'s' if phase_distribution[2][1] > phase_distribution[2][0] else ''} {phase_distribution[2][0]}{f'-{phase_distribution[2][1]}' if phase_distribution[2][1] > phase_distribution[2][0] else ''})**
 - **Conquista:** [Habilidade avançada específica sobre {tema}]
     - *Mini-desafio:* [Projeto avançado sobre {tema} relacionado à conquista acima]
 - **Conquista:** [Outra habilidade avançada sobre {tema}]
@@ -132,23 +147,24 @@ FORMATO CORRETO (sem pronome inicial):
 - **Conquista:** [Habilidade de expert em {tema}]
     - *Mini-desafio:* [Projeto complexo sobre {tema} para demonstrar maestria]
 
-## Seu Plano de Ataque Personalizado:
-⏱ **Escolha Seu Ritmo:**
-- 🚀Modo Turbo: [X]h total ([Y]h por parte) → Foco no essencial
-- 🐢Modo Profundo: [X*2]h total → Com projetos práticos
-
-🛠 **Kit Ferramentas Incluso:**
-[Lista de 5 ferramentas úteis com emoji e descrição específica para {tema}]
+## Kit Ferramentas Incluso:
+[Lista de 5 ferramentas principais para {tema}, cada uma com emoji e descrição específica de uso]
+Exemplo de formato para cada ferramenta:
+- [Emoji] [Nome da Ferramenta]: [Descrição curta e específica do uso para {tema}]
 
 ## Primeiro Passo Imediato:
-[3 ações concretas para começar com {tema} em 1 hora]
+[3 ações concretas e verificáveis para começar com {tema} em 1 hora, com foco em resultados práticos]
+Exemplo de formato para cada ação:
+1️⃣ [Ação específica com duração] → [Resultado esperado]
 
-IMPORTANTE: 
-1. Use APENAS exemplos e termos específicos de {tema}, NUNCA use exemplos genéricos ou de outros temas
-2. NÃO mencione assuntos como DaisyUI, Tailwind, programação ou tecnologia se o tema não for relacionado a estes assuntos
-3. Adapte todos os exemplos para serem extremamente específicos de {tema}
-4. Seja MUITO ESPECÍFICO sobre {tema}, usando exemplos concretos e terminologia própria desta área
-5. Escreva APENAS a introdução, não comece as partes!"""
+IMPORTANTE: Os títulos das fases devem:
+1. EVITAR termos genéricos como "Fundamentos", "Intermediário" ou "Avançado"
+2. USAR terminologia específica de {tema}, como:
+   - Para Django: "Construindo Views", "Modelagem de Dados", "APIs REST"
+   - Para IA: "Redes Neurais", "Deep Learning", "Processamento Natural"
+   - Para Playstation: "História dos Consoles", "Jogos Exclusivos", "Evolução Gráfica"
+3. SE ADAPTAR ao número total de {num_partes} partes
+4. INCLUIR corretamente "Parte" (singular) ou "Partes" (plural) com números"""
 
                 intro_response = gemini_model.generate_content(intro_prompt)
                 if hasattr(intro_response, 'text'):
@@ -522,12 +538,7 @@ FORMATO CORRETO (sem pronome inicial):
 - **Conquista:** [Habilidade de expert em {tema}]
     - *Mini-desafio:* [Projeto complexo sobre {tema} para demonstrar maestria]
 
-## Seu Plano de Ataque Personalizado:
-⏱ **Escolha Seu Ritmo:**
-- 🚀Modo Turbo: [X]h total ([Y]h por parte) → Foco no essencial
-- 🐢Modo Profundo: [X*2]h total → Com projetos práticos
-
-🛠 **Kit Ferramentas Incluso:**
+## Kit Ferramentas Incluso:
 [Lista de 5 ferramentas úteis com emoji e descrição específica para {tema}]
 
 ## Primeiro Passo Imediato:
