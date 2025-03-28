@@ -277,22 +277,20 @@ Seja específico sobre {tema}, não use texto genérico."""
                                 if i + 1 < len(lines) and "Mini-desafio:" in lines[i + 1]:
                                     mini_desafio = lines[i + 1].strip()
                                     
-                                    # Começar o bloco ul
-                                    result_lines.append("<ul>")
+                                    # Remover o hífen inicial se existir
+                                    if mini_desafio.startswith("- "):
+                                        mini_desafio = mini_desafio[2:]
                                     
-                                    # Garantir que o mini-desafio está formatado corretamente
-                                    if not mini_desafio.startswith("- "):
-                                        mini_desafio = "- " + mini_desafio
+                                    # Tratar os dois casos possíveis
+                                    if "*Mini-desafio:*" in mini_desafio:
+                                        # Se já tem asteriscos, substitui tudo de uma vez
+                                        mini_desafio = mini_desafio.replace("*Mini-desafio:*", "<em>Mini-desafio:</em>")
+                                    else:
+                                        # Se não tem asteriscos, apenas substitui o texto
+                                        mini_desafio = mini_desafio.replace("Mini-desafio:", "<em>Mini-desafio:</em>")
                                     
-                                    # Aplicar formatação em itálico se necessário
-                                    if "*Mini-desafio:*" not in mini_desafio:
-                                        mini_desafio = mini_desafio.replace("Mini-desafio:", "*Mini-desafio:*")
-                                    
-                                    # Adicionar o mini-desafio formatado
-                                    result_lines.append(mini_desafio)
-                                    
-                                    # Fechar o bloco ul
-                                    result_lines.append("</ul>")
+                                    # Usar HTML para garantir a indentação correta
+                                    result_lines.append("<ul><li>" + mini_desafio + "</li></ul>")
                                     
                                     # Pular a linha do mini-desafio na próxima iteração
                                     i += 2
