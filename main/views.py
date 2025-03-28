@@ -138,19 +138,63 @@ Parte {num_partes}:
                 # Parsear o esqueleto para extrair títulos e tópicos
                 skeleton_parts = {}
                 for part in range(1, num_partes + 1):
-                    match = re.search(
+                    # Tentar vários formatos possíveis para capturar a resposta da API
+                    patterns = [
+                        # Formato original com asteriscos
+                        rf"\*\*Parte {part}:\*\*\n- Título: (.*?)\n- Tópicos principais:\n(.*?)\n- Nível de dificuldade: (\d+)",
+                        # Formato sem asteriscos (como visto no log)
                         rf"Parte {part}:\n- Título: (.*?)\n- Tópicos principais:\n(.*?)\n- Nível de dificuldade: (\d+)",
-                        skeleton_content, re.DOTALL
-                    )
+                        # Possível formato alternativo
+                        rf"Parte {part}:\s*\n\s*- Título: (.*?)\n\s*- Tópicos principais:\n(.*?)\n\s*- Nível de dificuldade: (\d+)"
+                    ]
+                    
+                    match = None
+                    for pattern in patterns:
+                        match = re.search(pattern, skeleton_content, re.DOTALL)
+                        if match:
+                            break
+                    
                     if match:
                         title = match.group(1).strip()
-                        topics = match.group(2).strip().split("\n")
+                        # Limpar os tópicos de indentação e marcadores
+                        topics_text = match.group(2)
+                        topics = [line.strip().lstrip('- ') for line in topics_text.strip().split("\n")]
                         difficulty = int(match.group(3).strip())
                         skeleton_parts[part] = {
                             "title": title,
                             "topics": topics,
                             "difficulty": difficulty
                         }
+                
+                # Verificar se todas as partes foram encontradas
+                if len(skeleton_parts) != num_partes:
+                    missing_parts = [i for i in range(1, num_partes + 1) if i not in skeleton_parts]
+                    logger.warning(f"Partes faltantes no esqueleto: {missing_parts}. Formato retornado:\n{skeleton_content}")
+                    raise Exception(f"Falha ao extrair todas as partes do esqueleto ({len(skeleton_parts)}/{num_partes})")
+                
+                # Função auxiliar para extrair emoji de um título
+                def extract_emoji(title):
+                    """Extrai o emoji de um título de parte"""
+                    emoji_pattern = re.compile(r'[\U00010000-\U0010ffff]', flags=re.UNICODE)
+                    emojis = emoji_pattern.findall(title)
+                    return emojis[0] if emojis else "📚"  # Emoji padrão se nenhum for encontrado
+
+                # Preparar títulos das fases baseados na distribuição
+                phase_titles = []
+
+                for phase_idx, (start, end) in enumerate(phase_distribution, 1):
+                    if start == end:  # Uma única parte na fase
+                        phase_title = skeleton_parts[start]['title']
+                        emoji = extract_emoji(phase_title)
+                        phase_titles.append(f"{phase_title}")
+                    else:  # Múltiplas partes na fase
+                        # Para fases com múltiplas partes, criar uma síntese
+                        part_titles = [skeleton_parts[i]['title'] for i in range(start, end + 1)]
+                        part_titles_base = [re.sub(r'[\U00010000-\U0010ffff]', '', title).strip() for title in part_titles]
+                        
+                        # Instrução para sintetizar os títulos
+                        synthesis_instruction = f"[Sintetize um título que combine: {', '.join(part_titles_base)}]"
+                        phase_titles.append(synthesis_instruction)
                 
                 # Gerar introdução
                 logger.info("Gerando introdução...")
@@ -168,13 +212,13 @@ FORMATO CORRETO (sem pronome inicial):
 - Precisa dominar [habilidade específica] em [tempo determinado]?
 
 ## O Que Você Vai Construir:
-1️⃣ **Fase 1: {skeleton_parts[1]['title']} (Parte{'s' if phase_distribution[0][1] > phase_distribution[0][0] else ''} {phase_distribution[0][0]}{f'-{phase_distribution[0][1]}' if phase_distribution[0][1] > phase_distribution[0][0] else ''})**
+1️⃣ **Fase 1: {phase_titles[0]} (Parte{'s' if phase_distribution[0][1] > phase_distribution[0][0] else ''} {phase_distribution[0][0]}{f'-{phase_distribution[0][1]}' if phase_distribution[0][1] > phase_distribution[0][0] else ''})**
 - **Conquista:** [Habilidade concreta específica sobre {tema}]
     - *Mini-desafio:* [Tarefa prática sobre {tema} relacionada à conquista acima]
 - **Conquista:** [Outra habilidade concreta específica sobre {tema}]
     - *Mini-desafio:* [Outra tarefa prática sobre {tema} relacionada à conquista acima]
 
-2️⃣ **Fase 2: {skeleton_parts[2]['title']} (Parte{'s' if phase_distribution[1][1] > phase_distribution[1][0] else ''} {phase_distribution[1][0]}{f'-{phase_distribution[1][1]}' if phase_distribution[1][1] > phase_distribution[1][0] else ''})**
+2️⃣ **Fase 2: {phase_titles[1]} (Parte{'s' if phase_distribution[1][1] > phase_distribution[1][0] else ''} {phase_distribution[1][0]}{f'-{phase_distribution[1][1]}' if phase_distribution[1][1] > phase_distribution[1][0] else ''})**
 - **Conquista:** [Habilidade intermediária específica sobre {tema}]
     - *Mini-desafio:* [Tarefa mais complexa sobre {tema} relacionada à conquista acima]
 - **Conquista:** [Outra habilidade intermediária específica sobre {tema}]
@@ -182,7 +226,7 @@ FORMATO CORRETO (sem pronome inicial):
 - **Conquista:** [Terceira habilidade intermediária sobre {tema}]
     - *Mini-desafio:* [Tarefa desafiadora sobre {tema} relacionada à conquista acima]
 
-3️⃣ **Fase 3: {skeleton_parts[3]['title']} (Parte{'s' if phase_distribution[2][1] > phase_distribution[2][0] else ''} {phase_distribution[2][0]}{f'-{phase_distribution[2][1]}' if phase_distribution[2][1] > phase_distribution[2][0] else ''})**
+3️⃣ **Fase 3: {phase_titles[2]} (Parte{'s' if phase_distribution[2][1] > phase_distribution[2][0] else ''} {phase_distribution[2][0]}{f'-{phase_distribution[2][1]}' if phase_distribution[2][1] > phase_distribution[2][0] else ''})**
 - **Conquista:** [Habilidade avançada específica sobre {tema}]
     - *Mini-desafio:* [Projeto avançado sobre {tema} relacionado à conquista acima]
 - **Conquista:** [Outra habilidade avançada sobre {tema}]
@@ -217,6 +261,13 @@ IMPORTANTE: Os títulos das fases devem:
                     raise Exception("Resposta inválida na geração da introdução.")
                 
                 # Passo 2: Gerar cada parte individualmente
+                def get_phase_for_part(part_num, phase_distribution):
+                    """Determina a qual fase pertence uma parte específica"""
+                    for phase_idx, (start, end) in enumerate(phase_distribution, 1):
+                        if start <= part_num <= end:
+                            return phase_idx
+                    return 1  # Fallback para fase 1
+
                 for part_num in range(1, num_partes + 1):
                     logger.info(f"Gerando parte {part_num}...")
                     
@@ -226,8 +277,10 @@ IMPORTANTE: Os títulos das fases devem:
                     
                     part_prompt = f"""Crie APENAS a parte {part_num} de um guia de estudos sobre "{tema}" em {num_partes} partes.
 
-Use exatamente esta formatação:
+IMPORTANTE: Use EXATAMENTE este título, sem alterações:
 # Parte {part_num}: {skeleton_parts[part_num]['title']}
+
+Esta parte se refere à Fase {get_phase_for_part(part_num, phase_distribution)} do guia.
 
 Inclua para a Parte {part_num}:
 - Dificuldade: {skeleton_parts[part_num]['difficulty']}/5  
