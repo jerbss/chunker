@@ -154,6 +154,34 @@ function applyConsistentStyles() {
         item.style.color = '#17a2b8';
         item.style.fontSize = '0.95em';
         item.style.position = 'relative';
+        
+        // Corrigir setas duplicadas no texto
+        const text = item.innerHTML;
+        if (text.includes('↳ ↳')) {
+            item.innerHTML = text.replace('↳ ↳', '↳');
+        }
+        
+        // Corrigir spans aninhados com setas duplicadas
+        const nestedSpans = item.querySelectorAll('span.mini-desafio span.mini-desafio');
+        if (nestedSpans.length > 0) {
+            nestedSpans.forEach(nestedSpan => {
+                // Obter o conteúdo do span interno
+                const innerContent = nestedSpan.innerHTML;
+                // Substituir o span aninhado pelo seu conteúdo
+                nestedSpan.outerHTML = innerContent;
+            });
+        }
+    });
+    
+    // Buscar por qualquer ocorrência remanescente de setas duplicadas
+    document.querySelectorAll('span.mini-desafio').forEach(span => {
+        // Verificar se o conteúdo contém setas duplicadas
+        if (span.innerHTML.includes('↳ ↳') || span.innerHTML.includes('↳ <em>↳')) {
+            span.innerHTML = span.innerHTML.replace(/↳\s*<em>?↳/g, '↳');
+        }
+        
+        // Garantir que a cor seja aplicada
+        span.style.color = '#17a2b8';
     });
     
     // Estilizar todas as conquistas que têm mini-desafios

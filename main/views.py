@@ -268,6 +268,9 @@ Seja específico sobre {tema}, não use texto genérico."""
                         # Garantir quebras de linha consistentes
                         markdown_text = markdown_text.replace("\r\n", "\n")
                         
+                        # Corrigir setas duplicadas antes do processamento
+                        markdown_text = markdown_text.replace('↳ ↳', '↳')
+                        
                         # Pré-processamento: inserir marcadores de início de fase
                         phase_pattern = r'(^\d+️⃣\s+\*\*Fase\s+\d+:.*?\*\*\s*$)'
                         markdown_text = re.sub(phase_pattern, r'<!-- phase-marker -->\n\1', markdown_text, flags=re.MULTILINE)
