@@ -82,6 +82,9 @@ function fixMiniChallenges() {
         }
     });
     
+    // Aplicar estilos aos cabeçalhos especiais
+    applyHeaderStyles();
+    
     // Adicionar estilos inline para garantir consistência
     applyConsistentStyles();
     
@@ -89,6 +92,35 @@ function fixMiniChallenges() {
     cleanupEmptyLists();
     
     console.log("fixMiniChallenges concluído");
+}
+
+// Aplicar estilos aos cabeçalhos especiais
+function applyHeaderStyles() {
+    document.querySelectorAll('h2').forEach(heading => {
+        const headingText = heading.textContent.trim();
+        
+        // Lista de cabeçalhos especiais que devem receber a mesma formatação
+        const specialHeadings = [
+            'Por Onde Começar?',
+            'O Que Você Vai Construir:',
+            'Kit Ferramentas Incluso:',
+            'Primeiro Passo Imediato:'
+        ];
+        
+        if (specialHeadings.some(title => headingText.includes(title))) {
+            // Aplicar a classe section-heading
+            heading.classList.add('section-heading');
+            
+            // Aplicar estilos inline para garantir consistência
+            heading.style.fontFamily = "'Exo 2', sans-serif";
+            heading.style.fontWeight = "700";
+            heading.style.color = "var(--text-color)";
+            heading.style.marginTop = "1.5rem";
+            heading.style.marginBottom = "1rem";
+            heading.style.paddingBottom = "0.5rem";
+            heading.style.borderBottom = "2px solid var(--primary-color)";
+        }
+    });
 }
 
 // Encontra o item de conquista anterior para um mini-desafio
