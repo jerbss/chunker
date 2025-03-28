@@ -135,6 +135,15 @@ function findPreviousConquestItem(miniChallengeItem) {
         return parentElement;
     }
     
+    // Se o mini-desafio está em uma lista isolada logo após uma fase
+    const previousSibling = miniChallengeItem.parentNode.previousElementSibling;
+    if (previousSibling && previousSibling.tagName === 'DIV') {
+        const firstConquest = previousSibling.querySelector('.conquest-item');
+        if (firstConquest) {
+            return firstConquest;
+        }
+    }
+    
     return null;
 }
 
@@ -156,6 +165,35 @@ function applyConsistentStyles() {
     document.querySelectorAll('.mini-desafio').forEach(span => {
         span.style.color = '#17a2b8';
     });
+    
+    // Garantir que todos os mini-desafios da primeira conquista tenham os estilos corretos
+    document.querySelectorAll('ul:not(.mini-challenges-list) > li.mini-challenge').forEach(challenge => {
+        if (isFirstConquestChallenge(challenge)) {
+            const previousElement = challenge.parentNode.previousElementSibling;
+            if (previousElement) {
+                const firstConquest = previousElement.querySelector('.conquest-item');
+                if (firstConquest && !firstConquest.querySelector('.mini-challenges-list')) {
+                    // Criar nova lista de mini-desafios
+                    const miniChallengesList = document.createElement('ul');
+                    miniChallengesList.className = 'mini-challenges-list';
+                    miniChallengesList.style.listStyleType = 'none';
+                    miniChallengesList.style.paddingLeft = '1.5rem';
+                    miniChallengesList.style.marginTop = '0.5rem';
+                    miniChallengesList.style.marginBottom = '0.75rem';
+                    
+                    // Mover o mini-desafio para a nova lista
+                    miniChallengesList.appendChild(challenge.cloneNode(true));
+                    firstConquest.appendChild(miniChallengesList);
+                    
+                    // Marcar a conquista
+                    firstConquest.classList.add('has-mini-challenge');
+                    
+                    // Ocultar o mini-desafio original
+                    challenge.style.display = 'none';
+                }
+            }
+        }
+    });
 }
 
 // Limpar listas vazias
@@ -165,4 +203,23 @@ function cleanupEmptyLists() {
             list.remove();
         }
     });
+}
+
+// Adicionar função para verificar se um mini-desafio pertence à primeira conquista
+function isFirstConquestChallenge(miniChallenge) {
+    // Verificar se o mini-desafio está em uma lista isolada logo após uma fase
+    const parentList = miniChallenge.closest('ul');
+    if (!parentList) return false;
+    
+    const previousElement = parentList.previousElementSibling;
+    if (!previousElement) return false;
+    
+    // Verificar se o elemento anterior é uma div contendo uma fase
+    if (previousElement.tagName === 'DIV' && 
+        previousElement.querySelector('p strong') && 
+        previousElement.querySelector('p strong').textContent.includes('Fase')) {
+        return true;
+    }
+    
+    return false;
 }
