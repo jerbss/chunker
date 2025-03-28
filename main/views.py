@@ -185,16 +185,38 @@ Parte {num_partes}:
                 for phase_idx, (start, end) in enumerate(phase_distribution, 1):
                     if start == end:  # Uma única parte na fase
                         phase_title = skeleton_parts[start]['title']
-                        emoji = extract_emoji(phase_title)
                         phase_titles.append(f"{phase_title}")
                     else:  # Múltiplas partes na fase
-                        # Para fases com múltiplas partes, criar uma síntese
+                        # Para fases com múltiplas partes, realizar uma verdadeira síntese
                         part_titles = [skeleton_parts[i]['title'] for i in range(start, end + 1)]
                         part_titles_base = [re.sub(r'[\U00010000-\U0010ffff]', '', title).strip() for title in part_titles]
                         
-                        # Instrução para sintetizar os títulos
-                        synthesis_instruction = f"[Sintetize um título que combine: {', '.join(part_titles_base)}]"
-                        phase_titles.append(synthesis_instruction)
+                        # Extrair emojis de ambas as partes e escolher um
+                        emojis = []
+                        for i in range(start, end + 1):
+                            emoji = extract_emoji(skeleton_parts[i]['title'])
+                            if emoji:
+                                emojis.append(emoji)
+                        
+                        selected_emoji = emojis[0] if emojis else "🔄"  # Emoji padrão para fases combinadas
+                        
+                        # Criar um título sintético real (não apenas uma instrução)
+                        if len(part_titles_base) == 2:
+                            # Combinar os verbos iniciais com os substantivos principais de cada título
+                            words1 = part_titles_base[0].split(' ', 1)
+                            words2 = part_titles_base[1].split(' ', 1)
+                            
+                            if len(words1) > 1 and len(words2) > 1:
+                                synthetic_title = f"{words1[0]} e {words2[0]} {words1[1]} e {words2[1]}"
+                            else:
+                                synthetic_title = f"{part_titles_base[0]} e {part_titles_base[1]}"
+                        else:
+                            # Para mais de duas partes, use uma abordagem mais genérica
+                            synthetic_title = " & ".join(part_titles_base)
+                        
+                        # Adicionar o emoji selecionado
+                        synthetic_title = f"{synthetic_title} {selected_emoji}"
+                        phase_titles.append(synthetic_title)
                 
                 # Gerar introdução
                 logger.info("Gerando introdução...")
