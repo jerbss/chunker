@@ -39,7 +39,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-z=wdk_lvex+(jq1qe(6y7
 DEBUG = os.environ.get('DEBUG', 'False') == 'False'
 
 # Hosts e origens confiáveis
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,chunker.up.railway.app').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,chunkify.up.railway.app').split(',')
 
 # Adiciona o domínio do Railway automaticamente
 if 'RAILWAY_STATIC_URL' in os.environ:
@@ -47,7 +47,7 @@ if 'RAILWAY_STATIC_URL' in os.environ:
 
 # Configuração CSRF para ambientes de produção (Railway)
 CSRF_TRUSTED_ORIGINS = [
-    'https://chunker.up.railway.app',
+    'https://chunkify.up.railway.app',
     'https://*.railway.app',
 ]
 
